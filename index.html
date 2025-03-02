@@ -2,157 +2,82 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Şehir Satın Alma & Profil</title>
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CitySell Harita Oyunu</title>
+
   <!-- Bootstrap 5 CSS -->
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
     rel="stylesheet"
   />
 
-  <!-- amCharts 5 (Core, Map, Temalar, GeoData) -->
+  <!-- amCharts 5 -->
   <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
 
-  <!-- Firebase (Compat sürümleri) -->
+  <!-- Firebase JS SDK (7.20.0 ve sonrası) -->
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore-compat.js"></script>
 
-  <!-- Projenizin Firebase config'i -->
-  <script>
-    // Kendi firebaseConfig değerlerinizi ekleyin:
-    const firebaseConfig = {
-     apiKey: "AIzaSyB2LQX2rSPYmV9fCn9S02R1zz9welQ9Skc",
-  authDomain: "citysell-45e32.firebaseapp.com",
-  projectId: "citysell-45e32",
-  storageBucket: "citysell-45e32.firebasestorage.app",
-  messagingSenderId: "325438858648",
-  appId: "1:325438858648:web:0c13beb02cd1a2b08fb7ed",
-  measurementId: "G-2HR99X6LXY
-    };
-  </script>
-
   <style>
-    /* Sayfa ve Navbar düzeni */
+    /* Tam ekran harita alanı */
+    html,
     body {
+      height: 100%;
       margin: 0;
       padding: 0;
-      background: linear-gradient(
-        120deg,
-        rgba(255, 255, 255, 1) 0%,
-        rgba(220, 240, 255, 1) 100%
-      );
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    nav.navbar {
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      z-index: 10;
     }
 
-    /* Ana görünüm (harita alanı) tam ekran */
-    #chartView {
-      flex: 1;
-      width: 100%;
-      display: block; /* Başlangıçta harita görünsün */
-    }
     #chartdiv {
       width: 100%;
-      height: calc(100vh - 56px); /* Navbar yükseklik kadar azalt */
+      height: 100vh; /* Tam ekran yükseklik */
     }
 
-    /* Profil görünümünü başlangıçta gizliyoruz */
-    #profileView {
-      display: none;
-      margin: 2rem auto;
-      max-width: 600px;
-      background: #fff;
-      border-radius: 8px;
-      padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    /* Bazı temel modal düzenlemeleri */
+    .modal-header {
+      background-color: #0d6efd;
+      color: #fff;
     }
-    #profileView h2 {
-      margin-bottom: 1.5rem;
-    }
-
-    /* Modal buton boşlukları */
-    #buyCityBtn {
-      margin-top: 1rem;
+    .modal-footer button {
+      min-width: 90px;
     }
   </style>
 </head>
 <body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
-      <a class="navbar-brand fw-bold" href="#">Şehir Oyunu</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarContent"
-        aria-controls="navbarContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarContent">
-        <ul class="navbar-nav ms-auto">
-          <!-- Profil Butonu (giriş yaptıktan sonra göster) -->
-          <li class="nav-item">
-            <button
-              class="btn btn-outline-info nav-link"
-              id="profileBtn"
-              style="display: none;"
-            >
-              Profil
-            </button>
-          </li>
-          <!-- Çıkış Butonu -->
-          <li class="nav-item">
-            <button
-              class="btn btn-danger nav-link"
-              style="display: none;"
-              id="logoutBtn"
-            >
-              Çıkış Yap
-            </button>
-          </li>
-        </ul>
+      <a class="navbar-brand" href="#">CitySell</a>
+      <div class="d-flex">
+        <!-- Profil butonu: Başlangıçta gizli, giriş yapınca gösterilecek -->
+        <button
+          id="btnProfile"
+          class="btn btn-light text-primary me-2"
+          style="display: none;"
+          data-bs-toggle="modal"
+          data-bs-target="#profileModal"
+        >
+          Profil
+        </button>
+        <!-- Çıkış butonu: Başlangıçta gizli, giriş yapınca gösterilecek -->
+        <button
+          id="btnLogout"
+          class="btn btn-danger"
+          style="display: none;"
+        >
+          Çıkış
+        </button>
       </div>
     </div>
   </nav>
-  <!-- /Navbar -->
 
-  <!-- 1) ANA GÖRÜNÜM (HARİTA) -->
-  <div id="chartView">
-    <!-- Harita Alanı -->
-    <div id="chartdiv"></div>
-  </div>
-  <!-- /ANA GÖRÜNÜM -->
+  <!-- Harita Container -->
+  <div id="chartdiv"></div>
 
-  <!-- 2) PROFİL GÖRÜNÜMÜ -->
-  <div id="profileView">
-    <h2>Profil Bilgileri</h2>
-    <p><strong>Kullanıcı Adı:</strong> <span id="profileUsername"></span></p>
-    <p><strong>E-posta:</strong> <span id="profileEmail"></span></p>
-    <p><strong>Bakiye (USDT):</strong> <span id="profileBalance"></span></p>
-    <hr />
-    <h5>Sahip Olduğunuz Şehirler:</h5>
-    <ul id="ownedCitiesList"></ul>
-    <hr />
-    <!-- Geri Dön Butonu -->
-    <button class="btn btn-primary" id="backToMapBtn">Haritaya Dön</button>
-  </div>
-  <!-- /PROFİL GÖRÜNÜMÜ -->
-
-  <!-- Giriş / Kayıt Modal -->
+  <!-- Kayıt/Giriş Modal -->
   <div
     class="modal fade"
     id="authModal"
@@ -160,10 +85,10 @@
     aria-labelledby="authModalLabel"
     aria-hidden="true"
   >
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-md">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="authModalLabel">Giriş Yap veya Kayıt Ol</h5>
+          <h5 class="modal-title" id="authModalLabel">Kayıt Ol veya Giriş Yap</h5>
           <button
             type="button"
             class="btn-close"
@@ -172,42 +97,82 @@
           ></button>
         </div>
         <div class="modal-body">
+          <!-- Nav tabs -->
           <ul class="nav nav-tabs" id="authTab" role="tablist">
             <li class="nav-item" role="presentation">
               <button
                 class="nav-link active"
-                id="login-tab"
+                id="register-tab"
                 data-bs-toggle="tab"
-                data-bs-target="#loginTabPane"
+                data-bs-target="#register"
                 type="button"
                 role="tab"
-                aria-controls="loginTabPane"
+                aria-controls="register"
                 aria-selected="true"
               >
-                Giriş
+                Kayıt Ol
               </button>
             </li>
             <li class="nav-item" role="presentation">
               <button
                 class="nav-link"
-                id="register-tab"
+                id="login-tab"
                 data-bs-toggle="tab"
-                data-bs-target="#registerTabPane"
+                data-bs-target="#login"
                 type="button"
                 role="tab"
-                aria-controls="registerTabPane"
+                aria-controls="login"
                 aria-selected="false"
               >
-                Kayıt
+                Giriş Yap
               </button>
             </li>
           </ul>
-
-          <div class="tab-content" id="authTabContent">
-            <!-- Giriş Formu -->
+          <!-- Tab panes -->
+          <div class="tab-content pt-3">
+            <!-- Kayıt Ol -->
             <div
-              class="tab-pane fade show active p-3"
-              id="loginTabPane"
+              class="tab-pane fade show active"
+              id="register"
+              role="tabpanel"
+              aria-labelledby="register-tab"
+            >
+              <form id="registerForm">
+                <div class="mb-3">
+                  <label for="registerUsername" class="form-label">Kullanıcı Adı</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="registerUsername"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="registerEmail" class="form-label">E-posta</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="registerEmail"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="registerPassword" class="form-label">Şifre (min 6 karakter)</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="registerPassword"
+                    minlength="6"
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Kayıt Ol</button>
+              </form>
+            </div>
+            <!-- Giriş Yap -->
+            <div
+              class="tab-pane fade"
+              id="login"
               role="tabpanel"
               aria-labelledby="login-tab"
             >
@@ -227,80 +192,30 @@
                     type="password"
                     class="form-control"
                     id="loginPassword"
-                    minlength="6"
                     required
                   />
                 </div>
-                <button type="submit" class="btn btn-primary w-100">
-                  Giriş Yap
-                </button>
+                <button type="submit" class="btn btn-success w-100">Giriş Yap</button>
               </form>
             </div>
-            <!-- /Giriş Formu -->
-
-            <!-- Kayıt Formu -->
-            <div
-              class="tab-pane fade p-3"
-              id="registerTabPane"
-              role="tabpanel"
-              aria-labelledby="register-tab"
-            >
-              <form id="registerForm">
-                <div class="mb-3">
-                  <label for="registerUsername" class="form-label"
-                    >Kullanıcı Adı</label
-                  >
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="registerUsername"
-                    required
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="registerEmail" class="form-label">E-posta</label>
-                  <input
-                    type="email"
-                    class="form-control"
-                    id="registerEmail"
-                    required
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="registerPassword" class="form-label">Şifre</label>
-                  <input
-                    type="password"
-                    class="form-control"
-                    id="registerPassword"
-                    minlength="6"
-                    required
-                  />
-                </div>
-                <button type="submit" class="btn btn-success w-100">
-                  Kayıt Ol
-                </button>
-              </form>
-            </div>
-            <!-- /Kayıt Formu -->
           </div>
         </div>
       </div>
     </div>
   </div>
-  <!-- /Auth Modal -->
 
-  <!-- Şehir Detay Modal -->
+  <!-- Profil Modal -->
   <div
     class="modal fade"
-    id="cityDetailModal"
+    id="profileModal"
     tabindex="-1"
-    aria-labelledby="cityDetailModalLabel"
+    aria-labelledby="profileModalLabel"
     aria-hidden="true"
   >
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-md">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="cityDetailModalLabel">Şehir Detayı</h5>
+          <h5 class="modal-title" id="profileModalLabel">Profil Bilgileri</h5>
           <button
             type="button"
             class="btn-close"
@@ -309,21 +224,51 @@
           ></button>
         </div>
         <div class="modal-body">
-          <p>
-            <strong>Şehir Adı:</strong>
-            <span id="cityNameSpan"></span>
-          </p>
-          <p>
-            <strong>Fiyat (USDT):</strong>
-            <span id="cityPriceSpan"></span>
-          </p>
-          <p>
-            <strong>Sahibi:</strong>
-            <span id="cityOwnerSpan"></span>
-          </p>
+          <p><strong>Kullanıcı Adı:</strong> <span id="profileUsername"></span></p>
+          <p><strong>Bakiye (USDT):</strong> <span id="profileBalance"></span></p>
+          <p><strong>Sahip Olduğunuz Şehirler:</strong></p>
+          <ul id="profileCities"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Şehir Detay Modal -->
+  <div
+    class="modal fade"
+    id="cityModal"
+    tabindex="-1"
+    aria-labelledby="cityModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="cityModalLabel">Şehir Detayı</h5>
           <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Kapat"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Şehir Adı:</strong> <span id="cityName"></span></p>
+          <p><strong>Fiyat (USDT):</strong> <span id="cityPrice"></span></p>
+          <p><strong>Sahibi:</strong> <span id="cityOwner"></span></p>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Kapat
+          </button>
+          <button
+            type="button"
             class="btn btn-primary"
-            id="buyCityBtn"
+            id="btnBuyCity"
           >
             Satın Al
           </button>
@@ -331,7 +276,6 @@
       </div>
     </div>
   </div>
-  <!-- /Şehir Detay Modal -->
 
   <!-- Bootstrap 5 JS (Popper dahil) -->
   <script
@@ -339,325 +283,401 @@
   ></script>
 
   <script>
-    /*******************************************/
-    /* 1) Firebase Başlatma, Auth ve Firestore */
-    /*******************************************/
+    /********************/
+    /** Firebase Config */
+    /********************/
+    // Lütfen kendi firebaseConfig değerlerinizi giriniz.
+    const firebaseConfig = {
+        apiKey: "AIzaSyB2LQX2rSPYmV9fCn9S02R1zz9welQ9Skc",
+  authDomain: "citysell-45e32.firebaseapp.com",
+  projectId: "citysell-45e32",
+  storageBucket: "citysell-45e32.firebasestorage.app",
+  messagingSenderId: "325438858648",
+  appId: "1:325438858648:web:0c13beb02cd1a2b08fb7ed",
+  measurementId: "G-2HR99X6LXY
+    };
+
+    // Firebase başlatma
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    /*******************************************/
-    /* 2) Global Değişkenler                   */
-    /*******************************************/
-    let currentUser = null;       // Oturum açmış kullanıcı
-    let selectedCityId = null;    // Modalda detayını gösterdiğimiz şehir doc ID
+    // Test aşamasında Firestore güvenlik kurallarınızı
+    // "allow read, write: if true;" olarak ayarlamayı unutmayın.
 
-    // Örnek şehir verileri (yoksa eklemek için):
-    const citySeedData = [
-      { name: "İstanbul", lat: 41.0082,  lon: 28.9784,  price: 500,  ownerId: null },
-      { name: "Ankara",   lat: 39.9208,  lon: 32.8541,  price: 400,  ownerId: null },
-      { name: "İzmir",    lat: 38.4237,  lon: 27.1428,  price: 300,  ownerId: null },
-      { name: "London",   lat: 51.5072,  lon: -0.1276,  price: 1000, ownerId: null },
-      { name: "Paris",    lat: 48.8566,  lon: 2.3522,   price: 900,  ownerId: null },
-      { name: "Berlin",   lat: 52.5200,  lon: 13.4050,  price: 950,  ownerId: null },
-      { name: "Tokyo",    lat: 35.6762,  lon: 139.6503, price: 1200, ownerId: null },
-      { name: "New York", lat: 40.7128,  lon: -74.0060, price: 1100, ownerId: null },
-      { name: "Moscow",   lat: 55.7558,  lon: 37.6173,  price: 800,  ownerId: null },
-    ];
+    /**************************************************/
+    /** DOM Elementleri ve Global Değişkenlerin Tanımı */
+    /**************************************************/
+    const authModal = new bootstrap.Modal(document.getElementById("authModal"), {
+      backdrop: "static",
+      keyboard: false,
+    });
+    const profileModal = new bootstrap.Modal(document.getElementById("profileModal"));
+    const cityModal = new bootstrap.Modal(document.getElementById("cityModal"));
 
-    /*******************************************/
-    /* 3) Firestore'a Şehir Verisi Seed Ekleme */
-    /*******************************************/
-    async function seedCitiesIfEmpty() {
-      const snapshot = await db.collection("cities").get();
-      if (snapshot.empty) {
-        for (let city of citySeedData) {
-          await db.collection("cities").add(city);
-        }
-        console.log("Örnek şehirler Firestore'a eklendi!");
-      }
-    }
+    const btnProfile = document.getElementById("btnProfile");
+    const btnLogout = document.getElementById("btnLogout");
 
-    /*******************************************/
-    /* 4) Kullanıcı Kayıt, Giriş ve Çıkış      */
-    /*******************************************/
-    // Kayıt Ol
-    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+    const profileUsernameEl = document.getElementById("profileUsername");
+    const profileBalanceEl = document.getElementById("profileBalance");
+    const profileCitiesEl = document.getElementById("profileCities");
+
+    const cityNameEl = document.getElementById("cityName");
+    const cityPriceEl = document.getElementById("cityPrice");
+    const cityOwnerEl = document.getElementById("cityOwner");
+    const btnBuyCity = document.getElementById("btnBuyCity");
+
+    let currentUser = null;         // Oturum açmış kullanıcı
+    let selectedCityId = null;      // Modal'da görüntülenen şehir ID'si
+    let selectedCityPrice = 0;      // Modal'da görüntülenen şehrin fiyatı
+
+    /**************************************************/
+    /** Kayıt / Giriş Formu Olay Dinleyicileri        */
+    /**************************************************/
+    const registerForm = document.getElementById("registerForm");
+    registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const username = document.getElementById("registerUsername").value.trim();
       const email = document.getElementById("registerEmail").value.trim();
       const password = document.getElementById("registerPassword").value;
 
       try {
+        // Firebase Auth ile kullanıcı oluşturma
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
 
-        // Yeni kullanıcının Firestore kaydı (varsayılan 1000 USDT bakiye ile)
+        // Firestore'a kullanıcı ekleme
         await db.collection("users").doc(user.uid).set({
           username: username,
           email: email,
-          balance: 1000,
-          ownedCities: []
+          balance: 1000,     // Yeni kullanıcıya örnek olarak 1000 USDT verilebilir
+          cities: [],        // Başlangıçta şehir yok
         });
 
-        alert("Kayıt başarılı! Giriş yapıldı.");
-        bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+        // Kayıt başarılı -> modal'ı kapat
+        authModal.hide();
       } catch (error) {
-        alert("Kayıt hatası: " + error.message);
+        alert("Kayıt olurken hata: " + error.message);
       }
     });
 
-    // Giriş Yap
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    const loginForm = document.getElementById("loginForm");
+    loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("loginEmail").value.trim();
       const password = document.getElementById("loginPassword").value;
 
       try {
+        // Firebase Auth ile giriş
         await auth.signInWithEmailAndPassword(email, password);
-        alert("Giriş başarılı!");
-        bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+        authModal.hide();
       } catch (error) {
-        alert("Giriş hatası: " + error.message);
+        alert("Giriş yaparken hata: " + error.message);
       }
     });
 
-    // Oturum durumu değiştiğinde
+    /**************************************************/
+    /** Çıkış Butonu Olay Dinleyicisi                 */
+    /**************************************************/
+    btnLogout.addEventListener("click", async () => {
+      await auth.signOut();
+    });
+
+    /**************************************************/
+    /** Auth State Değişikliği (onAuthStateChanged)   */
+    /**************************************************/
     auth.onAuthStateChanged(async (user) => {
       if (user) {
+        // Kullanıcı giriş yaptı
         currentUser = user;
-        document.getElementById("profileBtn").style.display = "inline-block";
-        document.getElementById("logoutBtn").style.display = "inline-block";
-      } else {
-        currentUser = null;
-        document.getElementById("profileBtn").style.display = "none";
-        document.getElementById("logoutBtn").style.display = "none";
+        btnProfile.style.display = "inline-block";
+        btnLogout.style.display = "inline-block";
 
-        // Giriş yapmayanlara modal açalım
-        const authModalEl = document.getElementById("authModal");
-        const authModal = new bootstrap.Modal(authModalEl);
+        // Şehir seed işlemi
+        await seedCitiesIfNeeded();
+
+        // Haritayı yükle
+        renderMap();
+
+      } else {
+        // Kullanıcı çıkış yaptı veya henüz giriş yapmadı
+        currentUser = null;
+        btnProfile.style.display = "none";
+        btnLogout.style.display = "none";
+
+        // Giriş/Kayıt modal'ını otomatik aç
         authModal.show();
       }
     });
 
-    // Çıkış Yap
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await auth.signOut();
-      alert("Çıkış yapıldı!");
-      // Ana görünüm (harita) göster, profil gizle
-      showMapView();
-    });
-
-    /*******************************************/
-    /* 5) Şehir Satın Alma ve Modal İşlemleri  */
-    /*******************************************/
-    // Şehir Marker tıklandığında modal aç
-    async function openCityDetailModal(cityId) {
-      selectedCityId = cityId;
-      const cityDoc = await db.collection("cities").doc(cityId).get();
-      if (!cityDoc.exists) return;
-
-      const cityData = cityDoc.data();
-      document.getElementById("cityNameSpan").textContent = cityData.name;
-      document.getElementById("cityPriceSpan").textContent = cityData.price;
-
-      if (cityData.ownerId) {
-        const ownerDoc = await db.collection("users").doc(cityData.ownerId).get();
-        const ownerData = ownerDoc.exists ? ownerDoc.data() : null;
-        document.getElementById("cityOwnerSpan").textContent = ownerData
-          ? ownerData.username
-          : "Bilinmiyor";
-      } else {
-        document.getElementById("cityOwnerSpan").textContent = "Sahipsiz";
-      }
-
-      const modal = new bootstrap.Modal(document.getElementById("cityDetailModal"));
-      modal.show();
-    }
-
-    // Şehir Satın Alma Butonu
-    document.getElementById("buyCityBtn").addEventListener("click", async () => {
-      if (!currentUser || !selectedCityId) {
-        return alert("Satın almak için önce giriş yapmalısınız!");
-      }
-      // Şehir verisi
-      const cityRef = db.collection("cities").doc(selectedCityId);
-      const cityDoc = await cityRef.get();
-      if (!cityDoc.exists) return alert("Şehir bulunamadı!");
-      const cityData = cityDoc.data();
-
-      // Zaten sahibi kullanıcıysa
-      if (cityData.ownerId && cityData.ownerId === currentUser.uid) {
-        return alert("Bu şehir zaten sizin!");
-      }
-
-      // Kullanıcı verisi
-      const userRef = db.collection("users").doc(currentUser.uid);
-      const userDoc = await userRef.get();
-      if (!userDoc.exists) return alert("Kullanıcı bulunamadı!");
-      const userData = userDoc.data();
-
-      // Bakiye kontrol
-      if (userData.balance < cityData.price) {
-        return alert("Yetersiz bakiye!");
-      }
-
-      // Satın alma işlemi
-      const newBalance = userData.balance - cityData.price;
-      const newOwnedCities = userData.ownedCities
-        ? [...userData.ownedCities, cityRef.id]
-        : [cityRef.id];
-
-      // 1) Şehir ownerId güncelle
-      await cityRef.update({ ownerId: currentUser.uid });
-
-      // 2) Kullanıcı bakiyesini düşüp ownedCities'e ekleyelim
-      await userRef.update({
-        balance: newBalance,
-        ownedCities: newOwnedCities
-      });
-
-      alert(cityData.name + " şehrini satın aldınız!");
-      bootstrap.Modal.getInstance(document.getElementById("cityDetailModal")).hide();
-    });
-
-    /*******************************************/
-    /* 6) Profil Ekranı Göster/Gizle Fonksiyon */
-    /*******************************************/
-    function showProfileView() {
-      document.getElementById("chartView").style.display = "none";
-      document.getElementById("profileView").style.display = "block";
-    }
-    function showMapView() {
-      document.getElementById("profileView").style.display = "none";
-      document.getElementById("chartView").style.display = "block";
-    }
-
-    // Profil butonuna tıklayınca profil verilerini yükle, ekrana getir
-    document.getElementById("profileBtn").addEventListener("click", async () => {
-      if (!currentUser) {
-        return alert("Önce giriş yapmalısınız!");
-      }
-      await loadUserProfile();
-      showProfileView();
-    });
-
-    // Profilden haritaya dönüş
-    document.getElementById("backToMapBtn").addEventListener("click", () => {
-      showMapView();
-    });
-
-    // Profil Verilerini Yükle
-    async function loadUserProfile() {
+    /**************************************************/
+    /** Profil Modal Açıldığında Bilgi Güncelleme     */
+    /**************************************************/
+    document.getElementById("profileModal").addEventListener("show.bs.modal", async () => {
       if (!currentUser) return;
+
       const userDoc = await db.collection("users").doc(currentUser.uid).get();
       if (userDoc.exists) {
-        const data = userDoc.data();
-        document.getElementById("profileUsername").textContent = data.username;
-        document.getElementById("profileEmail").textContent = data.email;
-        document.getElementById("profileBalance").textContent = data.balance;
+        const userData = userDoc.data();
+        profileUsernameEl.textContent = userData.username || "";
+        profileBalanceEl.textContent = userData.balance || 0;
 
-        // Sahip olunan şehirleri listele
-        const ownedCitiesList = document.getElementById("ownedCitiesList");
-        ownedCitiesList.innerHTML = "";
-        if (data.ownedCities && data.ownedCities.length > 0) {
-          for (let cityId of data.ownedCities) {
-            const cityDoc = await db.collection("cities").doc(cityId).get();
-            if (cityDoc.exists) {
-              const cityData = cityDoc.data();
-              const li = document.createElement("li");
-              li.textContent = cityData.name + " (" + cityData.price + " USDT)";
-              ownedCitiesList.appendChild(li);
-            }
-          }
+        // Şehir listesini doldur
+        profileCitiesEl.innerHTML = "";
+        if (Array.isArray(userData.cities) && userData.cities.length > 0) {
+          userData.cities.forEach((cityName) => {
+            const li = document.createElement("li");
+            li.textContent = cityName;
+            profileCitiesEl.appendChild(li);
+          });
         } else {
           const li = document.createElement("li");
           li.textContent = "Henüz şehriniz yok.";
-          ownedCitiesList.appendChild(li);
+          profileCitiesEl.appendChild(li);
+        }
+      }
+    });
+
+    /**************************************************/
+    /** Şehir Seed İşlemi (Firestore'da yoksa ekle)   */
+    /**************************************************/
+    async function seedCitiesIfNeeded() {
+      const citiesRef = db.collection("cities");
+      const snapshot = await citiesRef.get();
+      if (snapshot.empty) {
+        // Örnek şehirler seed ediliyor
+        const seedData = [
+          {
+            name: "İstanbul",
+            price: 200,
+            latitude: 41.0082,
+            longitude: 28.9784,
+            ownerId: null,
+          },
+          {
+            name: "Ankara",
+            price: 150,
+            latitude: 39.9208,
+            longitude: 32.8541,
+            ownerId: null,
+          },
+          {
+            name: "İzmir",
+            price: 100,
+            latitude: 38.4237,
+            longitude: 27.1428,
+            ownerId: null,
+          },
+        ];
+
+        for (let city of seedData) {
+          await citiesRef.add(city);
         }
       }
     }
 
-    /*******************************************/
-    /* 7) amCharts 5 Harita Kurulumu           */
-    /*******************************************/
-    am5.ready(function () {
-      // Root ve tema
+    /**************************************************/
+    /** amCharts 5 ile Harita Oluşturma               */
+    /**************************************************/
+    let chart; // Global olarak tanımlayalım, tekrar tekrar oluşturmasın
+
+    async function renderMap() {
+      // Eğer chart zaten varsa, temizleyelim
+      if (chart) {
+        chart.dispose();
+      }
+
+      // amCharts root oluşturalım
       let root = am5.Root.new("chartdiv");
+
+      // Tema
       root.setThemes([am5themes_Animated.new(root)]);
 
-      // Harita
-      let chart = root.container.children.push(
+      // Map Chart
+      chart = root.container.children.push(
         am5map.MapChart.new(root, {
-          projection: am5map.geoMercator()
+          panX: "none",
+          panY: "none",
+          wheelY: "none",
+          projection: am5map.geoMercator(),
         })
       );
 
-      // Ülke poligon serisi (Dünya haritası)
+      // Dünya haritası polygon serisi
       let polygonSeries = chart.series.push(
         am5map.MapPolygonSeries.new(root, {
           geoJSON: am5geodata_worldLow
         })
       );
+
       polygonSeries.mapPolygons.template.setAll({
-        fill: am5.color(0xe0e0e0),
-        stroke: am5.color(0xffffff)
+        tooltipText: "{name}",
+        interactive: true,
+        fill: am5.color(0xd0d0d0),
       });
 
-      // Şehir point serisi
-      let citySeries = chart.series.push(
+      polygonSeries.mapPolygons.template.states.create("hover", {
+        fill: am5.color(0x677935),
+      });
+
+      // Şehir noktaları için bir seri oluşturalım
+      let pointSeries = chart.series.push(
         am5map.MapPointSeries.new(root, {
-          latitudeField: "lat",
-          longitudeField: "lon"
+          latitudeField: "latitude",
+          longitudeField: "longitude"
         })
       );
 
-      // Marker (Kırmızı pin)
-      citySeries.bullets.push(() => {
-        let circle = am5.Graphics.new(root, {
-          svgPath:
-            "M12,2C7.029,2,3,6.029,3,11c0,4.695,3.94,8.823,8.563,15.108C11.864,26.51,12,26.754,12,27c0,0.246,0.136,0.49,0.437,0.892C16.06,19.059,20,14.931,20,11C20,6.029,15.971,2,12,2z M12,15c-2.206,0-4-1.794-4-4s1.794-4,4-4c2.205,0,4,1.794,4,4S14.205,15,12,15z",
-          fill: am5.color(0xf23c3c),
-          scale: 0.7,
-          centerX: am5.p50,
-          centerY: am5.p50,
-          tooltipText: "{name}\nFiyat: {price} USDT",
-          cursorOverStyle: "pointer"
-        });
-
-        circle.events.on("click", (ev) => {
-          let dataContext = ev.target.dataItem.dataContext;
-          openCityDetailModal(dataContext.id);
-        });
-
-        circle.states.create("hover", {
-          scale: 0.9,
-          fill: am5.color(0xff0000)
-        });
-        return am5.Bullet.new(root, { sprite: circle });
+      // Şehir verilerini Firestore'dan çekelim
+      const citiesSnapshot = await db.collection("cities").get();
+      let cityData = [];
+      citiesSnapshot.forEach((doc) => {
+        let data = doc.data();
+        data.id = doc.id; // Firestore doc ID
+        cityData.push(data);
       });
 
-      // Firestore'dan şehirleri yükleme
-      async function loadCities() {
-        const snapshot = await db.collection("cities").get();
-        let cityDataArray = [];
-        snapshot.forEach((doc) => {
-          let data = doc.data();
-          cityDataArray.push({
-            id: doc.id,
-            name: data.name,
-            lat: data.lat,
-            lon: data.lon,
-            price: data.price
-          });
+      // Şehirleri seri'ye ekleyelim
+      pointSeries.data.setAll(cityData);
+
+      // Marker görünümleri
+      pointSeries.bullets.push(() => {
+        let container = am5.Container.new(root, {});
+        let circle = container.children.push(
+          am5.Graphics.new(root, {
+            radius: 8,
+            fill: am5.color(0xf5333f),
+            cursorOverStyle: "pointer",
+            tooltipText: "{name}"
+          })
+        );
+
+        // Hover efekti
+        circle.states.create("hover", {
+          scale: 1.3,
+          fill: am5.color(0xff7f50),
         });
-        citySeries.data.setAll(cityDataArray);
+
+        // Tıklama eventi
+        circle.events.on("click", (e) => {
+          let dataContext = e.target.dataItem.dataContext;
+          openCityModal(dataContext);
+        });
+
+        return am5.Bullet.new(root, {
+          sprite: container,
+        });
+      });
+    }
+
+    /**************************************************/
+    /** Şehir Modal'ını Açma ve Verileri Gösterme     */
+    /**************************************************/
+    async function openCityModal(city) {
+      // city objesinde: {name, price, latitude, longitude, ownerId, id} var
+      selectedCityId = city.id;
+      selectedCityPrice = city.price;
+
+      cityNameEl.textContent = city.name;
+      cityPriceEl.textContent = city.price + " USDT";
+
+      if (!city.ownerId) {
+        cityOwnerEl.textContent = "Henüz sahibi yok.";
+      } else {
+        // ownerId ile users koleksiyonundan kullanıcı adı alalım
+        const ownerDoc = await db.collection("users").doc(city.ownerId).get();
+        if (ownerDoc.exists) {
+          const ownerData = ownerDoc.data();
+          cityOwnerEl.textContent = ownerData.username;
+        } else {
+          cityOwnerEl.textContent = "Bilinmiyor";
+        }
       }
 
-      // Sayfa yüklendiğinde seed ve marker yükleme
-      seedCitiesIfEmpty().then(() => {
-        setTimeout(loadCities, 1000);
+      // Eğer şehir kullanıcıya ait ise "Satın Al" butonunu gizleyebiliriz (isteğe bağlı)
+      if (city.ownerId === currentUser?.uid) {
+        btnBuyCity.style.display = "none";
+      } else {
+        btnBuyCity.style.display = "inline-block";
+      }
+
+      cityModal.show();
+    }
+
+    /**************************************************/
+    /** Şehir Satın Alma Butonu                       */
+    /**************************************************/
+    btnBuyCity.addEventListener("click", async () => {
+      if (!currentUser || !selectedCityId) return;
+
+      // Öncelikle kullanıcının güncel bakiyesini kontrol edelim
+      const userRef = db.collection("users").doc(currentUser.uid);
+      const userDoc = await userRef.get();
+      const userData = userDoc.data();
+
+      if (!userData) return alert("Kullanıcı bilgisi bulunamadı!");
+
+      let balance = userData.balance || 0;
+      if (balance < selectedCityPrice) {
+        return alert("Yetersiz bakiye!");
+      }
+
+      // Şehir bilgisini çekelim
+      const cityRef = db.collection("cities").doc(selectedCityId);
+      const cityDoc = await cityRef.get();
+      if (!cityDoc.exists) {
+        return alert("Şehir bulunamadı!");
+      }
+
+      const cityData = cityDoc.data();
+      // Zaten sahibiyse engelle (isteğe bağlı)
+      if (cityData.ownerId) {
+        return alert("Şehir zaten satılmış!");
+      }
+
+      // İşlem: Kullanıcının bakiyesini düşür, şehrin ownerId'sini ayarla, kullanıcının cities listesine ekle
+      // Firestore Transaction veya Batch ile yapmak daha güvenlidir.
+      await db.runTransaction(async (transaction) => {
+        const freshUserDoc = await transaction.get(userRef);
+        const freshCityDoc = await transaction.get(cityRef);
+
+        if (!freshUserDoc.exists || !freshCityDoc.exists) {
+          throw "Geçersiz kullanıcı veya şehir!";
+        }
+
+        let freshUserData = freshUserDoc.data();
+        let freshCityData = freshCityDoc.data();
+
+        // Tekrar bakiye kontrolü
+        if (freshUserData.balance < selectedCityPrice) {
+          throw "Yetersiz bakiye!";
+        }
+
+        // Şehir boşta mı?
+        if (freshCityData.ownerId) {
+          throw "Şehir zaten satılmış!";
+        }
+
+        // Bakiye düş
+        let newBalance = freshUserData.balance - selectedCityPrice;
+        // Şehir listesini güncelle
+        let userCities = freshUserData.cities || [];
+        userCities.push(freshCityData.name);
+
+        // Güncellemeleri yap
+        transaction.update(userRef, {
+          balance: newBalance,
+          cities: userCities,
+        });
+        transaction.update(cityRef, {
+          ownerId: currentUser.uid,
+        });
       });
+
+      alert("Satın alma işlemi başarılı!");
+      cityModal.hide();
+      // Haritayı tekrar çizerek son durumları güncelleyebilirsiniz (örn: marker rengi değiştirilebilir).
+      renderMap();
     });
   </script>
 </body>
