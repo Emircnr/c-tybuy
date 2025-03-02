@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Harita - Firebase & amCharts Örneği</title>
+
+  <!-- amCharts 5 Kütüphaneleri -->
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/geodata/data/countries2.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
+
+  <!-- Firebase SDK (9.x) -->
+  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"></script>
+
+  <style>
+    /* Sayfa genel ayarları (harita tam ekran yapabilmek için sıfırlamalar) */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Harita kapsayıcısı tüm ekranı kapsasın */
+    #chartdiv {
+      width: 100%;
+      height: 100%;
+      position: relative; /* Modal vs. konumlandırmak için */
+    }
+
+    /* Giriş/Kayıt formu için basit bir modal/overlay */
+    #authModal, #cityModal, #profileModal {
+      display: none; /* Başlangıçta kapalı */
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 20px;
+      z-index: 9999; /* Harita üstünde gözüksün */
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      min-width: 300px;
+    }
+
+    /* Modal arkaplan karartması */
+    .modal-overlay {
+      display: none;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9998;
+    }
+
+    .modal-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      font-size: 14px;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #4285f4;
+      color: #fff;
+      padding: 8px 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-top: 5px;
+    }
+
+    .btn:hover {
+      background: #3367d6;
+    }
+
+    /* Profil alanı: sağ üst köşede küçük bir buton gibi */
+    #profileBtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 9999;
+      background: #4caf50;
+    }
+
+    /* Kapatma butonu */
+    .close-btn {
+      background: #e74c3c;
+      margin-left: 10px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Modal arkaplan karartması -->
+  <div class="modal-overlay" id="overlay"></div>
+
+  <!-- Kayıt/Giriş Modal -->
+  <div id="authModal">
+    <div class="modal-title">Giriş veya Kayıt Ol</div>
+    <div class="form-group">
+      <label for="authUsername">Kullanıcı Adı (Kayıt için)</label>
+      <input type="text" id="authUsername" placeholder="Kullanıcı Adı" />
+    </div>
+    <div class="form-group">
+      <label for="authEmail">E-Posta</label>
+      <input type="email" id="authEmail" placeholder="Email" />
+    </div>
+    <div class="form-group">
+      <label for="authPassword">Şifre</label>
+      <input type="password" id="authPassword" placeholder="Şifre" />
+    </div>
+    <button id="loginBtn" class="btn">Giriş Yap</button>
+    <button id="registerBtn" class="btn">Kayıt Ol</button>
+  </div>
+
+  <!-- Profil Modal -->
+  <div id="profileModal">
+    <div class="modal-title">Profil</div>
+    <p><strong>Kullanıcı Adı:</strong> <span id="profileUsername"></span></p>
+    <p><strong>Sahip Olduğunuz Şehirler:</strong> <span id="profileOwnedCities"></span></p>
+    <p><strong>Bakiye (USDT):</strong> <span id="profileBalance"></span></p>
+    <button id="logoutBtn" class="btn close-btn">Çıkış Yap</button>
+    <button id="closeProfile" class="btn">Kapat</button>
+  </div>
+
+  <!-- Şehir Bilgisi Modal -->
+  <div id="cityModal">
+    <div class="modal-title" id="cityTitle">Şehir Bilgisi</div>
+    <p><strong>Fiyat:</strong> <span id="cityPrice"></span> USDT</p>
+    <p><strong>Sahibi:</strong> <span id="cityOwner"></span></p>
+    <button id="closeCityModal" class="btn">Kapat</button>
+  </div>
+
+  <!-- Profil butonu (örneğin sağ üstte) -->
+  <button id="profileBtn" class="btn" style="display:none;">Profil</button>
+
+  <!-- Harita konteyneri -->
+  <div id="chartdiv"></div>
+
+<script>
+/* -----------------------------
+ * 1) Firebase Başlangıç
+ * ----------------------------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyDThNGVa7YBhQIINuIOxUiLbTvu0cOZh4w",
+  authDomain: "maping-c0315.firebaseapp.com",
+  databaseURL: "https://maping-c0315-default-rtdb.firebaseio.com",
+  projectId: "maping-c0315",
+  storageBucket: "maping-c0315.firebasestorage.app",
+  messagingSenderId: "1056086990632",
+  appId: "1:1056086990632:web:1f83946cad5b68e2f73a1d",
+  measurementId: "G-3N34BTYV8C"
+};
+
+// Firebase modüllerini 9.x versiyonuyla kullanıyoruz
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* -----------------------------
+ * 2) Global Değişkenler
+ * ----------------------------- */
+
+// Oturum açmış kullanıcının Firestore'daki verileri (username, balance vs.)
+let currentUserData = null;
+
+/* -----------------------------
+ * 3) Modal Aç/Kapa Fonksiyonları
+ * ----------------------------- */
+function openModal(modalId) {
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById(modalId).style.display = 'block';
+}
+function closeModal(modalId) {
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById(modalId).style.display = 'none';
+}
+
+/* -----------------------------
+ * 4) Kayıt / Giriş İşlemleri
+ * ----------------------------- */
+async function registerUser() {
+  const username = document.getElementById('authUsername').value.trim();
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value.trim();
+
+  if (!email || !password || !username) {
+    alert("Kullanıcı adı, e-posta ve şifre gereklidir!");
+    return;
+  }
+  try {
+    let userCred = await auth.createUserWithEmailAndPassword(email, password);
+    let user = userCred.user;
+    // Yeni kullanıcı Firestore'a ekle (örnek alanlar: username, balance, ownedCities)
+    await db.collection("users").doc(user.uid).set({
+      username: username,
+      email: email,
+      balance: 100,         // Örnek başlangıç bakiyesi
+      ownedCities: []       // Başlangıçta hiç şehre sahip değil
+    });
+    closeModal("authModal");
+  } catch (err) {
+    alert("Kayıt olurken hata: " + err.message);
+  }
+}
+
+async function loginUser() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value.trim();
+  if (!email || !password) {
+    alert("E-posta ve şifre giriniz!");
+    return;
+  }
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+    closeModal("authModal");
+  } catch (err) {
+    alert("Giriş yaparken hata: " + err.message);
+  }
+}
+
+// Oturum kapatma
+function logoutUser() {
+  auth.signOut();
+}
+
+/* -----------------------------
+ * 5) Kullanıcı Durum Değişimi (Auth State)
+ * ----------------------------- */
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    // Kullanıcı giriş yaptı, Firestore'dan verileri çek
+    let docRef = db.collection("users").doc(user.uid);
+    let docSnap = await docRef.get();
+    if (docSnap.exists) {
+      currentUserData = docSnap.data();
+      // Profil butonunu görünür yap
+      document.getElementById("profileBtn").style.display = "inline-block";
+    }
+  } else {
+    // Kullanıcı çıkış yaptı
+    currentUserData = null;
+    document.getElementById("profileBtn").style.display = "none";
+  }
+});
+
+/* -----------------------------
+ * 6) Profil Gösterme
+ * ----------------------------- */
+function showProfile() {
+  if (!currentUserData) return;
+  document.getElementById("profileUsername").innerText = currentUserData.username || "";
+  document.getElementById("profileOwnedCities").innerText = currentUserData.ownedCities
+    ? currentUserData.ownedCities.join(", ")
+    : "-";
+  document.getElementById("profileBalance").innerText = currentUserData.balance || 0;
+  openModal("profileModal");
+}
+
+/* -----------------------------
+ * 7) Şehir Verileri & Harita
+ * ----------------------------- */
+let mapChart;
+let citySeries; // şehir noktaları için
+
+// Örnek şehir verilerini Firestore'a kaydetmek istiyorsanız, el ile bir defa ekleyebilirsiniz.
+// Aşağıda lokal bir dizi şeklinde tanımladık. "price" ve "ownerId" Firestore'dan da çekilebilir.
+let cityData = [
+  {
+    id: "city_1",
+    title: "İstanbul",
+    latitude: 41.0082,
+    longitude: 28.9784,
+    price: 1000,
+    ownerId: null // Sahip yok
+  },
+  {
+    id: "city_2",
+    title: "Ankara",
+    latitude: 39.9208,
+    longitude: 32.8541,
+    price: 800,
+    ownerId: null
+  },
+  {
+    id: "city_3",
+    title: "İzmir",
+    latitude: 38.4237,
+    longitude: 27.1428,
+    price: 600,
+    ownerId: null
+  }
+];
+
+function initMap() {
+  // Root
+  let root = am5.Root.new("chartdiv");
+  // Tema
+  root.setThemes([ am5themes_Animated.new(root) ]);
+
+  // Harita
+  let chart = root.container.children.push(
+    am5map.MapChart.new(root, {
+      panX: "rotateX",
+      projection: am5map.geoMercator()
+    })
+  );
+  mapChart = chart; // global referans
+
+  // Dünya haritası
+  let worldSeries = chart.series.push(
+    am5map.MapPolygonSeries.new(root, {
+      geoJSON: am5geodata_worldLow,
+      exclude: ["AQ"]
+    })
+  );
+  worldSeries.mapPolygons.template.setAll({
+    tooltipText: "{name}",
+    fill: am5.color(0xcccccc)
+  });
+
+  // Şehir noktaları için MapPointSeries
+  citySeries = chart.series.push(
+    am5map.MapPointSeries.new(root, {})
+  );
+
+  // Şehir nokta stili
+  citySeries.bullets.push(function() {
+    let circle = am5.Circle.new(root, {
+      radius: 6,
+      tooltipText: "{title}",
+      fill: am5.color(0xff0000),
+      cursorOverStyle: "pointer"
+    });
+
+    // Şehre tıklandığında modal aç
+    circle.events.on("click", function(e) {
+      let dataItem = e.target.dataItem;
+      if (!dataItem) return;
+      let cityInfo = dataItem.dataContext;
+      openCityModal(cityInfo);
+    });
+    return am5.Bullet.new(root, { sprite: circle });
+  });
+
+  // Firestore'dan cityData'yı çekmek isterseniz buraya bir load fonksiyonu da yazabilirsiniz.
+  // Şimdilik local "cityData" yı set ediyoruz:
+  citySeries.data.setAll(cityData);
+
+  // Zoom vs. default ayarlar
+  chart.goHome();
+}
+
+/* -----------------------------
+ * 8) Şehir Modal (Tıklanınca Açılacak)
+ * ----------------------------- */
+function openCityModal(cityInfo) {
+  // cityInfo örn: { id, title, price, ownerId, ... }
+  document.getElementById('cityTitle').innerText = cityInfo.title;
+  document.getElementById('cityPrice').innerText = cityInfo.price;
+  if (cityInfo.ownerId) {
+    document.getElementById('cityOwner').innerText = "Kullanıcı ID: " + cityInfo.ownerId;
+  } else {
+    document.getElementById('cityOwner').innerText = "Sahipsiz";
+  }
+  openModal("cityModal");
+}
+
+/* -----------------------------
+ * 9) Sayfa Yüklendiğinde
+ * ----------------------------- */
+window.onload = function() {
+  // Haritayı başlat
+  initMap();
+  // Kullanıcı giriş/kayıt ekranını göster (isteğe bağlı, eğer otomatik göstermeyelim derseniz kapatın)
+  openModal("authModal");
+
+  // Buton eventleri
+  document.getElementById("registerBtn").addEventListener("click", registerUser);
+  document.getElementById("loginBtn").addEventListener("click", loginUser);
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    logoutUser();
+    closeModal("profileModal");
+  });
+
+  document.getElementById("profileBtn").addEventListener("click", showProfile);
+  document.getElementById("closeProfile").addEventListener("click", () => closeModal("profileModal"));
+  document.getElementById("closeCityModal").addEventListener("click", () => closeModal("cityModal"));
+};
+
+/* -----------------------------
+ * (Opsiyonel) Şehri Satın Alma, Fiyat Güncelleme vb.
+ * -----------------------------
+   - Bir şehir satın alındığında:
+     1) currentUserData.balance >= city.price ise satın alabilir.
+     2) city.ownerId = user.uid, city firestore'da güncellenir.
+     3) user's balance düşer, ownedCities listesine city.title eklenir.
+     4) user ve city verileri Firestore'a kaydedilir.
+   - Bu mantığı openCityModal'a veya ayrı bir "Satın Al" butonuna ekleyebilirsiniz.
+ */
+
+</script>
+</body>
+</html>
