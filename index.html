@@ -36,7 +36,7 @@
       apiKey: "AIzaSyB2LQX2rSPYmV9fCn9S02R1zz9welQ9Skc",
       authDomain: "citysell-45e32.firebaseapp.com",
       projectId: "citysell-45e32",
-      storageBucket: "citysell-45e32.firebasestorage.app",
+      storageBucket: "citysell-45e32.firebaseapp.com",
       messagingSenderId: "325438858648",
       appId: "1:325438858648:web:0c13beb02cd1a2b08fb7ed",
       measurementId: "G-2HR99X6LXY"
@@ -50,86 +50,175 @@
       padding: 0;
       width: 100%;
       height: 100%;
+      font-family: 'Roboto', sans-serif;
+      background: #f4f4f4;
     }
 
-    /* Harita kapsayıcı div */
-    #chartdiv {
-      width: 100%;
+    /* Ana kapsayıcı */
+    #appContainer {
+      display: flex;
+      flex-direction: column;
       height: 100vh;
     }
 
-    /* Profil modal estetiği */
-    .profile-info {
+    /* Navbar ve altındaki bölümlerin boyutları */
+    .navbar {
+      flex: 0 0 auto;
+    }
+    #contentArea {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: row;
+    }
+
+    /* Harita alanı */
+    #chartdiv {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Auth Modal'ın içeriği */
+    .modal-body {
+      background: #f9f9f9;
+    }
+    .nav-tabs .nav-link.active {
+      background-color: #28a745 !important;
+      color: #fff !important;
+    }
+
+    /* Profil sayfası (gizli veya görünür) */
+    #profilePage {
+      display: none; /* Başlangıçta gizli */
+      width: 100%;
+      padding: 20px;
+      overflow-y: auto;
+      background: #fff;
+    }
+
+    /* Profil bilgileri stili */
+    .profile-header {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 1.2rem;
+      gap: 1rem;
+      margin-bottom: 2rem;
     }
-    .profile-icon {
-      font-size: 1.5rem;
-      color: #28a745;
-      animation: spin 2s linear infinite; /* animasyon örneği */
+    .profile-header img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #28a745;
     }
-    @keyframes spin {
-      0% { transform: rotate(0deg);}
-      100% { transform: rotate(360deg);}
+    .profile-header .user-info h2 {
+      margin: 0;
+      color: #333;
     }
-    .country-list li {
+    .profile-header .user-info p {
+      margin: 0;
+      color: #666;
+    }
+
+    /* Bayrak tasarım canvas */
+    #flagCanvas {
+      border: 2px solid #ccc;
+      cursor: crosshair;
+    }
+
+    /* Sahip olunan ülkeler listesi */
+    .owned-list li {
       margin-bottom: 5px;
+    }
+
+    /* Ülke detay modal */
+    .modal-body p {
+      margin-bottom: 0.5rem;
     }
   </style>
 </head>
-<body class="d-flex flex-column">
+<body>
+  <div id="appContainer">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#" id="navBrand">Ülke Oyunu</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarContent"
+          aria-controls="navbarContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">Ülke Oyunu</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarContent"
-        aria-controls="navbarContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+          <ul class="navbar-nav ms-auto">
+            <!-- Giriş yaptıktan sonra gözükecek -->
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="#"
+                id="profileNavLink"
+                style="display: none;"
+              >
+                Profil
+              </a>
+            </li>
+            <!-- Çıkış -->
+            <li class="nav-item">
+              <button
+                class="btn btn-danger nav-link"
+                style="display: none;"
+                id="logoutBtn"
+              >
+                Çıkış Yap
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- /Navbar -->
 
-      <div class="collapse navbar-collapse" id="navbarContent">
-        <ul class="navbar-nav ms-auto">
-          <!-- Giriş yapınca görünecek -->
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="#"
-              id="profileBtn"
-              data-bs-toggle="modal"
-              data-bs-target="#profileModal"
-              style="display: none;"
-            >
-              Profil
-            </a>
-          </li>
-          <!-- Çıkış butonu -->
-          <li class="nav-item">
-            <button
-              class="btn btn-danger nav-link"
-              style="display: none;"
-              id="logoutBtn"
-            >
-              Çıkış Yap
-            </button>
-          </li>
-        </ul>
+    <!-- İçerik Alanı: Harita ve Profil sayfası -->
+    <div id="contentArea">
+      <!-- Harita Alanı -->
+      <div id="chartdiv"></div>
+
+      <!-- Profil Sayfası -->
+      <div id="profilePage">
+        <div class="profile-header">
+          <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="User Avatar" id="profileAvatar">
+          <div class="user-info">
+            <h2 id="profileUsername">Kullanıcı Adı</h2>
+            <p id="profileEmail">email@example.com</p>
+            <p><strong>Bakiye: </strong><span id="profileBalance">0</span> USDT</p>
+          </div>
+        </div>
+
+        <hr />
+
+        <!-- Bayrak Tasarım Bölümü -->
+        <h4>Bayrak Tasarla</h4>
+        <p style="color: #555;">Aşağıdaki alanda farenizle çizim yaparak kendi bayrağınızı oluşturabilirsiniz.</p>
+        <canvas id="flagCanvas" width="400" height="200"></canvas><br/>
+        <button class="btn btn-success mt-2" id="saveFlagBtn">Bayrağı Kaydet</button>
+
+        <hr />
+
+        <!-- Sahip olunan ülkeler -->
+        <h4>Sahip Olduğunuz Ülkeler</h4>
+        <ul class="owned-list" id="ownedCountriesList"></ul>
+
+        <button class="btn btn-secondary mt-3" id="backToMapBtn">
+          Haritaya Geri Dön
+        </button>
       </div>
     </div>
-  </nav>
-  <!-- /Navbar -->
+  </div>
 
-  <!-- Harita Alanı -->
-  <div id="chartdiv"></div>
 
   <!-- Giriş / Kayıt Modal -->
   <div
@@ -141,9 +230,9 @@
   >
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header bg-success text-white">
           <h5 class="modal-title" id="authModalLabel">Giriş / Kayıt</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
         </div>
         <div class="modal-body">
           <ul class="nav nav-tabs" id="authTab" role="tablist">
@@ -242,58 +331,6 @@
   </div>
   <!-- /Auth Modal -->
 
-  <!-- Profil Modal (daha estetik) -->
-  <div
-    class="modal fade"
-    id="profileModal"
-    tabindex="-1"
-    aria-labelledby="profileModalLabel"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="profileModalLabel">Profil Bilgileri</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
-        </div>
-        <div class="modal-body">
-          <!-- Kullanıcı Adı ve E-posta -->
-          <div class="mb-3">
-            <div class="profile-info">
-              <i class="fas fa-user-circle profile-icon"></i>
-              <span style="font-weight: bold;">Kullanıcı Adı: </span>
-              <span id="profileUsername"></span>
-            </div>
-          </div>
-          <div class="mb-3">
-            <div class="profile-info">
-              <i class="fas fa-envelope"></i>
-              <span style="font-weight: bold;">E-posta: </span>
-              <span id="profileEmail"></span>
-            </div>
-          </div>
-
-          <!-- Bakiye -->
-          <div class="mb-3">
-            <div class="profile-info">
-              <i class="fas fa-coins profile-icon"></i>
-              <span style="font-weight: bold;">Bakiye: </span>
-              <span id="profileBalance"></span>
-              <span>USDT</span>
-            </div>
-          </div>
-
-          <hr />
-
-          <!-- Sahip olunan ülkeler -->
-          <h5><i class="fas fa-flag"></i> Sahip Olduğunuz Ülkeler</h5>
-          <ul id="ownedCountriesList" class="country-list"></ul>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- /Profil Modal -->
-
   <!-- Ülke Detay Modal -->
   <div
     class="modal fade"
@@ -304,18 +341,15 @@
   >
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header bg-primary text-white">
           <h5 class="modal-title" id="countryDetailModalLabel">Ülke Detayı</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
         </div>
         <div class="modal-body">
           <p><strong>Ülke Adı:</strong> <span id="countryNameSpan"></span></p>
           <p><strong>Fiyat (USDT):</strong> <span id="countryPriceSpan">750</span></p>
           <p><strong>Sahibi:</strong> <span id="countryOwnerSpan"></span></p>
-          <button
-            class="btn btn-primary mt-3"
-            id="buyCountryBtn"
-          >
+          <button class="btn btn-primary mt-3 w-100" id="buyCountryBtn">
             Satın Al
           </button>
         </div>
@@ -338,10 +372,17 @@
     const db = firebase.firestore();
 
     /*******************************************/
-    /* 2) Global Değişkenler */
+    /* 2) Global Değişkenler ve Cache */
     /*******************************************/
     let currentUser = null;       // Oturum açmış kullanıcı
-    let selectedCountryId = null; // Tıklanan ülkenin Firestore'daki ID'si (ör: "US", "TR", vb.)
+    let selectedCountryId = null; // Tıklanan ülkenin ID'si (ör: "TR", "US", vs.)
+    let countriesCache = {};      // Firestore'dan çekilen tüm ülkeler (countryId -> docData)
+    let usersCache = {};          // Kullanıcı verilerini cache'lemek için (uid -> userDocData)
+    let mapChart, worldSeries;    // amCharts referansları
+
+    // Profil/Canvas ile ilgili
+    let flagCanvas, flagCtx;
+    let painting = false;
 
     /*******************************************/
     /* 3) Kullanıcı Kayıt, Giriş ve Çıkış İşlemleri */
@@ -361,11 +402,12 @@
         await db.collection("users").doc(user.uid).set({
           username: username,
           email: email,
-          balance: 1000,   // başlangıç bakiyesi
-          ownedCountries: []
+          balance: 3000,   // başlangıç bakiyesi 3000
+          ownedCountries: [],
+          flagData: null  // Başlangıçta bayrak verisi yok
         });
 
-        alert("Kayıt başarılı! Giriş yapıldı.");
+        alert("Kayıt başarılı! Oturum açıldı.");
         bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
       } catch (error) {
         alert("Kayıt hatası: " + error.message);
@@ -387,19 +429,20 @@
       }
     });
 
-    // Oturum değiştiğinde
+    // Oturum değişikliği
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUser = user;
-        document.getElementById("profileBtn").style.display = "block";
+        document.getElementById("profileNavLink").style.display = "block";
         document.getElementById("logoutBtn").style.display = "block";
-        await loadUserProfile();
+        await loadUserProfile();  // Profil bilgilerini getir
+        await fetchAllCountries(); // Ülke verilerini getir & harita güncelle
       } else {
         currentUser = null;
-        document.getElementById("profileBtn").style.display = "none";
+        document.getElementById("profileNavLink").style.display = "none";
         document.getElementById("logoutBtn").style.display = "none";
-
-        // Giriş yapmamışsa, auth modal aç
+        showMap(); // Haritayı göster (profil sayfasını gizle)
+        // Giriş yapmamışsa Auth modalını göster
         const authModalEl = document.getElementById("authModal");
         const authModal = new bootstrap.Modal(authModalEl);
         authModal.show();
@@ -412,83 +455,195 @@
       alert("Çıkış yapıldı!");
     });
 
-    // Profil bilgilerini yükle
+    /*******************************************/
+    /* 4) Profil Sayfası İşlemleri */
+    /*******************************************/
+    // Profil sayfasını göster
+    document.getElementById("profileNavLink").addEventListener("click", () => {
+      showProfile();
+    });
+
+    // Haritaya geri dön
+    document.getElementById("backToMapBtn").addEventListener("click", () => {
+      showMap();
+    });
+
+    // Profil bilgilerini Firestore'dan okuyup sayfada göster
     async function loadUserProfile() {
       if (!currentUser) return;
       const userDoc = await db.collection("users").doc(currentUser.uid).get();
       if (userDoc.exists) {
         const data = userDoc.data();
+        // Profil üst bilgileri
         document.getElementById("profileUsername").textContent = data.username;
         document.getElementById("profileEmail").textContent = data.email;
         document.getElementById("profileBalance").textContent = data.balance;
 
         // Sahip olunan ülkeler
-        const ownedCountriesList = document.getElementById("ownedCountriesList");
-        ownedCountriesList.innerHTML = "";
+        const ownedList = document.getElementById("ownedCountriesList");
+        ownedList.innerHTML = "";
         if (data.ownedCountries && data.ownedCountries.length > 0) {
-          for (let countryId of data.ownedCountries) {
-            const countryDoc = await db.collection("countries").doc(countryId).get();
-            if (countryDoc.exists) {
-              const countryData = countryDoc.data();
-              // countryData.name yoksa ID gösterebilirsiniz
-              const li = document.createElement("li");
-              li.textContent = countryData.name || countryId;
-              ownedCountriesList.appendChild(li);
+          for (let cId of data.ownedCountries) {
+            // Ülke ismi varsa göster
+            let countryName = cId;
+            if (countriesCache[cId] && countriesCache[cId].name) {
+              countryName = countriesCache[cId].name;
             }
+            const li = document.createElement("li");
+            li.textContent = countryName + " (" + cId + ")";
+            ownedList.appendChild(li);
           }
         } else {
           const li = document.createElement("li");
-          li.textContent = "Henüz ülkeniz yok.";
-          ownedCountriesList.appendChild(li);
+          li.textContent = "Henüz hiçbir ülkeye sahip değilsiniz.";
+          ownedList.appendChild(li);
         }
       }
     }
 
+    // Profil sayfasını aç
+    function showProfile() {
+      document.getElementById("chartdiv").style.display = "none";
+      document.getElementById("profilePage").style.display = "block";
+    }
+
+    // Haritaya geri dön
+    function showMap() {
+      document.getElementById("chartdiv").style.display = "block";
+      document.getElementById("profilePage").style.display = "none";
+    }
+
     /*******************************************/
-    /* 4) Ülke (Polygon) Detay Modal Açma & Satın Alma */
+    /* 5) Bayrak (Paint) Özelliği */
     /*******************************************/
-    // Poligon tıklanınca modal aç
+    // Canvas başlat
+    function initFlagCanvas() {
+      flagCanvas = document.getElementById("flagCanvas");
+      flagCtx = flagCanvas.getContext("2d");
+
+      // Basit çizim fonksiyonları
+      flagCanvas.addEventListener("mousedown", (e) => {
+        painting = true;
+        flagCtx.beginPath();
+        flagCtx.moveTo(e.offsetX, e.offsetY);
+      });
+      flagCanvas.addEventListener("mouseup", () => {
+        painting = false;
+      });
+      flagCanvas.addEventListener("mousemove", drawOnCanvas);
+    }
+
+    // Fare hareketinde çiz
+    function drawOnCanvas(e) {
+      if (!painting) return;
+      flagCtx.lineWidth = 3;
+      flagCtx.lineCap = "round";
+      flagCtx.strokeStyle = "#000000";
+      flagCtx.lineTo(e.offsetX, e.offsetY);
+      flagCtx.stroke();
+    }
+
+    // Bayrağı kaydet (base64) -> Firestore
+    document.getElementById("saveFlagBtn").addEventListener("click", async () => {
+      if (!currentUser) return;
+      const flagDataUrl = flagCanvas.toDataURL("image/png");
+      const userRef = db.collection("users").doc(currentUser.uid);
+      await userRef.update({
+        flagData: flagDataUrl
+      });
+      alert("Bayrak kaydedildi! Artık satın aldığınız ülkeler bu bayrakla gösterilecek.");
+      // Haritayı güncelle (varsa sahip olunan ülkelerde desen uygula)
+      await fetchAllCountries();
+      await loadUserProfile();
+    });
+
+    /*******************************************/
+    /* 6) Harita (amCharts 5) Kurulumu */
+    /*******************************************/
+    am5.ready(function () {
+      let root = am5.Root.new("chartdiv");
+      root.setThemes([am5themes_Animated.new(root)]);
+
+      // Dünya haritası
+      mapChart = root.container.children.push(
+        am5map.MapChart.new(root, {
+          projection: am5map.geoMercator(),
+          // Yakınlaştırma/uzaklaştırma (zoom) ve sürükleme
+          panX: "translateX",
+          panY: "translateY",
+          wheelX: "zoomX",
+          wheelY: "zoomY",
+          minZoomLevel: 1,
+          maxZoomLevel: 8
+        })
+      );
+
+      // Dünya poligon serisi
+      worldSeries = mapChart.series.push(
+        am5map.MapPolygonSeries.new(root, {
+          geoJSON: am5geodata_worldLow,
+          exclude: ["AQ"] // Antarktika hariç
+        })
+      );
+
+      // Hover rengi
+      let colors = am5.ColorSet.new(root, {});
+      worldSeries.mapPolygons.template.setAll({
+        tooltipText: "{name}",
+        interactive: true,
+        fill: am5.color(0xcccccc)
+      });
+      worldSeries.mapPolygons.template.states.create("hover", {
+        fill: colors.getIndex(2)
+      });
+
+      // Poligon tıklanınca Ülke Detay Modal aç
+      worldSeries.mapPolygons.template.events.on("click", (ev) => {
+        let dataItem = ev.target.dataItem;
+        let data = dataItem.dataContext;
+        selectedCountryId = data.id; // Örneğin "TR", "US", vb.
+        openCountryDetailModal(selectedCountryId);
+      });
+
+      // Canvas init
+      initFlagCanvas();
+    }); // am5.ready
+
+    /*******************************************/
+    /* 7) Ülke Detay Modal */
+    /*******************************************/
     async function openCountryDetailModal(countryId) {
-      selectedCountryId = countryId;
-
-      // Firestore'da bu ülke dökümanı var mı?
-      // Yoksa, ilk tıklamada kaydetmek de bir seçenek olabilir.
-      // Örneğin "countries" koleksiyonunda countryId = "TR" doc saklanabilir.
-      // (Uygulamanızda bu kısım otomatik veya manuel yapılabilir.)
-      const countryRef = db.collection("countries").doc(countryId);
-      let countryDoc = await countryRef.get();
-
-      // Eğer yoksa, oluştur (fiyat = 750, ownerId = null, name = iso code)
-      if (!countryDoc.exists) {
-        await countryRef.set({
+      if (!countryId) return;
+      // Ülke Firestore'da yoksa ekle (price=750, ownerId=null)
+      if (!countriesCache[countryId]) {
+        await db.collection("countries").doc(countryId).set({
           name: countryId,
           price: 750,
           ownerId: null
         });
-        countryDoc = await countryRef.get();
+        // Tekrar çek
+        await fetchAllCountries();
       }
-
-      const countryData = countryDoc.data();
+      const countryData = countriesCache[countryId];
+      // Modal doldur
       document.getElementById("countryNameSpan").textContent = countryData.name || countryId;
       document.getElementById("countryPriceSpan").textContent = countryData.price || 750;
 
       if (countryData.ownerId) {
-        const ownerDoc = await db.collection("users").doc(countryData.ownerId).get();
-        if (ownerDoc.exists) {
-          document.getElementById("countryOwnerSpan").textContent = ownerDoc.data().username;
-        } else {
-          document.getElementById("countryOwnerSpan").textContent = "Bilinmiyor";
-        }
+        // Sahip kullanıcıyı oku
+        const ownerData = await getUserDoc(countryData.ownerId);
+        document.getElementById("countryOwnerSpan").textContent = ownerData ? ownerData.username : "Bilinmiyor";
       } else {
         document.getElementById("countryOwnerSpan").textContent = "Sahipsiz";
       }
 
-      const countryModalEl = document.getElementById("countryDetailModal");
-      const countryModal = new bootstrap.Modal(countryModalEl);
-      countryModal.show();
+      // Modal göster
+      const modalEl = document.getElementById("countryDetailModal");
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
     }
 
-    // Satın Alma
+    // Satın Al butonu
     document.getElementById("buyCountryBtn").addEventListener("click", async () => {
       if (!currentUser || !selectedCountryId) return;
 
@@ -507,70 +662,99 @@
       if (!userDoc.exists) return alert("Kullanıcı verisi bulunamadı!");
 
       const userData = userDoc.data();
-      const price = countryData.price || 750; // Firestore'daki price, yoksa 750
+      const price = countryData.price || 750;
 
       if (userData.balance < price) {
         return alert("Yetersiz bakiye!");
       }
 
-      // Satın al (ülke sahibi güncelle, kullanıcının bakiyesini düş)
+      // Satın al
       await countryRef.update({ ownerId: currentUser.uid });
       await userRef.update({
         balance: userData.balance - price,
-        ownedCountries: [...(userData.ownedCountries || []), countryRef.id]
+        ownedCountries: [...(userData.ownedCountries || []), selectedCountryId]
       });
 
-      alert((countryData.name || countryRef.id) + " ülkesini satın aldınız!");
+      alert((countryData.name || selectedCountryId) + " ülkesini satın aldınız!");
       bootstrap.Modal.getInstance(document.getElementById("countryDetailModal")).hide();
+
+      // Yeniden verileri çek + profil güncelle
+      await fetchAllCountries();
       await loadUserProfile();
     });
 
     /*******************************************/
-    /* 5) amCharts 5 Harita Kurulumu (Dünya) */
+    /* 8) Firestore'dan Ülkeleri ve Kullanıcıları Çekip Haritayı Güncelleme */
     /*******************************************/
-    am5.ready(function () {
-      let root = am5.Root.new("chartdiv");
-      root.setThemes([am5themes_Animated.new(root)]);
-
-      // Dünya haritası
-      let chart = root.container.children.push(
-        am5map.MapChart.new(root, {
-          projection: am5map.geoMercator(),
-          // Sağa-sola veya zoom yapılmasın, tek dünya haritası sabit kalsın
-          panX: "none",
-          panY: "none",
-          wheelX: "none",
-          wheelY: "none"
-        })
-      );
-
-      // Dünya poligon serisi
-      let worldSeries = chart.series.push(
-        am5map.MapPolygonSeries.new(root, {
-          geoJSON: am5geodata_worldLow,
-          exclude: ["AQ"] // Antarktika hariç
-        })
-      );
-
-      // Hover rengi
-      let colors = am5.ColorSet.new(root, {});
-      worldSeries.mapPolygons.template.setAll({
-        tooltipText: "{name}",
-        interactive: true,
-        fill: am5.color(0xcccccc)
-      });
-      worldSeries.mapPolygons.template.states.create("hover", {
-        fill: colors.getIndex(9)
+    async function fetchAllCountries() {
+      // Tüm ülke verilerini çek
+      const snapshot = await db.collection("countries").get();
+      snapshot.forEach(doc => {
+        countriesCache[doc.id] = doc.data();
       });
 
-      // Ülkeye tıklanınca modal aç
-      worldSeries.mapPolygons.template.events.on("click", (ev) => {
-        let dataItem = ev.target.dataItem;
-        let data = dataItem.dataContext;
-        let countryId = data.id; // Örneğin "TR", "US", "FR" vb.
-        openCountryDetailModal(countryId);
+      // Haritadaki polygonları güncelle (sahip varsa bayrak deseni ver)
+      if (worldSeries) {
+        worldSeries.mapPolygons.each(async (polygon) => {
+          let dataContext = polygon.dataItem.dataContext;
+          let cId = dataContext.id;
+          let countryDoc = countriesCache[cId];
+          if (!countryDoc) {
+            // Firestore'da henüz yoksa => sahipsiz
+            polygon.set("fill", am5.color(0xcccccc));
+            return;
+          }
+
+          if (countryDoc.ownerId) {
+            // Sahip kullanıcıyı al
+            let ownerData = await getUserDoc(countryDoc.ownerId);
+            // Kullanıcı bayrağı varsa desen uygula
+            if (ownerData && ownerData.flagData) {
+              applyFlagToPolygon(polygon, ownerData.flagData);
+            } else {
+              // Bayrak yoksa farklı renk (örnek)
+              polygon.set("fill", am5.color(0xffd700)); 
+            }
+          } else {
+            // Sahipsiz
+            polygon.set("fill", am5.color(0xcccccc));
+            polygon.set("fillPattern", null); // Pattern'ı sıfırla
+          }
+        });
+      }
+    }
+
+    // Kullanıcı dökümanını cache ederek getir
+    async function getUserDoc(uid) {
+      if (usersCache[uid]) {
+        return usersCache[uid];
+      }
+      const userSnap = await db.collection("users").doc(uid).get();
+      if (userSnap.exists) {
+        usersCache[uid] = userSnap.data();
+        return usersCache[uid];
+      }
+      return null;
+    }
+
+    // Bir polygon'a base64 resmi pattern olarak uygular
+    function applyFlagToPolygon(polygon, dataURL) {
+      // amCharts ImagePattern kullanarak bir pattern oluştur
+      let root = polygon._root; // poligonun root referansı
+      let imgPattern = am5.ImagePattern.new(root, {
+        width: 50,
+        height: 50,
+        src: dataURL,
+        // Diğer pattern ayarları:
+        repetition: "repeat" 
       });
-    }); // am5.ready sonu
+      polygon.set("fillPattern", imgPattern);
+    }
+
+    // Sayfa yüklendiğinde canvas init, harita init vb.
+    window.addEventListener("DOMContentLoaded", () => {
+      // Hiçbir kullanıcı giriş yapmamışsa, Auth modal'ı otomatik açılacak (onAuthStateChanged içerisinde).
+    });
   </script>
 </body>
 </html>
