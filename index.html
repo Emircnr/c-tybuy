@@ -1,36 +1,32 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <title>amCharts + Firebase (Compat) Tam Çalışan Örnek</title>
+  <meta charset="UTF-8">
+  <title>amCharts + Firebase Tam Çalışan Örnek</title>
   <style>
-    /* Sayfanın ve haritanın tüm ekranı kaplaması için */
+    /* Sayfa ve harita tam ekran */
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
       font-family: Arial, sans-serif;
-      background: #f0f0f0;
     }
-
-    /* Harita, tüm pencereyi kaplasın */
     #chartdiv {
       width: 100%;
       height: 100%;
-      position: relative;
       background: #fff;
+      position: relative; /* Modalları üstte göstermek için */
     }
 
-    /* Modal için basit stiller */
+    /* Modal overlay (sayfa karartması) */
     .modal-overlay {
       display: none;
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0,0,0,0.5);
       z-index: 9998;
     }
+    /* Modal kutuları */
     .modal {
       display: none;
       position: absolute;
@@ -47,17 +43,14 @@
       font-weight: bold;
       margin-bottom: 10px;
     }
-    .form-group {
-      margin-bottom: 10px;
-    }
+    .form-group { margin-bottom: 10px; }
     .form-group label {
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
     }
     .form-group input {
       width: 100%;
       padding: 8px;
-      font-size: 14px;
     }
     .btn {
       display: inline-block;
@@ -69,22 +62,18 @@
       border-radius: 4px;
       margin-top: 5px;
     }
-    .btn:hover {
-      background: #3367d6;
-    }
-    /* Kapatma butonu */
+    .btn:hover { background: #3367d6; }
     .close-btn {
       background: #e74c3c;
       margin-left: 10px;
     }
 
-    /* Profil butonu (sağ üstte) */
+    /* Profil butonu: sağ üstte */
     #profileBtn {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 10px; right: 10px;
       z-index: 9999;
-      display: none; /* Başlangıçta gizli */
+      display: none; /* Giriş yapılınca görünür */
       background: #4caf50;
     }
   </style>
@@ -93,20 +82,20 @@
   <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-  <script src="https://cdn.amcharts.com/lib/5/geodata/data/countries2.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/geodata/data/countries2.js"></script>
 
-  <!-- Firebase (Compat Sürümü) -->
+  <!-- Firebase (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-<!-- Modal Arkaplan -->
+<!-- Arkaplan karartması (Modal) -->
 <div class="modal-overlay" id="overlay"></div>
 
-<!-- Giriş/Kayıt Modal -->
+<!-- Giriş / Kayıt Modal -->
 <div class="modal" id="authModal">
   <div class="modal-title">Giriş veya Kayıt Ol</div>
   <div class="form-group">
@@ -118,7 +107,7 @@
     <input type="email" id="authEmail" placeholder="Email" />
   </div>
   <div class="form-group">
-    <label for="authPassword">Şifre (Min. 6 karakter)</label>
+    <label for="authPassword">Şifre (min. 6 karakter)</label>
     <input type="password" id="authPassword" placeholder="Şifre" />
   </div>
   <button id="loginBtn" class="btn">Giriş Yap</button>
@@ -135,7 +124,7 @@
   <button id="closeProfile" class="btn">Kapat</button>
 </div>
 
-<!-- Şehir Modal -->
+<!-- Şehir Bilgisi Modal -->
 <div class="modal" id="cityModal">
   <div class="modal-title" id="cityTitle">Şehir Bilgisi</div>
   <p><strong>Fiyat:</strong> <span id="cityPrice"></span> USDT</p>
@@ -143,7 +132,7 @@
   <button id="closeCityModal" class="btn">Kapat</button>
 </div>
 
-<!-- Profil Butonu -->
+<!-- Profil Butonu (sağ üstte) -->
 <button id="profileBtn" class="btn">Profil</button>
 
 <!-- Harita -->
@@ -151,7 +140,7 @@
 
 <script>
 /* ------------------------------------------------------------------
-  1) Firebase Ayarları
+  1) Firebase Başlatma
 ------------------------------------------------------------------ */
 const firebaseConfig = {
   apiKey: "AIzaSyDThNGVa7YBhQIINuIOxUiLbTvu0cOZh4w",
@@ -163,25 +152,23 @@ const firebaseConfig = {
   appId: "1:1056086990632:web:1f83946cad5b68e2f73a1d",
   measurementId: "G-3N34BTYV8C"
 };
-
-// Firebase başlat (Compat versiyon)
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
 /* ------------------------------------------------------------------
-  2) Global Değişkenler / Fonksiyonlar
+  2) Temel Değişkenler
 ------------------------------------------------------------------ */
-let currentUserData = null;
+let currentUserData = null; // Giriş yapan kullanıcının Firestore verileri (username vs.)
 
-// Modal Açma/Kapama
+// Modal aç/kapa
 function openModal(id) {
-  document.getElementById('overlay').style.display = 'block';
-  document.getElementById(id).style.display = 'block';
+  document.getElementById("overlay").style.display = "block";
+  document.getElementById(id).style.display = "block";
 }
 function closeModal(id) {
-  document.getElementById('overlay').style.display = 'none';
-  document.getElementById(id).style.display = 'none';
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById(id).style.display = "none";
 }
 
 /* ------------------------------------------------------------------
@@ -193,36 +180,34 @@ async function registerUser() {
   const password = document.getElementById('authPassword').value.trim();
 
   if (!username || !email || !password) {
-    alert("Kullanıcı adı, e-posta ve şifre boş olamaz!");
+    alert("Kullanıcı adı, email ve şifre boş olamaz!");
     return;
   }
   if (password.length < 6) {
-    alert("Şifre en az 6 karakter olmalıdır!");
+    alert("Şifre en az 6 karakter olmalı!");
     return;
   }
 
   try {
     let userCred = await auth.createUserWithEmailAndPassword(email, password);
     let user = userCred.user;
-    // Firestore'a kullanıcı ekle
+    // Kullanıcı Firestore'a kaydedilir
     await db.collection("users").doc(user.uid).set({
       username: username,
       email: email,
-      balance: 100,         // Örnek başlangıç bakiyesi
-      ownedCities: []       // Başlangıçta hiç şehre sahip değil
+      balance: 100,
+      ownedCities: []
     });
     closeModal("authModal");
     console.log("Kayıt başarılı!");
   } catch (err) {
     alert("Kayıt hatası: " + err.message);
-    console.error(err);
   }
 }
 
 async function loginUser() {
   const email = document.getElementById('authEmail').value.trim();
   const password = document.getElementById('authPassword').value.trim();
-
   if (!email || !password) {
     alert("E-posta ve şifre boş olamaz!");
     return;
@@ -234,7 +219,6 @@ async function loginUser() {
     console.log("Giriş başarılı!");
   } catch (err) {
     alert("Giriş hatası: " + err.message);
-    console.error(err);
   }
 }
 
@@ -244,26 +228,27 @@ function logoutUser() {
 }
 
 /* ------------------------------------------------------------------
-  4) Auth State (Kullanıcı durumu değişince)
+  4) Auth State (Giriş/Çıkış Olduğunda)
 ------------------------------------------------------------------ */
 auth.onAuthStateChanged(async (user) => {
   if (user) {
-    // Kullanıcı giriş yaptı, Firestore'dan verisini çek
-    let docSnap = await db.collection("users").doc(user.uid).get();
+    // Giriş yapıldı
+    let docRef = db.collection("users").doc(user.uid);
+    let docSnap = await docRef.get();
     if (docSnap.exists) {
       currentUserData = docSnap.data();
+      // Profil butonu görünür olsun
       document.getElementById("profileBtn").style.display = "inline-block";
-      console.log("Kullanıcı verisi:", currentUserData);
     }
   } else {
-    // Kullanıcı çıkış yaptı
+    // Çıkış yapıldı
     currentUserData = null;
     document.getElementById("profileBtn").style.display = "none";
   }
 });
 
 /* ------------------------------------------------------------------
-  5) Profil Gösterme
+  5) Profil Modal
 ------------------------------------------------------------------ */
 function showProfile() {
   if (!currentUserData) return;
@@ -276,9 +261,9 @@ function showProfile() {
 }
 
 /* ------------------------------------------------------------------
-  6) Harita ve Şehir Bilgileri
+  6) Harita ve Şehir Noktaları
 ------------------------------------------------------------------ */
-let citySeries;
+let citySeries; 
 let cityData = [
   {
     id: "city_1",
@@ -308,24 +293,28 @@ let cityData = [
 
 function initMap() {
   let root = am5.Root.new("chartdiv");
-  root.setThemes([ am5themes_Animated.new(root) ]);
+  root.setThemes([am5themes_Animated.new(root)]);
 
-  let chart = root.container.children.push(am5map.MapChart.new(root, {
-    panX: "rotateX",
-    projection: am5map.geoMercator()
-  }));
+  let chart = root.container.children.push(
+    am5map.MapChart.new(root, {
+      panX: "rotateX", // Ortamı sürükleyerek döndürülebilir
+      projection: am5map.geoMercator()
+    })
+  );
 
   // Dünya haritası
-  let worldSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
-    geoJSON: am5geodata_worldLow,
-    exclude: ["AQ"] // Antarktika hariç
-  }));
+  let worldSeries = chart.series.push(
+    am5map.MapPolygonSeries.new(root, {
+      geoJSON: am5geodata_worldLow,
+      exclude: ["AQ"] // Antarktika hariç
+    })
+  );
   worldSeries.mapPolygons.template.setAll({
     tooltipText: "{name}",
     fill: am5.color(0xcccccc)
   });
 
-  // Şehir noktaları
+  // Şehir Noktaları Serisi
   citySeries = chart.series.push(am5map.MapPointSeries.new(root, {}));
   citySeries.bullets.push(function() {
     let circle = am5.Circle.new(root, {
@@ -334,32 +323,28 @@ function initMap() {
       fill: am5.color(0xff0000),
       cursorOverStyle: "pointer"
     });
-    circle.events.on("click", function(ev) {
+    circle.events.on("click", (ev) => {
       let dataItem = ev.target.dataItem;
       if (!dataItem) return;
-      let cityInfo = dataItem.dataContext;
-      openCityModal(cityInfo);
+      openCityModal(dataItem.dataContext);
     });
     return am5.Bullet.new(root, { sprite: circle });
   });
 
-  // cityData'yı ekle
   citySeries.data.setAll(cityData);
 
   chart.goHome();
 }
 
 /* ------------------------------------------------------------------
-  7) Şehir Modal Açma (Haritada bir şehre tıklayınca)
+  7) Şehir Modalı (Tıklanınca)
 ------------------------------------------------------------------ */
 function openCityModal(cityInfo) {
-  document.getElementById("cityTitle").innerText = cityInfo.title || "Şehir";
-  document.getElementById("cityPrice").innerText = cityInfo.price || 0;
-  if (cityInfo.ownerId) {
-    document.getElementById("cityOwner").innerText = "Kullanıcı ID: " + cityInfo.ownerId;
-  } else {
-    document.getElementById("cityOwner").innerText = "Sahipsiz";
-  }
+  document.getElementById("cityTitle").innerText = cityInfo.title;
+  document.getElementById("cityPrice").innerText = cityInfo.price;
+  document.getElementById("cityOwner").innerText = cityInfo.ownerId
+    ? "Kullanıcı ID: " + cityInfo.ownerId
+    : "Sahipsiz";
   openModal("cityModal");
 }
 
@@ -367,18 +352,27 @@ function openCityModal(cityInfo) {
   8) Sayfa Yüklendiğinde
 ------------------------------------------------------------------ */
 window.onload = function() {
-  initMap();            // Haritayı başlat
-  openModal("authModal"); // Direkt giriş/kayıt ekranı açılsın (isteğe bağlı)
+  // Harita hemen yüklensin (Boş sayfa olmaması için)
+  initMap();
 
-  // Modal butonları
-  document.getElementById("registerBtn").addEventListener("click", registerUser);
+  // Kullanıcı login değilse Auth modal açalım
+  auth.onAuthStateChanged((user) => {
+    if (!user) {
+      openModal("authModal");
+    }
+  });
+
+  // Buton Eventleri
   document.getElementById("loginBtn").addEventListener("click", loginUser);
+  document.getElementById("registerBtn").addEventListener("click", registerUser);
+
   document.getElementById("logoutBtn").addEventListener("click", () => {
     logoutUser();
     closeModal("profileModal");
   });
   document.getElementById("closeProfile").addEventListener("click", () => closeModal("profileModal"));
   document.getElementById("closeCityModal").addEventListener("click", () => closeModal("cityModal"));
+
   document.getElementById("profileBtn").addEventListener("click", showProfile);
 };
 </script>
