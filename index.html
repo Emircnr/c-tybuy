@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Şehir Satın Alma Oyunu</title>
+  <title>Şehir Satın Alma Oyunu - Ülke/Şehir Sınırları</title>
 
   <!-- Bootstrap 5 CSS -->
   <link
@@ -19,13 +19,17 @@
     referrerpolicy="no-referrer"
   />
 
-  <!-- amCharts 5 (Temel, Map, Temalar, GeoData) -->
+  <!-- amCharts 5 (Core, Map, Temalar, GeoData) -->
   <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/geodata/data/countries2.js"></script>
 
+  <!-- Türkiye (veya istediğiniz ülkenin) coğrafi verisi -->
+  <!-- Not: Türkiye verisi için Avrupa klasöründe yer alabiliyor. Yolu değişebilir. -->
+  <script src="https://cdn.amcharts.com/lib/5/geodata/region/europe/turkeyLow.js"></script>
+  
   <!-- Firebase (Compat sürümleri) -->
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-auth-compat.js"></script>
@@ -33,20 +37,19 @@
 
   <!-- Örnek Firebase config (kendi projenizin config verileri ile değiştirin!) -->
   <script>
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
     const firebaseConfig = {
-      apiKey: "AIzaSyB2LQX2rSPYmV9fCn9S02R1zz9welQ9Skc",
-      authDomain: "citysell-45e32.firebaseapp.com",
-      projectId: "citysell-45e32",
-      storageBucket: "citysell-45e32.appspot.com",
-      messagingSenderId: "325438858648",
-      appId: "1:325438858648:web:0c13beb02cd1a2b08fb7ed",
-      measurementId: "G-2HR99X6LXY"
+   apiKey: "AIzaSyB2LQX2rSPYmV9fCn9S02R1zz9welQ9Skc",
+  authDomain: "citysell-45e32.firebaseapp.com",
+  projectId: "citysell-45e32",
+  storageBucket: "citysell-45e32.firebasestorage.app",
+  messagingSenderId: "325438858648",
+  appId: "1:325438858648:web:0c13beb02cd1a2b08fb7ed",
+  measurementId: "G-2HR99X6LXY"
     };
   </script>
 
   <style>
-    /* Sayfa ve harita alanı tam ekran olsun, sağ-sol boşluk olmasın */
+    /* Sayfa ve harita alanı tam ekran olsun */
     html, body {
       margin: 0;
       padding: 0;
@@ -54,36 +57,29 @@
       height: 100%;
     }
 
-    /* Harita div'i tam sayfa boyunda */
     #chartdiv {
       width: 100%;
       height: 100vh;
     }
 
-    /* Modal içi ve profil görünümüyle ilgili ek stiller */
+    /* Profil modal estetiği */
     .profile-info {
       display: flex;
       align-items: center;
       gap: 10px;
       font-size: 1.2rem;
     }
-
     .profile-icon {
       font-size: 1.5rem;
       color: #28a745;
-      animation: spin 2s linear infinite; /* örnek animasyon */
+      animation: spin 2s linear infinite; /* animasyon örneği */
     }
-
     @keyframes spin {
       0% { transform: rotate(0deg);}
       100% { transform: rotate(360deg);}
     }
-
     .city-list li {
       margin-bottom: 5px;
-    }
-    .city-list i {
-      color: #007bff;
     }
   </style>
 </head>
@@ -318,7 +314,7 @@
         </div>
         <div class="modal-body">
           <p><strong>Şehir Adı:</strong> <span id="cityNameSpan"></span></p>
-          <!-- Fiyatı sabit 25 USDT göster -->
+          <!-- Burada demo amaçlı sabit 25 yazdık. Firestore'dan da alabilirsiniz. -->
           <p><strong>Fiyat (USDT):</strong> <span id="cityPriceSpan">25</span></p>
           <p><strong>Sahibi:</strong> <span id="cityOwnerSpan"></span></p>
           <button
@@ -343,59 +339,19 @@
     /* 1) Firebase Başlatma */
     /*******************************************/
     firebase.initializeApp(firebaseConfig);
-
     const auth = firebase.auth();
     const db = firebase.firestore();
 
     /*******************************************/
     /* 2) Global Değişkenler */
     /*******************************************/
-    let currentUser = null; // Oturum açmış kullanıcı (null = yok)
-    let selectedCityId = null; // Detayını görüntülediğimiz şehir
-    
-    // Şehir koleksiyonunda seed verisi eklenmemişse ekleyeceğimiz örnekler
-    const citySeedData = [
-      {
-        name: "İstanbul",
-        lat: 41.0082,
-        lon: 28.9784,
-        price: 25,    // Artık DB'ye de 25 kaydediyoruz (isteğe bağlı)
-        ownerId: null
-      },
-      {
-        name: "Ankara",
-        lat: 39.9208,
-        lon: 32.8541,
-        price: 25,
-        ownerId: null
-      },
-      {
-        name: "İzmir",
-        lat: 38.4237,
-        lon: 27.1428,
-        price: 25,
-        ownerId: null
-      }
-    ];
+    let currentUser = null;    // Oturum açmış kullanıcı
+    let selectedCityId = null; // Tıklanan şehir/province'in Firestore'daki ID'si
 
     /*******************************************/
-    /* 3) Firestore'a Şehir Verileri Seedleme */
+    /* 3) Kullanıcı Kayıt, Giriş ve Çıkış İşlemleri */
     /*******************************************/
-    async function seedCitiesIfEmpty() {
-      const citiesSnapshot = await db.collection("cities").get();
-      if (citiesSnapshot.empty) {
-        // Hiç şehir yok, seed ekleyelim
-        for (let city of citySeedData) {
-          await db.collection("cities").add(city);
-        }
-        console.log("Örnek şehirler Firestore'a eklendi!");
-      }
-    }
-
-    /*******************************************/
-    /* 4) Kullanıcı Kayıt, Giriş ve Çıkış İşlemleri */
-    /*******************************************/
-    // Kayıt Ol
+    // Kayıt
     document.getElementById("registerForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const username = document.getElementById("registerUsername").value.trim();
@@ -406,12 +362,11 @@
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
 
-        // Firestore'da "users" koleksiyonunda kullanıcı belgesi oluştur
-        // Örnek başlangıç bakiyesi: 1000 USDT
+        // Yeni kullanıcı belgesi
         await db.collection("users").doc(user.uid).set({
           username: username,
           email: email,
-          balance: 1000,
+          balance: 1000,  // başlangıç bakiyesi
           ownedCities: []
         });
 
@@ -422,7 +377,7 @@
       }
     });
 
-    // Giriş Yap
+    // Giriş
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("loginEmail").value.trim();
@@ -437,37 +392,32 @@
       }
     });
 
-    // Oturum durumu değiştiğinde
+    // Oturum değiştiğinde
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUser = user;
         document.getElementById("profileBtn").style.display = "block";
         document.getElementById("logoutBtn").style.display = "block";
-
-        // Profil bilgilerini güncelle
         await loadUserProfile();
-
       } else {
         currentUser = null;
         document.getElementById("profileBtn").style.display = "none";
         document.getElementById("logoutBtn").style.display = "none";
 
-        // Giriş yapmayanlara auth modal göster
+        // Giriş yapmamışsa, auth modal aç
         const authModalEl = document.getElementById("authModal");
         const authModal = new bootstrap.Modal(authModalEl);
         authModal.show();
       }
     });
 
-    // Çıkış Yap
+    // Çıkış
     document.getElementById("logoutBtn").addEventListener("click", async () => {
       await auth.signOut();
       alert("Çıkış yapıldı!");
     });
 
-    /*******************************************/
-    /* 5) Profil Modal Bilgilerini Yükleme */
-    /*******************************************/
+    // Profil bilgilerini yükle
     async function loadUserProfile() {
       if (!currentUser) return;
       const userDoc = await db.collection("users").doc(currentUser.uid).get();
@@ -477,7 +427,7 @@
         document.getElementById("profileEmail").textContent = data.email;
         document.getElementById("profileBalance").textContent = data.balance;
 
-        // Sahip olunan şehirleri listele
+        // Sahip olunan şehirler
         const ownedCitiesList = document.getElementById("ownedCitiesList");
         ownedCitiesList.innerHTML = "";
         if (data.ownedCities && data.ownedCities.length > 0) {
@@ -485,8 +435,9 @@
             const cityDoc = await db.collection("cities").doc(cityId).get();
             if (cityDoc.exists) {
               const cityData = cityDoc.data();
+              // cityData.name yoksa ID gösterebilirsiniz
               const li = document.createElement("li");
-              li.innerHTML = `<i class="fas fa-location-dot"></i> ${cityData.name}`;
+              li.textContent = cityData.name || cityId;
               ownedCitiesList.appendChild(li);
             }
           }
@@ -499,27 +450,28 @@
     }
 
     /*******************************************/
-    /* 6) Şehir Detay Modal Açma & Satın Alma */
+    /* 4) Şehir (Polygon) Detay Modal Açma & Satın Alma */
     /*******************************************/
-    // Şehir Marker tıklandığında detay modal'ı aç
+    // Polygon tıklanınca modal aç
     async function openCityDetailModal(cityId) {
       selectedCityId = cityId;
       const cityDoc = await db.collection("cities").doc(cityId).get();
-      if (!cityDoc.exists) return;
+      if (!cityDoc.exists) {
+        alert("Şehir verisi Firestore'da bulunamadı. (ID: " + cityId + ")");
+        return;
+      }
 
       const cityData = cityDoc.data();
-
-      document.getElementById("cityNameSpan").textContent = cityData.name;
-      // Burada fiyatı sabit 25 USDT gösteriyoruz (DB'deki price yerine)
-      document.getElementById("cityPriceSpan").textContent = 25;
+      document.getElementById("cityNameSpan").textContent = cityData.name || cityId;
+      document.getElementById("cityPriceSpan").textContent = cityData.price || 25;
 
       if (cityData.ownerId) {
-        // Sahibi varsa
         const ownerDoc = await db.collection("users").doc(cityData.ownerId).get();
-        const ownerData = ownerDoc.exists ? ownerDoc.data() : null;
-        document.getElementById("cityOwnerSpan").textContent = ownerData
-          ? ownerData.username
-          : "Bilinmiyor";
+        if (ownerDoc.exists) {
+          document.getElementById("cityOwnerSpan").textContent = ownerDoc.data().username;
+        } else {
+          document.getElementById("cityOwnerSpan").textContent = "Bilinmiyor";
+        }
       } else {
         document.getElementById("cityOwnerSpan").textContent = "Sahipsiz";
       }
@@ -529,17 +481,15 @@
       cityModal.show();
     }
 
-    // Şehir Satın Alma
+    // Satın Alma
     document.getElementById("buyCityBtn").addEventListener("click", async () => {
       if (!currentUser || !selectedCityId) return;
 
-      // Şehir ve kullanıcı verilerini kontrol edelim
       const cityRef = db.collection("cities").doc(selectedCityId);
       const cityDoc = await cityRef.get();
       if (!cityDoc.exists) return alert("Şehir bulunamadı!");
 
       const cityData = cityDoc.data();
-
       if (cityData.ownerId && cityData.ownerId === currentUser.uid) {
         return alert("Bu şehir zaten sizin!");
       }
@@ -550,270 +500,137 @@
       if (!userDoc.exists) return alert("Kullanıcı verisi bulunamadı!");
 
       const userData = userDoc.data();
+      const price = cityData.price || 25; // Firestore'dan yoksa 25 varsayılan
 
-      // Satış fiyatını 25 USDT kabul ediyoruz
-      const cityPrice = 25;
-
-      // Bakiye yeterli mi?
-      if (userData.balance < cityPrice) {
+      if (userData.balance < price) {
         return alert("Yetersiz bakiye!");
       }
 
-      // Satın alma işlemi
-      const newBalance = userData.balance - cityPrice;
-      const newOwnedCities = userData.ownedCities
-        ? [...userData.ownedCities, cityRef.id]
-        : [cityRef.id];
-
-      // Şehir ownerId güncelle
-      await cityRef.update({
-        ownerId: currentUser.uid
-      });
-
-      // Kullanıcı bakiyesini ve ownedCities'i güncelle
+      // Satın al
+      await cityRef.update({ ownerId: currentUser.uid });
       await userRef.update({
-        balance: newBalance,
-        ownedCities: newOwnedCities
+        balance: userData.balance - price,
+        ownedCities: [...(userData.ownedCities || []), cityRef.id]
       });
 
-      alert(cityData.name + " şehrini satın aldınız!");
+      alert((cityData.name || cityRef.id) + " şehrini satın aldınız!");
       bootstrap.Modal.getInstance(document.getElementById("cityDetailModal")).hide();
-      // Profil bilgisi güncelle
       await loadUserProfile();
     });
 
     /*******************************************/
-    /* 7) amCharts 5 Harita Kurulumu + Tooltip */
+    /* 5) amCharts 5 Harita Kurulumu (Dünya > Ülke > Şehir Polygon) */
     /*******************************************/
     am5.ready(function () {
-      // Tema
       let root = am5.Root.new("chartdiv");
       root.setThemes([am5themes_Animated.new(root)]);
 
       let chart = root.container.children.push(
         am5map.MapChart.new(root, {
-          panX: "rotateX",
-          projection: am5map.geoMercator()
+          projection: am5map.geoMercator(),
+          panX: "rotateX"
         })
       );
 
-      // Renk seti
-      let colors = am5.ColorSet.new(root, {});
-      let continents = {
-        AF: 0,
-        AN: 1,
-        AS: 2,
-        EU: 3,
-        NA: 4,
-        OC: 5,
-        SA: 6
-      };
-
-      // Dünya Poligon Serisi
+      // Dünya poligon serisi
       let worldSeries = chart.series.push(
         am5map.MapPolygonSeries.new(root, {
           geoJSON: am5geodata_worldLow,
-          exclude: ["AQ"] // Antarktika hariç
+          exclude: ["AQ"] // Antarktika
         })
       );
 
+      // Ülke hover rengi
+      let colors = am5.ColorSet.new(root, {});
       worldSeries.mapPolygons.template.setAll({
         tooltipText: "{name}",
         interactive: true,
-        fill: am5.color(0xaaaaaa),
-        templateField: "polygonSettings"
+        fill: am5.color(0xcccccc)
       });
-
       worldSeries.mapPolygons.template.states.create("hover", {
         fill: colors.getIndex(9)
       });
 
-      // Ülke Poligon Serisi (drill-down için)
-      let countrySeries = chart.series.push(
-        am5map.MapPolygonSeries.new(root, {
-          visible: false
-        })
-      );
-
-      countrySeries.mapPolygons.template.setAll({
-        tooltipText: "{name}",
-        interactive: true,
-        fill: am5.color(0xaaaaaa)
-      });
-
-      countrySeries.mapPolygons.template.states.create("hover", {
-        fill: colors.getIndex(9)
-      });
-
-      let data = [];
-      for (let id in am5geodata_data_countries2) {
-        if (am5geodata_data_countries2.hasOwnProperty(id)) {
-          let country = am5geodata_data_countries2[id];
-          if (country.maps.length) {
-            data.push({
-              id: id,
-              map: country.maps[0],
-              polygonSettings: {
-                fill: colors.getIndex(continents[country.continent_code])
-              }
-            });
-          }
-        }
-      }
-      worldSeries.data.setAll(data);
-
-      // Geri dönme butonu
-      let backContainer = chart.children.push(
+      // Geri dön butonu
+      let backButtonContainer = chart.children.push(
         am5.Container.new(root, {
           x: am5.p100,
           centerX: am5.p100,
           dx: -10,
-          paddingTop: 5,
-          paddingRight: 10,
-          paddingBottom: 5,
-          y: 30,
-          interactiveChildren: false,
-          layout: root.horizontalLayout,
-          cursorOverStyle: "pointer",
-          background: am5.RoundedRectangle.new(root, {
-            fill: am5.color(0xffffff),
-            fillOpacity: 0.2
-          }),
+          y: 40,
           visible: false
         })
       );
-
-      backContainer.children.push(
-        am5.Label.new(root, {
-          text: "Geri Dön",
-          centerY: am5.p50,
-          fontWeight: "bold",
-          fill: am5.color(0x000000)
+      let backBtn = backButtonContainer.children.push(
+        am5.Button.new(root, {
+          label: am5.Label.new(root, { text: "Dünya Haritasına Dön" })
         })
       );
-
-      let backButton = backContainer.children.push(
-        am5.Graphics.new(root, {
-          width: 32,
-          height: 32,
-          centerY: am5.p50,
-          fill: am5.color(0x555555),
-          svgPath:
-            "M16,1.466C7.973,1.466,1.466,7.973,1.466,16c0,8.027,6.507,14.534,14.534,14.534c8.027,0,14.534-6.507,14.534-14.534C30.534,7.973,24.027,1.466,16,1.466z"
-        })
-      );
-
-      backContainer.events.on("click", function () {
+      backBtn.events.on("click", function () {
         chart.goHome();
+        // Dünya serisi göster, Türkiye serisi sakla
         worldSeries.show();
-        countrySeries.hide();
-        backContainer.hide();
+        if (turkeySeries) turkeySeries.hide();
+        backButtonContainer.set("visible", false);
       });
 
-      worldSeries.mapPolygons.template.events.on("click", (ev) => {
+      // Türkiye (veya herhangi bir ülke) poligon serisi
+      let turkeySeries = chart.series.push(
+        am5map.MapPolygonSeries.new(root, {
+          visible: false // başta gizli
+        })
+      );
+      turkeySeries.mapPolygons.template.setAll({
+        tooltipText: "{name}",
+        interactive: true,
+        fill: am5.color(0xeeeeee)
+      });
+      turkeySeries.mapPolygons.template.states.create("hover", {
+        fill: colors.getIndex(2)
+      });
+
+      // Ülke tıklanınca
+      worldSeries.mapPolygons.template.events.on("click", async (ev) => {
         let dataItem = ev.target.dataItem;
         let data = dataItem.dataContext;
-        let zoomAnimation = worldSeries.zoomToDataItem(dataItem);
+        // Ülke kodu (ör: TR)
+        if (data.id === "TR") {
+          // Haritayı Türkiye'ye zoomla
+          let zoomAnimation = worldSeries.zoomToDataItem(dataItem);
+          await zoomAnimation.waitForStop();
 
-        Promise.all([
-          zoomAnimation.waitForStop(),
-          am5.net.load("https://cdn.amcharts.com/lib/5/geodata/json/" + data.map + ".json", chart)
-        ]).then((results) => {
-          let geodata = am5.JSONParser.parse(results[1].response);
-          countrySeries.setAll({
-            geoJSON: geodata,
-            fill: data.polygonSettings.fill
+          // Türkiye haritası verisini yükle
+          turkeySeries.setAll({
+            geoJSON: am5geodata_region_europe_turkeyLow
           });
 
-          countrySeries.show();
+          turkeySeries.show();
           worldSeries.hide(100);
-          backContainer.show();
-        });
-      });
-
-      // Şehir Marker Serisi
-      let citySeries = chart.series.push(
-        am5map.MapPointSeries.new(root, {
-          latitudeField: "lat",
-          longitudeField: "lon"
-        })
-      );
-
-      // Markerlara tooltip ekleyelim
-      citySeries.bullets.push(() => {
-        let container = am5.Container.new(root, {});
-
-        let circle = container.children.push(
-          am5.Graphics.new(root, {
-            svgPath:
-              "M12.75,2.625c-5.59,0-10.125,4.535-10.125,10.125c0,7.594,10.125,18.225,10.125,18.225s10.125-10.631,10.125-18.225C22.875,7.16,18.34,2.625,12.75,2.625z M12.75,16.125c-1.984,0-3.6-1.616-3.6-3.6c0-1.984,1.616-3.6,3.6-3.6c1.983,0,3.6,1.616,3.6,3.6C16.35,14.509,14.733,16.125,12.75,16.125z",
-            scale: 0.7,
-            fill: am5.color(0xe60000),
-            centerX: am5.p50,
-            centerY: am5.p50,
-            draggable: false,
-            cursorOverStyle: "pointer"
-          })
-        );
-
-        // Tooltip ayarları
-        let tooltip = am5.Tooltip.new(root, {
-          getFillFromSprite: false,
-          autoTextColor: false,
-          getLabelFillFromSprite: false,
-          labelText: "{name}\nFiyat: 25 USDT\nSahibi: {ownerName}",
-          fill: am5.color(0xffffff),
-          labelFill: am5.color(0x000000),
-        });
-        circle.set("tooltip", tooltip);
-
-        // Tıklama olayı (modal açmak için)
-        circle.events.on("click", function (ev) {
-          let dataContext = ev.target.dataItem.dataContext;
-          openCityDetailModal(dataContext.id); // cityId
-        });
-
-        circle.states.create("hover", {
-          scale: 1,
-          fill: am5.color(0xff0000)
-        });
-
-        return am5.Bullet.new(root, {
-          sprite: container
-        });
-      });
-
-      // Firestore'dan şehir verilerini çekip marker olarak ekle
-      async function loadCityMarkers() {
-        const snapshot = await db.collection("cities").get();
-        let cityDataArray = [];
-        for (let doc of snapshot.docs) {
-          let data = doc.data();
-          // Sahibi varsa isim çek
-          let ownerName = "Sahipsiz";
-          if (data.ownerId) {
-            const ownerDoc = await db.collection("users").doc(data.ownerId).get();
-            if (ownerDoc.exists) {
-              ownerName = ownerDoc.data().username;
-            }
-          }
-          cityDataArray.push({
-            id: doc.id,
-            name: data.name,
-            lat: data.lat,
-            lon: data.lon,
-            // price: data.price,  // DB'deki price'ı kullanmak isterseniz
-            ownerName: ownerName
-          });
+          backButtonContainer.set("visible", true);
         }
-        citySeries.data.setAll(cityDataArray);
-      }
-
-      // Sayfa ilk yüklendiğinde şehirleri seed et, sonra markerları yükle
-      seedCitiesIfEmpty().then(() => {
-        setTimeout(loadCityMarkers, 1000);
       });
-    }); // end am5.ready
+
+      // Türkiye'deki "şehir/province" poligonlarına tooltip ve tıklama olayı
+      turkeySeries.mapPolygons.template.events.on("click", (ev) => {
+        let clickedPolygon = ev.target;
+        let clickedData = clickedPolygon.dataItem.dataContext; 
+        // amCharts'ta her il vs. genelde "id", "name" gibi alanlar içerir.
+        // Firestore'da bu "id" ile eşleyeceğiz (örneğin "TR-01", "TR-35" vb.)
+
+        let cityId = clickedData.id; // Örneğin "TR-35"
+        openCityDetailModal(cityId);
+      });
+
+      // Tooltip metni (province name)
+      turkeySeries.mapPolygons.template.setAll({
+        tooltipText: "{name}"
+      });
+
+      // (İsteğe Bağlı) Firestore’da seed verisi ekle:
+      // Örn. "cities" koleksiyonunda doc id = "TR-35", 
+      // field: { name: "İzmir", price: 25, ownerId: null }
+      // Bunu manuel veya kod ile yapabilirsiniz.
+    }); // am5.ready sonu
   </script>
 </body>
 </html>
