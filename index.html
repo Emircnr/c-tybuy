@@ -25,33 +25,33 @@
   <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
 
-  <!-- Firebase (Compat sürümleri) -->
+  <!-- Firebase (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore-compat.js"></script>
 
-  <!-- Örnek Firebase config (kendi projenizin config verileri ile değiştirin!) -->
+  <!-- Örnek Firebase config -->
   <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyB2LQX2rSPYmV9fCn9S02R1zz9welQ9Skc",
-      authDomain: "citysell-45e32.firebaseapp.com",
-      projectId: "citysell-45e32",
-      storageBucket: "citysell-45e32.firebaseapp.com",
-      messagingSenderId: "325438858648",
-      appId: "1:325438858648:web:0c13beb02cd1a2b08fb7ed",
-      measurementId: "G-2HR99X6LXY"
+      apiKey: "AIzaSyB2LQ...",
+      authDomain: "example.firebaseapp.com",
+      projectId: "example",
+      storageBucket: "example.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdefg",
+      measurementId: "G-ABCDEFG"
     };
   </script>
 
   <style>
-    /* Sayfa ve harita alanı tam ekran olsun */
+    /* Tam ekran kullanım */
     html, body {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
       font-family: 'Roboto', sans-serif;
-      background: #f4f4f4;
+      background-color: #f4f4f4;
     }
 
     /* Ana kapsayıcı */
@@ -61,7 +61,6 @@
       height: 100vh;
     }
 
-    /* Navbar ve altındaki bölümlerin boyutları */
     .navbar {
       flex: 0 0 auto;
     }
@@ -77,25 +76,16 @@
       height: 100%;
     }
 
-    /* Auth Modal'ın içeriği */
-    .modal-body {
-      background: #f9f9f9;
-    }
-    .nav-tabs .nav-link.active {
-      background-color: #28a745 !important;
-      color: #fff !important;
-    }
-
-    /* Profil sayfası (gizli veya görünür) */
+    /* Profil sayfası */
     #profilePage {
-      display: none; /* Başlangıçta gizli */
       width: 100%;
+      display: none; /* Başlangıçta gizli */
       padding: 20px;
-      overflow-y: auto;
       background: #fff;
+      overflow-y: auto;
     }
 
-    /* Profil bilgileri stili */
+    /* Profil üst bilgileri */
     .profile-header {
       display: flex;
       align-items: center;
@@ -113,10 +103,6 @@
       margin: 0;
       color: #333;
     }
-    .profile-header .user-info p {
-      margin: 0;
-      color: #666;
-    }
 
     /* Bayrak tasarım canvas */
     #flagCanvas {
@@ -124,12 +110,19 @@
       cursor: crosshair;
     }
 
-    /* Sahip olunan ülkeler listesi */
-    .owned-list li {
-      margin-bottom: 5px;
+    /* Boyama araçları */
+    .paint-controls {
+      margin: 10px 0;
+    }
+    .paint-controls input[type=color] {
+      vertical-align: middle;
     }
 
-    /* Ülke detay modal */
+    /* Modal içerikleri */
+    .modal-header.bg-success,
+    .modal-header.bg-primary {
+      color: #fff;
+    }
     .modal-body p {
       margin-bottom: 0.5rem;
     }
@@ -155,24 +148,14 @@
 
         <div class="collapse navbar-collapse" id="navbarContent">
           <ul class="navbar-nav ms-auto">
-            <!-- Giriş yaptıktan sonra gözükecek -->
+            <!-- Giriş yaptıktan sonra gözükür -->
             <li class="nav-item">
-              <a
-                class="nav-link"
-                href="#"
-                id="profileNavLink"
-                style="display: none;"
-              >
+              <a class="nav-link" href="#" id="profileNavLink" style="display: none;">
                 Profil
               </a>
             </li>
-            <!-- Çıkış -->
             <li class="nav-item">
-              <button
-                class="btn btn-danger nav-link"
-                style="display: none;"
-                id="logoutBtn"
-              >
+              <button class="btn btn-danger nav-link" id="logoutBtn" style="display: none;">
                 Çıkış Yap
               </button>
             </li>
@@ -182,7 +165,7 @@
     </nav>
     <!-- /Navbar -->
 
-    <!-- İçerik Alanı: Harita ve Profil sayfası -->
+    <!-- İçerik: Harita + Profil -->
     <div id="contentArea">
       <!-- Harita Alanı -->
       <div id="chartdiv"></div>
@@ -197,17 +180,29 @@
             <p><strong>Bakiye: </strong><span id="profileBalance">0</span> USDT</p>
           </div>
         </div>
-
         <hr />
-
         <!-- Bayrak Tasarım Bölümü -->
         <h4>Bayrak Tasarla</h4>
-        <p style="color: #555;">Aşağıdaki alanda farenizle çizim yaparak kendi bayrağınızı oluşturabilirsiniz.</p>
+        <p style="color: #555;">Aşağıdaki alanda çizim araçlarını kullanarak kendi bayrağınızı oluşturun.</p>
+
+        <div class="paint-controls">
+          <label for="paintColor">Renk:</label>
+          <input type="color" id="paintColor" value="#000000">
+          
+          <label for="brushSize">Kalınlık:</label>
+          <input type="range" id="brushSize" min="1" max="30" value="3">
+
+          <button class="btn btn-sm btn-outline-secondary" id="penModeBtn">Fırça</button>
+          <button class="btn btn-sm btn-outline-secondary" id="eraserModeBtn">Silgi</button>
+          <button class="btn btn-sm btn-outline-secondary" id="rectModeBtn">Dikdörtgen</button>
+          <button class="btn btn-sm btn-outline-secondary" id="circleModeBtn">Daire</button>
+          <button class="btn btn-sm btn-outline-danger" id="clearCanvasBtn">Temizle</button>
+        </div>
+        
         <canvas id="flagCanvas" width="400" height="200"></canvas><br/>
         <button class="btn btn-success mt-2" id="saveFlagBtn">Bayrağı Kaydet</button>
 
         <hr />
-
         <!-- Sahip olunan ülkeler -->
         <h4>Sahip Olduğunuz Ülkeler</h4>
         <ul class="owned-list" id="ownedCountriesList"></ul>
@@ -219,7 +214,6 @@
     </div>
   </div>
 
-
   <!-- Giriş / Kayıt Modal -->
   <div
     class="modal fade"
@@ -230,11 +224,11 @@
   >
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header bg-success text-white">
+        <div class="modal-header bg-success">
           <h5 class="modal-title" id="authModalLabel">Giriş / Kayıt</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" style="background: #f9f9f9;">
           <ul class="nav nav-tabs" id="authTab" role="tablist">
             <li class="nav-item" role="presentation">
               <button
@@ -266,8 +260,8 @@
             </li>
           </ul>
 
-          <div class="tab-content" id="authTabContent">
-            <!-- Giriş Formu -->
+          <div class="tab-content">
+            <!-- Giriş -->
             <div
               class="tab-pane fade show active p-3"
               id="loginTabPane"
@@ -292,9 +286,7 @@
                 <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
               </form>
             </div>
-            <!-- /Giriş Formu -->
-
-            <!-- Kayıt Formu -->
+            <!-- Kayıt -->
             <div
               class="tab-pane fade p-3"
               id="registerTabPane"
@@ -323,13 +315,11 @@
                 <button type="submit" class="btn btn-success w-100">Kayıt Ol</button>
               </form>
             </div>
-            <!-- /Kayıt Formu -->
           </div>
         </div>
       </div>
     </div>
   </div>
-  <!-- /Auth Modal -->
 
   <!-- Ülke Detay Modal -->
   <div
@@ -341,13 +331,15 @@
   >
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title" id="countryDetailModalLabel">Ülke Detayı</h5>
+        <div class="modal-header bg-primary">
+          <h5 class="modal-title" id="countryDetailModalLabel" style="color: #fff;">
+            Ülke Detayı
+          </h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
         </div>
         <div class="modal-body">
           <p><strong>Ülke Adı:</strong> <span id="countryNameSpan"></span></p>
-          <p><strong>Fiyat (USDT):</strong> <span id="countryPriceSpan">750</span></p>
+          <p><strong>Fiyat (USDT):</strong> <span id="countryPriceSpan"></span></p>
           <p><strong>Sahibi:</strong> <span id="countryOwnerSpan"></span></p>
           <button class="btn btn-primary mt-3 w-100" id="buyCountryBtn">
             Satın Al
@@ -356,36 +348,32 @@
       </div>
     </div>
   </div>
-  <!-- /Ülke Detay Modal -->
 
-  <!-- Bootstrap 5 JS (Popper dahil) -->
+  <!-- Bootstrap -->
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
   ></script>
 
   <script>
     /*******************************************/
-    /* 1) Firebase Başlatma */
+    /* 1) Firebase ve Global Değişkenler       */
     /*******************************************/
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    /*******************************************/
-    /* 2) Global Değişkenler ve Cache */
-    /*******************************************/
-    let currentUser = null;       // Oturum açmış kullanıcı
-    let selectedCountryId = null; // Tıklanan ülkenin ID'si (ör: "TR", "US", vs.)
-    let countriesCache = {};      // Firestore'dan çekilen tüm ülkeler (countryId -> docData)
-    let usersCache = {};          // Kullanıcı verilerini cache'lemek için (uid -> userDocData)
-    let mapChart, worldSeries;    // amCharts referansları
-
-    // Profil/Canvas ile ilgili
-    let flagCanvas, flagCtx;
-    let painting = false;
+    let currentUser = null;                // Oturum açan kullanıcı
+    let selectedCountryId = null;          // Tıklanan ülkenin kodu ("TR", "US", vb.)
+    let countriesCache = {};               // Firestore'daki ülke verilerini tutar
+    let usersCache = {};                   // Kullanıcı verilerini tutar
+    let mapChart, worldSeries;             // amCharts referansları
+    let painting = false;                  // Serbest çizim mouse down/up
+    let paintMode = "pen";                 // "pen", "eraser", "rect", "circle"
+    let startX, startY;                    // Dikdörtgen, daire için başlangıç noktası
+    let flagCtx;                           // Canvas 2D context
 
     /*******************************************/
-    /* 3) Kullanıcı Kayıt, Giriş ve Çıkış İşlemleri */
+    /* 2) Auth (Kayıt, Giriş, Çıkış)           */
     /*******************************************/
     // Kayıt
     document.getElementById("registerForm").addEventListener("submit", async (e) => {
@@ -397,16 +385,14 @@
       try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
-
-        // Yeni kullanıcı belgesi
+        // Yeni kullanıcı dökümanı
         await db.collection("users").doc(user.uid).set({
-          username: username,
-          email: email,
-          balance: 3000,   // başlangıç bakiyesi 3000
+          username,
+          email,
+          balance: 3000,    // Başlangıç bakiyesi 3000 USDT
           ownedCountries: [],
-          flagData: null  // Başlangıçta bayrak verisi yok
+          flagData: null
         });
-
         alert("Kayıt başarılı! Oturum açıldı.");
         bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
       } catch (error) {
@@ -429,22 +415,22 @@
       }
     });
 
-    // Oturum değişikliği
+    // Auth state
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUser = user;
         document.getElementById("profileNavLink").style.display = "block";
         document.getElementById("logoutBtn").style.display = "block";
-        await loadUserProfile();  // Profil bilgilerini getir
-        await fetchAllCountries(); // Ülke verilerini getir & harita güncelle
+        // Kullanıcı bilgileri, ülkeler
+        await loadUserProfile();
+        await fetchAllCountries();
       } else {
         currentUser = null;
         document.getElementById("profileNavLink").style.display = "none";
         document.getElementById("logoutBtn").style.display = "none";
-        showMap(); // Haritayı göster (profil sayfasını gizle)
-        // Giriş yapmamışsa Auth modalını göster
-        const authModalEl = document.getElementById("authModal");
-        const authModal = new bootstrap.Modal(authModalEl);
+        showMap();
+        // Giriş yapmamışsa modal aç
+        const authModal = new bootstrap.Modal(document.getElementById("authModal"));
         authModal.show();
       }
     });
@@ -456,25 +442,22 @@
     });
 
     /*******************************************/
-    /* 4) Profil Sayfası İşlemleri */
+    /* 3) Profil Sayfası                       */
     /*******************************************/
-    // Profil sayfasını göster
+    // Profil linki -> profil sayfası
     document.getElementById("profileNavLink").addEventListener("click", () => {
       showProfile();
     });
-
     // Haritaya geri dön
     document.getElementById("backToMapBtn").addEventListener("click", () => {
       showMap();
     });
 
-    // Profil bilgilerini Firestore'dan okuyup sayfada göster
     async function loadUserProfile() {
       if (!currentUser) return;
       const userDoc = await db.collection("users").doc(currentUser.uid).get();
       if (userDoc.exists) {
         const data = userDoc.data();
-        // Profil üst bilgileri
         document.getElementById("profileUsername").textContent = data.username;
         document.getElementById("profileEmail").textContent = data.email;
         document.getElementById("profileBalance").textContent = data.balance;
@@ -483,102 +466,146 @@
         const ownedList = document.getElementById("ownedCountriesList");
         ownedList.innerHTML = "";
         if (data.ownedCountries && data.ownedCountries.length > 0) {
-          for (let cId of data.ownedCountries) {
-            // Ülke ismi varsa göster
-            let countryName = cId;
-            if (countriesCache[cId] && countriesCache[cId].name) {
-              countryName = countriesCache[cId].name;
+          data.ownedCountries.forEach(countryId => {
+            let countryName = countryId;
+            if (countriesCache[countryId] && countriesCache[countryId].name) {
+              countryName = countriesCache[countryId].name;
             }
             const li = document.createElement("li");
-            li.textContent = countryName + " (" + cId + ")";
+            li.textContent = `${countryName} (${countryId})`;
             ownedList.appendChild(li);
-          }
+          });
         } else {
           const li = document.createElement("li");
-          li.textContent = "Henüz hiçbir ülkeye sahip değilsiniz.";
+          li.textContent = "Henüz ülkeniz yok.";
           ownedList.appendChild(li);
         }
       }
     }
 
-    // Profil sayfasını aç
     function showProfile() {
       document.getElementById("chartdiv").style.display = "none";
       document.getElementById("profilePage").style.display = "block";
     }
-
-    // Haritaya geri dön
     function showMap() {
       document.getElementById("chartdiv").style.display = "block";
       document.getElementById("profilePage").style.display = "none";
     }
 
     /*******************************************/
-    /* 5) Bayrak (Paint) Özelliği */
+    /* 4) Bayrak Tasarım (Canvas)             */
     /*******************************************/
-    // Canvas başlat
-    function initFlagCanvas() {
-      flagCanvas = document.getElementById("flagCanvas");
-      flagCtx = flagCanvas.getContext("2d");
+    // Kontroller
+    const canvas = document.getElementById("flagCanvas");
+    flagCtx = canvas.getContext("2d");
 
-      // Basit çizim fonksiyonları
-      flagCanvas.addEventListener("mousedown", (e) => {
-        painting = true;
+    const colorPicker = document.getElementById("paintColor");
+    const brushSize = document.getElementById("brushSize");
+
+    canvas.addEventListener("mousedown", (e) => {
+      painting = true;
+      startX = e.offsetX;
+      startY = e.offsetY;
+      if (paintMode === "pen" || paintMode === "eraser") {
         flagCtx.beginPath();
-        flagCtx.moveTo(e.offsetX, e.offsetY);
-      });
-      flagCanvas.addEventListener("mouseup", () => {
-        painting = false;
-      });
-      flagCanvas.addEventListener("mousemove", drawOnCanvas);
-    }
-
-    // Fare hareketinde çiz
-    function drawOnCanvas(e) {
+        flagCtx.moveTo(startX, startY);
+      }
+    });
+    canvas.addEventListener("mouseup", (e) => {
+      if (paintMode === "rect" || paintMode === "circle") {
+        // Dikdörtgen / Daire çizim
+        const endX = e.offsetX;
+        const endY = e.offsetY;
+        const w = endX - startX;
+        const h = endY - startY;
+        flagCtx.lineWidth = parseInt(brushSize.value);
+        if (paintMode === "rect") {
+          flagCtx.strokeStyle = colorPicker.value;
+          flagCtx.strokeRect(startX, startY, w, h);
+        } else if (paintMode === "circle") {
+          flagCtx.strokeStyle = colorPicker.value;
+          flagCtx.beginPath();
+          // Daire için basit yaklaşım: ortadan yarıçap
+          let radius = Math.sqrt(w*w + h*h);
+          flagCtx.arc(startX, startY, radius, 0, 2 * Math.PI);
+          flagCtx.stroke();
+        }
+      }
+      painting = false;
+    });
+    canvas.addEventListener("mousemove", (e) => {
       if (!painting) return;
-      flagCtx.lineWidth = 3;
-      flagCtx.lineCap = "round";
-      flagCtx.strokeStyle = "#000000";
-      flagCtx.lineTo(e.offsetX, e.offsetY);
-      flagCtx.stroke();
-    }
+      if (paintMode === "pen") {
+        flagCtx.strokeStyle = colorPicker.value;
+        flagCtx.lineWidth = parseInt(brushSize.value);
+        flagCtx.lineCap = "round";
+        flagCtx.lineTo(e.offsetX, e.offsetY);
+        flagCtx.stroke();
+      } else if (paintMode === "eraser") {
+        // Silgi
+        flagCtx.strokeStyle = "#ffffff";
+        flagCtx.lineWidth = parseInt(brushSize.value) + 10;
+        flagCtx.lineCap = "round";
+        flagCtx.lineTo(e.offsetX, e.offsetY);
+        flagCtx.stroke();
+      }
+    });
 
-    // Bayrağı kaydet (base64) -> Firestore
+    // Mod butonları
+    document.getElementById("penModeBtn").addEventListener("click", () => {
+      paintMode = "pen";
+    });
+    document.getElementById("eraserModeBtn").addEventListener("click", () => {
+      paintMode = "eraser";
+    });
+    document.getElementById("rectModeBtn").addEventListener("click", () => {
+      paintMode = "rect";
+    });
+    document.getElementById("circleModeBtn").addEventListener("click", () => {
+      paintMode = "circle";
+    });
+    // Temizle
+    document.getElementById("clearCanvasBtn").addEventListener("click", () => {
+      flagCtx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    // Bayrağı kaydet
     document.getElementById("saveFlagBtn").addEventListener("click", async () => {
       if (!currentUser) return;
-      const flagDataUrl = flagCanvas.toDataURL("image/png");
-      const userRef = db.collection("users").doc(currentUser.uid);
-      await userRef.update({
-        flagData: flagDataUrl
+      const dataURL = canvas.toDataURL("image/png");
+      await db.collection("users").doc(currentUser.uid).update({
+        flagData: dataURL
       });
-      alert("Bayrak kaydedildi! Artık satın aldığınız ülkeler bu bayrakla gösterilecek.");
-      // Haritayı güncelle (varsa sahip olunan ülkelerde desen uygula)
+      alert("Bayrak kaydedildi!");
+      // Haritayı güncelle
       await fetchAllCountries();
       await loadUserProfile();
     });
 
     /*******************************************/
-    /* 6) Harita (amCharts 5) Kurulumu */
+    /* 5) Harita (amCharts) Kurulumu           */
     /*******************************************/
     am5.ready(function () {
       let root = am5.Root.new("chartdiv");
       root.setThemes([am5themes_Animated.new(root)]);
 
-      // Dünya haritası
       mapChart = root.container.children.push(
         am5map.MapChart.new(root, {
           projection: am5map.geoMercator(),
-          // Yakınlaştırma/uzaklaştırma (zoom) ve sürükleme
-          panX: "translateX",
+          panX: "translateX",    // sürükleme
           panY: "translateY",
-          wheelX: "zoomX",
+          wheelX: "zoomX",       // fare tekeri zoom
           wheelY: "zoomY",
           minZoomLevel: 1,
-          maxZoomLevel: 8
+          maxZoomLevel: 10
         })
       );
 
-      // Dünya poligon serisi
+      // ZoomControl (+ / - butonları)
+      let zoomControl = am5map.ZoomControl.new(root, {});
+      mapChart.set("zoomControl", zoomControl);
+
+      // Dünya serisi
       worldSeries = mapChart.series.push(
         am5map.MapPolygonSeries.new(root, {
           geoJSON: am5geodata_worldLow,
@@ -586,7 +613,7 @@
         })
       );
 
-      // Hover rengi
+      // Default stil
       let colors = am5.ColorSet.new(root, {});
       worldSeries.mapPolygons.template.setAll({
         tooltipText: "{name}",
@@ -597,56 +624,49 @@
         fill: colors.getIndex(2)
       });
 
-      // Poligon tıklanınca Ülke Detay Modal aç
+      // Tıklanınca ülke modal aç
       worldSeries.mapPolygons.template.events.on("click", (ev) => {
         let dataItem = ev.target.dataItem;
         let data = dataItem.dataContext;
-        selectedCountryId = data.id; // Örneğin "TR", "US", vb.
+        selectedCountryId = data.id;  // "TR", "US", vb.
         openCountryDetailModal(selectedCountryId);
       });
-
-      // Canvas init
-      initFlagCanvas();
-    }); // am5.ready
+    });
 
     /*******************************************/
-    /* 7) Ülke Detay Modal */
+    /* 6) Ülke Detay Modal                     */
     /*******************************************/
     async function openCountryDetailModal(countryId) {
       if (!countryId) return;
-      // Ülke Firestore'da yoksa ekle (price=750, ownerId=null)
+      // Firestore'da yoksa ekle
       if (!countriesCache[countryId]) {
         await db.collection("countries").doc(countryId).set({
           name: countryId,
           price: 750,
           ownerId: null
         });
-        // Tekrar çek
         await fetchAllCountries();
       }
       const countryData = countriesCache[countryId];
       // Modal doldur
       document.getElementById("countryNameSpan").textContent = countryData.name || countryId;
       document.getElementById("countryPriceSpan").textContent = countryData.price || 750;
-
       if (countryData.ownerId) {
-        // Sahip kullanıcıyı oku
-        const ownerData = await getUserDoc(countryData.ownerId);
-        document.getElementById("countryOwnerSpan").textContent = ownerData ? ownerData.username : "Bilinmiyor";
+        let ownerData = await getUserDoc(countryData.ownerId);
+        document.getElementById("countryOwnerSpan").textContent =
+          ownerData ? ownerData.username : "Bilinmiyor";
       } else {
         document.getElementById("countryOwnerSpan").textContent = "Sahipsiz";
       }
 
       // Modal göster
-      const modalEl = document.getElementById("countryDetailModal");
-      const modal = new bootstrap.Modal(modalEl);
+      const modal = new bootstrap.Modal(document.getElementById("countryDetailModal"));
       modal.show();
     }
 
-    // Satın Al butonu
+    // Satın Al
     document.getElementById("buyCountryBtn").addEventListener("click", async () => {
       if (!currentUser || !selectedCountryId) return;
-
       const countryRef = db.collection("countries").doc(selectedCountryId);
       const countryDoc = await countryRef.get();
       if (!countryDoc.exists) return alert("Ülke bulunamadı!");
@@ -659,11 +679,10 @@
       // Kullanıcı verisi
       const userRef = db.collection("users").doc(currentUser.uid);
       const userDoc = await userRef.get();
-      if (!userDoc.exists) return alert("Kullanıcı verisi bulunamadı!");
+      if (!userDoc.exists) return alert("Kullanıcı verisi yok!");
 
       const userData = userDoc.data();
       const price = countryData.price || 750;
-
       if (userData.balance < price) {
         return alert("Yetersiz bakiye!");
       }
@@ -678,53 +697,50 @@
       alert((countryData.name || selectedCountryId) + " ülkesini satın aldınız!");
       bootstrap.Modal.getInstance(document.getElementById("countryDetailModal")).hide();
 
-      // Yeniden verileri çek + profil güncelle
+      // Verileri tekrar yükle
       await fetchAllCountries();
       await loadUserProfile();
     });
 
     /*******************************************/
-    /* 8) Firestore'dan Ülkeleri ve Kullanıcıları Çekip Haritayı Güncelleme */
+    /* 7) Firestore'dan Ülkeleri/Kullanıcıları  */
+    /*    çek ve Haritayı Güncelle             */
     /*******************************************/
     async function fetchAllCountries() {
-      // Tüm ülke verilerini çek
-      const snapshot = await db.collection("countries").get();
-      snapshot.forEach(doc => {
+      const snap = await db.collection("countries").get();
+      snap.forEach(doc => {
         countriesCache[doc.id] = doc.data();
       });
-
-      // Haritadaki polygonları güncelle (sahip varsa bayrak deseni ver)
+      // Haritadaki polygonları güncelle
       if (worldSeries) {
         worldSeries.mapPolygons.each(async (polygon) => {
           let dataContext = polygon.dataItem.dataContext;
           let cId = dataContext.id;
-          let countryDoc = countriesCache[cId];
-          if (!countryDoc) {
-            // Firestore'da henüz yoksa => sahipsiz
+          const cData = countriesCache[cId];
+          if (!cData) {
+            // henüz yoksa
             polygon.set("fill", am5.color(0xcccccc));
+            polygon.set("fillPattern", null);
             return;
           }
-
-          if (countryDoc.ownerId) {
-            // Sahip kullanıcıyı al
-            let ownerData = await getUserDoc(countryDoc.ownerId);
-            // Kullanıcı bayrağı varsa desen uygula
+          // Sahip varsa
+          if (cData.ownerId) {
+            let ownerData = await getUserDoc(cData.ownerId);
             if (ownerData && ownerData.flagData) {
               applyFlagToPolygon(polygon, ownerData.flagData);
             } else {
-              // Bayrak yoksa farklı renk (örnek)
-              polygon.set("fill", am5.color(0xffd700)); 
+              polygon.set("fill", am5.color(0xffd700)); // Basit sarı
+              polygon.set("fillPattern", null);
             }
           } else {
-            // Sahipsiz
             polygon.set("fill", am5.color(0xcccccc));
-            polygon.set("fillPattern", null); // Pattern'ı sıfırla
+            polygon.set("fillPattern", null);
           }
         });
       }
     }
 
-    // Kullanıcı dökümanını cache ederek getir
+    // Kullanıcı verisi (cache)
     async function getUserDoc(uid) {
       if (usersCache[uid]) {
         return usersCache[uid];
@@ -737,23 +753,24 @@
       return null;
     }
 
-    // Bir polygon'a base64 resmi pattern olarak uygular
+    // Poligon üzerine base64 pattern
     function applyFlagToPolygon(polygon, dataURL) {
-      // amCharts ImagePattern kullanarak bir pattern oluştur
-      let root = polygon._root; // poligonun root referansı
-      let imgPattern = am5.ImagePattern.new(root, {
-        width: 50,
-        height: 50,
+      let root = polygon._root;
+      let pattern = am5.ImagePattern.new(root, {
+        width: 200,   // pattern boyutu
+        height: 200,
         src: dataURL,
-        // Diğer pattern ayarları:
-        repetition: "repeat" 
+        repetition: "repeat"
       });
-      polygon.set("fillPattern", imgPattern);
+      // Beyaz bir fill verip pattern uygula
+      polygon.set("fill", am5.color(0xffffff));
+      polygon.set("fillPattern", pattern);
     }
 
-    // Sayfa yüklendiğinde canvas init, harita init vb.
+    // Sayfa yüklendiğinde
     window.addEventListener("DOMContentLoaded", () => {
-      // Hiçbir kullanıcı giriş yapmamışsa, Auth modal'ı otomatik açılacak (onAuthStateChanged içerisinde).
+      // Canvas vb. init tamam. 
+      // Geri kalan iş, onAuthStateChanged tetiklenince çalışacaktır.
     });
   </script>
 </body>
