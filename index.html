@@ -1,777 +1,418 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Ülke Satın Alma Oyunu</title>
-
-  <!-- Bootstrap 5 CSS -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
-
-  <!-- Font Awesome (ikonlar) -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    integrity="sha512-..."
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
-
-  <!-- amCharts 5 (Core, Map, Temalar, GeoData) -->
-  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-  <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
-  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-  <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
-
-  <!-- Firebase (Compat) -->
-  <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore-compat.js"></script>
-
-  <!-- Örnek Firebase config -->
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyB2LQX2rSPYmV9fCn9S02R1zz9welQ9Skc",
-  authDomain: "citysell-45e32.firebaseapp.com",
-  projectId: "citysell-45e32",
-  storageBucket: "citysell-45e32.firebasestorage.app",
-  messagingSenderId: "325438858648",
-  appId: "1:325438858648:web:0c13beb02cd1a2b08fb7ed",
-  measurementId: "G-2HR99X6LXY"
-    };
-  </script>
-
+  <meta charset="UTF-8">
+  <title>5 Karadelikli Arena - Sesli</title>
   <style>
-    /* Tam ekran kullanım */
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      font-family: 'Roboto', sans-serif;
-      background-color: #f4f4f4;
+    body {
+      background: radial-gradient(ellipse at center, #232b41 70%, #10141c 100%);
+      color: #232344;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0; padding: 0;
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: flex-start;
     }
-
-    /* Ana kapsayıcı */
-    #appContainer {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+    .title {
+      margin-top: 34px;
+      font-size: 2.3rem;
+      color: #24243a;
+      font-weight: 800;
+      letter-spacing: 1.13px;
+      text-align: center;
+      user-select: none;
+      text-shadow: 0 2px 18px #fff8, 0 10px 38px #bbeaff99;
     }
-
-    .navbar {
-      flex: 0 0 auto;
+    #container {
+      margin-top: 19px;
+      background: linear-gradient(138deg,#f4f7fb 63%,#d3e3f3 100%);
+      border-radius: 50px;
+      box-shadow: 0 14px 90px #7bdbfc2a, 0 2px 18px #8fcdfa11;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 38px 18px 28px 18px;
     }
-    #contentArea {
-      flex: 1 1 auto;
-      display: flex;
-      flex-direction: row;
-    }
-
-    /* Harita alanı */
-    #chartdiv {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Profil sayfası */
-    #profilePage {
-      width: 100%;
-      display: none; /* Başlangıçta gizli */
-      padding: 20px;
-      background: #fff;
-      overflow-y: auto;
-    }
-
-    /* Profil üst bilgileri */
-    .profile-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    .profile-header img {
-      width: 60px;
-      height: 60px;
+    #canvas {
+      display: block;
+      background: radial-gradient(circle at 60% 60%, #e2eaf7 75%, #b7c5dd 100%);
       border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #28a745;
+      box-shadow: 0 0 0 20px #e5f7ff11, 0 0 84px #c1eaff18 inset;
+      margin: 0 auto;
+      border: 14px solid #bde3ff;
     }
-    .profile-header .user-info h2 {
-      margin: 0;
-      color: #333;
+    #startBtn {
+      margin-top: 22px;
+      padding: 17px 48px;
+      font-size: 1.18rem;
+      border-radius: 17px;
+      border: none;
+      background: linear-gradient(90deg,#7be2ff 0%,#fff7 97%);
+      color: #171c29;
+      font-weight: bold;
+      box-shadow: 0 4px 29px #96e7ff7d;
+      cursor: pointer;
+      transition: background .13s, box-shadow .13s;
+      letter-spacing: 1.07px;
     }
-
-    /* Bayrak tasarım canvas */
-    #flagCanvas {
-      border: 2px solid #ccc;
-      cursor: crosshair;
+    #startBtn:hover {
+      background: linear-gradient(92deg,#1ec3ff 0%,#e8fafd 100%);
+      box-shadow: 0 4px 40px #b8f8fff1;
     }
-
-    /* Boyama araçları */
-    .paint-controls {
-      margin: 10px 0;
+    #desc {
+      font-size: 1.14rem;
+      color: #38446c;
+      text-align: center;
+      margin-bottom: 17px;
+      margin-top: 0;
+      letter-spacing: .18px;
+      font-weight: 500;
     }
-    .paint-controls input[type=color] {
-      vertical-align: middle;
-    }
-
-    /* Modal içerikleri */
-    .modal-header.bg-success,
-    .modal-header.bg-primary {
-      color: #fff;
-    }
-    .modal-body p {
-      margin-bottom: 0.5rem;
+    #counter {
+      font-size: 1.09rem;
+      font-weight: 600;
+      color: #1488b8;
+      margin-bottom: 13px;
+      letter-spacing: .09px;
     }
   </style>
 </head>
 <body>
-  <div id="appContainer">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#" id="navBrand">Ülke Oyunu</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarContent"
-          aria-controls="navbarContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarContent">
-          <ul class="navbar-nav ms-auto">
-            <!-- Giriş yaptıktan sonra gözükür -->
-            <li class="nav-item">
-              <a class="nav-link" href="#" id="profileNavLink" style="display: none;">
-                Profil
-              </a>
-            </li>
-            <li class="nav-item">
-              <button class="btn btn-danger nav-link" id="logoutBtn" style="display: none;">
-                Çıkış Yap
-              </button>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-    <!-- /Navbar -->
-
-    <!-- İçerik: Harita + Profil -->
-    <div id="contentArea">
-      <!-- Harita Alanı -->
-      <div id="chartdiv"></div>
-
-      <!-- Profil Sayfası -->
-      <div id="profilePage">
-        <div class="profile-header">
-          <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="User Avatar" id="profileAvatar">
-          <div class="user-info">
-            <h2 id="profileUsername">Kullanıcı Adı</h2>
-            <p id="profileEmail">email@example.com</p>
-            <p><strong>Bakiye: </strong><span id="profileBalance">0</span> USDT</p>
-          </div>
-        </div>
-        <hr />
-        <!-- Bayrak Tasarım Bölümü -->
-        <h4>Bayrak Tasarla</h4>
-        <p style="color: #555;">Aşağıdaki alanda çizim araçlarını kullanarak kendi bayrağınızı oluşturun.</p>
-
-        <div class="paint-controls">
-          <label for="paintColor">Renk:</label>
-          <input type="color" id="paintColor" value="#000000">
-          
-          <label for="brushSize">Kalınlık:</label>
-          <input type="range" id="brushSize" min="1" max="30" value="3">
-
-          <button class="btn btn-sm btn-outline-secondary" id="penModeBtn">Fırça</button>
-          <button class="btn btn-sm btn-outline-secondary" id="eraserModeBtn">Silgi</button>
-          <button class="btn btn-sm btn-outline-secondary" id="rectModeBtn">Dikdörtgen</button>
-          <button class="btn btn-sm btn-outline-secondary" id="circleModeBtn">Daire</button>
-          <button class="btn btn-sm btn-outline-danger" id="clearCanvasBtn">Temizle</button>
-        </div>
-        
-        <canvas id="flagCanvas" width="400" height="200"></canvas><br/>
-        <button class="btn btn-success mt-2" id="saveFlagBtn">Bayrağı Kaydet</button>
-
-        <hr />
-        <!-- Sahip olunan ülkeler -->
-        <h4>Sahip Olduğunuz Ülkeler</h4>
-        <ul class="owned-list" id="ownedCountriesList"></ul>
-
-        <button class="btn btn-secondary mt-3" id="backToMapBtn">
-          Haritaya Geri Dön
-        </button>
-      </div>
-    </div>
+  <div class="title">
+    5 Karadelikli Arena - SESLİ
   </div>
-
-  <!-- Giriş / Kayıt Modal -->
-  <div
-    class="modal fade"
-    id="authModal"
-    tabindex="-1"
-    aria-labelledby="authModalLabel"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-success">
-          <h5 class="modal-title" id="authModalLabel">Giriş / Kayıt</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
-        </div>
-        <div class="modal-body" style="background: #f9f9f9;">
-          <ul class="nav nav-tabs" id="authTab" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button
-                class="nav-link active"
-                id="login-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#loginTabPane"
-                type="button"
-                role="tab"
-                aria-controls="loginTabPane"
-                aria-selected="true"
-              >
-                Giriş
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button
-                class="nav-link"
-                id="register-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#registerTabPane"
-                type="button"
-                role="tab"
-                aria-controls="registerTabPane"
-                aria-selected="false"
-              >
-                Kayıt
-              </button>
-            </li>
-          </ul>
-
-          <div class="tab-content">
-            <!-- Giriş -->
-            <div
-              class="tab-pane fade show active p-3"
-              id="loginTabPane"
-              role="tabpanel"
-              aria-labelledby="login-tab"
-            >
-              <form id="loginForm">
-                <div class="mb-3">
-                  <label for="loginEmail" class="form-label">E-posta</label>
-                  <input type="email" class="form-control" id="loginEmail" required />
-                </div>
-                <div class="mb-3">
-                  <label for="loginPassword" class="form-label">Şifre</label>
-                  <input
-                    type="password"
-                    class="form-control"
-                    id="loginPassword"
-                    minlength="6"
-                    required
-                  />
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
-              </form>
-            </div>
-            <!-- Kayıt -->
-            <div
-              class="tab-pane fade p-3"
-              id="registerTabPane"
-              role="tabpanel"
-              aria-labelledby="register-tab"
-            >
-              <form id="registerForm">
-                <div class="mb-3">
-                  <label for="registerUsername" class="form-label">Kullanıcı Adı</label>
-                  <input type="text" class="form-control" id="registerUsername" required />
-                </div>
-                <div class="mb-3">
-                  <label for="registerEmail" class="form-label">E-posta</label>
-                  <input type="email" class="form-control" id="registerEmail" required />
-                </div>
-                <div class="mb-3">
-                  <label for="registerPassword" class="form-label">Şifre</label>
-                  <input
-                    type="password"
-                    class="form-control"
-                    id="registerPassword"
-                    minlength="6"
-                    required
-                  />
-                </div>
-                <button type="submit" class="btn btn-success w-100">Kayıt Ol</button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div id="container">
+    <p id="desc">
+      <b>Her karadelik farklı renkte parlak halo ile çevrili. Toplar patlayınca 3'e bölünür, efekt ve arka plan sesiyle!</b><br>
+      Her top yutulduğunda büyüme 2 kat hızlı, toplam 500 top sınırı.
+    </p>
+    <div id="counter">Toplar: <span id="ballCount">0</span> / 500</div>
+    <canvas id="canvas" width="1100" height="1100"></canvas>
+    <button id="startBtn">Başlat</button>
+    <!-- SESLER -->
+    <audio id="bgMusic" src="https://cdn.pixabay.com/audio/2022/10/16/audio_12fa874df2.mp3" loop preload="auto"></audio>
+    <audio id="popSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_12618.mp3" preload="auto"></audio>
+    <audio id="bhEat" src="https://cdn.pixabay.com/audio/2022/03/15/audio_11462.mp3" preload="auto"></audio>
   </div>
-
-  <!-- Ülke Detay Modal -->
-  <div
-    class="modal fade"
-    id="countryDetailModal"
-    tabindex="-1"
-    aria-labelledby="countryDetailModalLabel"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-primary">
-          <h5 class="modal-title" id="countryDetailModalLabel" style="color: #fff;">
-            Ülke Detayı
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
-        </div>
-        <div class="modal-body">
-          <p><strong>Ülke Adı:</strong> <span id="countryNameSpan"></span></p>
-          <p><strong>Fiyat (USDT):</strong> <span id="countryPriceSpan"></span></p>
-          <p><strong>Sahibi:</strong> <span id="countryOwnerSpan"></span></p>
-          <button class="btn btn-primary mt-3 w-100" id="buyCountryBtn">
-            Satın Al
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bootstrap -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-  ></script>
-
   <script>
-    /*******************************************/
-    /* 1) Firebase ve Global Değişkenler       */
-    /*******************************************/
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    // Ayarlar
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    const ARENA = { x: w/2, y: h/2, r: 445 };
+    const BH_COUNT = 5;
+    const BH_AURAS = [
+      "#48eaff", // cyan
+      "#e86dff", // mor
+      "#fff247", // sarı
+      "#ffac40", // turuncu
+      "#48ff93"  // yeşil
+    ];
+    const ANGLES = Array.from({length: BH_COUNT}, (_,i)=>Math.PI/2 + i*2*Math.PI/BH_COUNT);
+    const BLACK_HOLE_INIT_R = 48;
+    const NEON_MAIN_R = 35;
+    const NEON_CHILD_R = 16;
+    const MIN_BH_R = 28;
+    const MAX_BALLS = 500;
+    const FPS_LIMIT = 60;
 
-    let currentUser = null;                // Oturum açan kullanıcı
-    let selectedCountryId = null;          // Tıklanan ülkenin kodu ("TR", "US", vb.)
-    let countriesCache = {};               // Firestore'daki ülke verilerini tutar
-    let usersCache = {};                   // Kullanıcı verilerini tutar
-    let mapChart, worldSeries;             // amCharts referansları
-    let painting = false;                  // Serbest çizim mouse down/up
-    let paintMode = "pen";                 // "pen", "eraser", "rect", "circle"
-    let startX, startY;                    // Dikdörtgen, daire için başlangıç noktası
-    let flagCtx;                           // Canvas 2D context
+    let blackholes = [];
+    let balls = [], running = false, animationId = null, timerId = null, t = 0, lastFrame = 0;
+    let enableSpawn = true;
 
-    /*******************************************/
-    /* 2) Auth (Kayıt, Giriş, Çıkış)           */
-    /*******************************************/
-    // Kayıt
-    document.getElementById("registerForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const username = document.getElementById("registerUsername").value.trim();
-      const email = document.getElementById("registerEmail").value.trim();
-      const password = document.getElementById("registerPassword").value;
+    const BALL_COLORS = [
+      "#1976d2", "#ec407a", "#00897b", "#f4511e", "#6d4c41", "#3949ab", "#00acc1", "#ffa000"
+    ];
 
+    function playSound(id, volume=0.28) {
+      let el = document.getElementById(id);
       try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-        // Yeni kullanıcı dökümanı
-        await db.collection("users").doc(user.uid).set({
-          username,
-          email,
-          balance: 300000,    // Başlangıç bakiyesi 3000 USDT
-          ownedCountries: [],
-          flagData: null
-        });
-        alert("Kayıt başarılı! Oturum açıldı.");
-        bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
-      } catch (error) {
-        alert("Kayıt hatası: " + error.message);
+        el.pause();
+        el.currentTime = 0;
+        el.volume = volume;
+        el.play();
+      } catch(e) {}
+    }
+
+    function neonColor(i) {
+      return BALL_COLORS[i % BALL_COLORS.length];
+    }
+
+    function drawArena() {
+      ctx.save();
+      let grad = ctx.createRadialGradient(ARENA.x-ARENA.r*0.45, ARENA.y-ARENA.r*0.43, ARENA.r*0.33, ARENA.x, ARENA.y, ARENA.r);
+      grad.addColorStop(0, "#fafdff");
+      grad.addColorStop(0.39, "#d9e7f8");
+      grad.addColorStop(0.72, "#c9d4e9");
+      grad.addColorStop(1, "#9ec1da");
+      ctx.beginPath();
+      ctx.arc(ARENA.x, ARENA.y, ARENA.r, 0, Math.PI*2);
+      ctx.fillStyle = grad;
+      ctx.shadowColor = "#eaf8ff";
+      ctx.shadowBlur = 38;
+      ctx.fill();
+      ctx.globalAlpha = 0.13;
+      for(let i=1;i<=5;i++){
+        ctx.beginPath();
+        ctx.arc(ARENA.x, ARENA.y, ARENA.r*i/5, 0, Math.PI*2);
+        ctx.strokeStyle = "#b5c9e8";
+        ctx.lineWidth = 2;
+        ctx.stroke();
       }
-    });
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 20;
+      ctx.strokeStyle = "#98d0ff";
+      ctx.beginPath();
+      ctx.arc(ARENA.x, ARENA.y, ARENA.r, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+    }
 
-    // Giriş
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("loginEmail").value.trim();
-      const password = document.getElementById("loginPassword").value;
+    function drawBlackHole(bh, auraColor, pulseT) {
+      ctx.save();
+      // Renkli parlak halo
+      let grad = ctx.createRadialGradient(bh.x, bh.y, bh.r*1.02, bh.x, bh.y, bh.r*1.5);
+      grad.addColorStop(0, "#fff0");
+      grad.addColorStop(0.19, auraColor+"33");
+      grad.addColorStop(0.5, auraColor+"99");
+      grad.addColorStop(0.9, auraColor+"13");
+      grad.addColorStop(1, "#fff0");
+      ctx.beginPath();
+      ctx.arc(bh.x, bh.y, bh.r*1.48, 0, Math.PI*2);
+      ctx.globalAlpha = 0.31;
+      ctx.fillStyle = grad;
+      ctx.shadowColor = auraColor;
+      ctx.shadowBlur = 32;
+      ctx.fill();
 
-      try {
-        await auth.signInWithEmailAndPassword(email, password);
-        alert("Giriş başarılı!");
-        bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
-      } catch (error) {
-        alert("Giriş hatası: " + error.message);
+      // Siyah çekirdek (karadelik)
+      ctx.beginPath();
+      ctx.arc(bh.x, bh.y, bh.r, 0, Math.PI*2);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#000";
+      ctx.shadowColor = "#222";
+      ctx.shadowBlur = 8;
+      ctx.fill();
+
+      // Yutulma animasyonu (shockwave)
+      if (bh.growAnim > 0.07) {
+        ctx.beginPath();
+        ctx.arc(bh.x, bh.y, bh.r*1.13 + Math.sin(pulseT*13)*2*bh.growAnim, 0, Math.PI*2);
+        ctx.strokeStyle = "#fff";
+        ctx.globalAlpha = 0.11*bh.growAnim;
+        ctx.lineWidth = 7*bh.growAnim;
+        ctx.shadowBlur = 15*bh.growAnim;
+        ctx.stroke();
+        bh.growAnim *= 0.89;
       }
-    });
+      ctx.restore();
+    }
 
-    // Auth state
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        currentUser = user;
-        document.getElementById("profileNavLink").style.display = "block";
-        document.getElementById("logoutBtn").style.display = "block";
-        // Kullanıcı bilgileri, ülkeler
-        await loadUserProfile();
-        await fetchAllCountries();
-      } else {
-        currentUser = null;
-        document.getElementById("profileNavLink").style.display = "none";
-        document.getElementById("logoutBtn").style.display = "none";
-        showMap();
-        // Giriş yapmamışsa modal aç
-        const authModal = new bootstrap.Modal(document.getElementById("authModal"));
-        authModal.show();
-      }
-    });
+    function drawBalls(now) {
+      for(let i=0;i<balls.length;i++) {
+        let ball = balls[i];
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.r+6, 0, Math.PI*2);
+        ctx.globalAlpha = 0.18 + 0.11*Math.sin(now/1010+ball.colorSeed*4.2);
+        ctx.shadowColor = ball.color;
+        ctx.shadowBlur = 14 + 7*Math.sin(now/600+ball.colorSeed*1.3);
+        ctx.fillStyle = ball.color;
+        ctx.fill();
+        ctx.restore();
 
-    // Çıkış
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await auth.signOut();
-      alert("Çıkış yapıldı!");
-    });
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
+        ctx.globalAlpha = 0.97;
+        ctx.fillStyle = ball.color;
+        ctx.shadowColor = ball.color;
+        ctx.shadowBlur = 6;
+        ctx.fill();
 
-    /*******************************************/
-    /* 3) Profil Sayfası                       */
-    /*******************************************/
-    // Profil linki -> profil sayfası
-    document.getElementById("profileNavLink").addEventListener("click", () => {
-      showProfile();
-    });
-    // Haritaya geri dön
-    document.getElementById("backToMapBtn").addEventListener("click", () => {
-      showMap();
-    });
+        ctx.globalAlpha = 0.12;
+        ctx.beginPath();
+        ctx.arc(ball.x-ball.r/3, ball.y-ball.r/4, ball.r/3.7, 0, Math.PI*2);
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+        ctx.restore();
 
-    async function loadUserProfile() {
-      if (!currentUser) return;
-      const userDoc = await db.collection("users").doc(currentUser.uid).get();
-      if (userDoc.exists) {
-        const data = userDoc.data();
-        document.getElementById("profileUsername").textContent = data.username;
-        document.getElementById("profileEmail").textContent = data.email;
-        document.getElementById("profileBalance").textContent = data.balance;
-
-        // Sahip olunan ülkeler
-        const ownedList = document.getElementById("ownedCountriesList");
-        ownedList.innerHTML = "";
-        if (data.ownedCountries && data.ownedCountries.length > 0) {
-          data.ownedCountries.forEach(countryId => {
-            let countryName = countryId;
-            if (countriesCache[countryId] && countriesCache[countryId].name) {
-              countryName = countriesCache[countryId].name;
-            }
-            const li = document.createElement("li");
-            li.textContent = `${countryName} (${countryId})`;
-            ownedList.appendChild(li);
-          });
-        } else {
-          const li = document.createElement("li");
-          li.textContent = "Henüz ülkeniz yok.";
-          ownedList.appendChild(li);
+        if (ball.exploding > 0.07) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(ball.x, ball.y, ball.r+ball.exploding*12, 0, Math.PI*2);
+          ctx.strokeStyle = "#fff";
+          ctx.globalAlpha = 0.09*ball.exploding;
+          ctx.lineWidth = 5*ball.exploding;
+          ctx.shadowColor = ball.color;
+          ctx.shadowBlur = 8*ball.exploding;
+          ctx.stroke();
+          ctx.restore();
+          ball.exploding *= 0.81;
         }
       }
     }
 
-    function showProfile() {
-      document.getElementById("chartdiv").style.display = "none";
-      document.getElementById("profilePage").style.display = "block";
+    function isInBlackHole(ball, bh) {
+      let dx = ball.x - bh.x, dy = ball.y - bh.y;
+      return Math.hypot(dx, dy) < bh.r - 2;
     }
-    function showMap() {
-      document.getElementById("chartdiv").style.display = "block";
-      document.getElementById("profilePage").style.display = "none";
-    }
-
-    /*******************************************/
-    /* 4) Bayrak Tasarım (Canvas)             */
-    /*******************************************/
-    // Kontroller
-    const canvas = document.getElementById("flagCanvas");
-    flagCtx = canvas.getContext("2d");
-
-    const colorPicker = document.getElementById("paintColor");
-    const brushSize = document.getElementById("brushSize");
-
-    canvas.addEventListener("mousedown", (e) => {
-      painting = true;
-      startX = e.offsetX;
-      startY = e.offsetY;
-      if (paintMode === "pen" || paintMode === "eraser") {
-        flagCtx.beginPath();
-        flagCtx.moveTo(startX, startY);
+    function reflectBall(ball) {
+      let dx = ball.x - ARENA.x, dy = ball.y - ARENA.y;
+      let dist = Math.hypot(dx, dy);
+      if (dist >= ARENA.r - ball.r - 10) {
+        let nx = dx / dist, ny = dy / dist;
+        let dot = ball.vx * nx + ball.vy * ny;
+        ball.vx -= 2 * dot * nx;
+        ball.vy -= 2 * dot * ny;
+        let speed = Math.hypot(ball.vx, ball.vy);
+        let angle = Math.atan2(ball.vy, ball.vx) + (Math.random()-0.5)*0.13;
+        ball.vx = Math.cos(angle)*speed*0.97;
+        ball.vy = Math.sin(angle)*speed*0.97;
+        let over = dist - (ARENA.r - ball.r - 10) + 1;
+        ball.x -= nx*over;
+        ball.y -= ny*over;
       }
-    });
-    canvas.addEventListener("mouseup", (e) => {
-      if (paintMode === "rect" || paintMode === "circle") {
-        // Dikdörtgen / Daire çizim
-        const endX = e.offsetX;
-        const endY = e.offsetY;
-        const w = endX - startX;
-        const h = endY - startY;
-        flagCtx.lineWidth = parseInt(brushSize.value);
-        if (paintMode === "rect") {
-          flagCtx.strokeStyle = colorPicker.value;
-          flagCtx.strokeRect(startX, startY, w, h);
-        } else if (paintMode === "circle") {
-          flagCtx.strokeStyle = colorPicker.value;
-          flagCtx.beginPath();
-          // Daire için basit yaklaşım: ortadan yarıçap
-          let radius = Math.sqrt(w*w + h*h);
-          flagCtx.arc(startX, startY, radius, 0, 2 * Math.PI);
-          flagCtx.stroke();
+    }
+
+    function spawnBalls(ball, now) {
+      if (!enableSpawn || balls.length >= MAX_BALLS) return;
+      let angle0 = Math.random()*Math.PI*2;
+      for(let k=0;k<3;k++) {
+        let angle = angle0 + k*(2*Math.PI/3) + (Math.random()-0.5)*0.10;
+        let speed = (1.17 + Math.random()*1.12) * 1.4;
+        let r = NEON_CHILD_R * (0.91 + Math.random()*0.21);
+        let colorSeed = Math.random();
+        let color = neonColor(Math.floor(Math.random()*60));
+        balls.push({
+          x: ball.x, y: ball.y,
+          vx: Math.cos(angle)*speed,
+          vy: Math.sin(angle)*speed,
+          r: r,
+          color,
+          colorSeed,
+          exploded: false,
+          exploding: 0,
+          explodeAt: (performance.now()/1000) + 3 + Math.random()*3,
+          createdAt: performance.now()/1000,
+          growStart: ball.r,
+          isMain: false
+        });
+      }
+      playSound('popSound', 0.17);
+    }
+
+    function updateCounter() {
+      document.getElementById('ballCount').textContent = balls.length;
+    }
+
+    function animate(now) {
+      if(now - lastFrame < 1000/FPS_LIMIT) {
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrame = now;
+      t = now/1000;
+
+      enableSpawn = balls.length < MAX_BALLS;
+
+      for(let i=balls.length-1;i>=0;i--) {
+        let ball = balls[i];
+        if (!ball.exploded && t > ball.explodeAt) {
+          ball.exploded = true;
+          ball.exploding = 1;
+          if(enableSpawn) spawnBalls(ball, now);
+          balls.splice(i,1);
+          continue;
+        }
+        if (!ball.exploded) {
+          let duration = ball.explodeAt - ball.createdAt;
+          let maxGrow = (ball.isMain ? NEON_MAIN_R*1.45 : NEON_CHILD_R*1.31);
+          let growth = (maxGrow - ball.r) / (duration * 60);
+          if(ball.r < maxGrow) ball.r += Math.max(growth, 0.05);
+          ball.x += ball.vx;
+          ball.y += ball.vy;
+          ball.vx *= 0.997;
+          ball.vy *= 0.997;
+          reflectBall(ball);
+
+          let eaten = false;
+          for(let b=0; b<BH_COUNT; b++){
+            if(isInBlackHole(ball, blackholes[b])){
+              let delta = ball.r*0.020*2; // 2 kat hızlı büyüme
+              blackholes[b].r += delta;
+              blackholes[b].growAnim = 1.11;
+              for(let j=0;j<BH_COUNT;j++) {
+                if(j!==b) blackholes[j].r = Math.max(MIN_BH_R, blackholes[j].r - delta/(BH_COUNT-1));
+              }
+              balls.splice(i,1);
+              eaten = true;
+              playSound('bhEat', 0.25);
+              break;
+            }
+          }
+          if(eaten) continue;
         }
       }
-      painting = false;
-    });
-    canvas.addEventListener("mousemove", (e) => {
-      if (!painting) return;
-      if (paintMode === "pen") {
-        flagCtx.strokeStyle = colorPicker.value;
-        flagCtx.lineWidth = parseInt(brushSize.value);
-        flagCtx.lineCap = "round";
-        flagCtx.lineTo(e.offsetX, e.offsetY);
-        flagCtx.stroke();
-      } else if (paintMode === "eraser") {
-        // Silgi
-        flagCtx.strokeStyle = "#ffffff";
-        flagCtx.lineWidth = parseInt(brushSize.value) + 10;
-        flagCtx.lineCap = "round";
-        flagCtx.lineTo(e.offsetX, e.offsetY);
-        flagCtx.stroke();
-      }
-    });
+      ctx.clearRect(0,0,w,h);
+      drawArena();
+      for(let i=0;i<BH_COUNT;i++) drawBlackHole(blackholes[i], BH_AURAS[i], t+0.33*i);
+      drawBalls(now);
+      updateCounter();
 
-    // Mod butonları
-    document.getElementById("penModeBtn").addEventListener("click", () => {
-      paintMode = "pen";
-    });
-    document.getElementById("eraserModeBtn").addEventListener("click", () => {
-      paintMode = "eraser";
-    });
-    document.getElementById("rectModeBtn").addEventListener("click", () => {
-      paintMode = "rect";
-    });
-    document.getElementById("circleModeBtn").addEventListener("click", () => {
-      paintMode = "circle";
-    });
-    // Temizle
-    document.getElementById("clearCanvasBtn").addEventListener("click", () => {
-      flagCtx.clearRect(0, 0, canvas.width, canvas.height);
-    });
-
-    // Bayrağı kaydet
-    document.getElementById("saveFlagBtn").addEventListener("click", async () => {
-      if (!currentUser) return;
-      const dataURL = canvas.toDataURL("image/png");
-      await db.collection("users").doc(currentUser.uid).update({
-        flagData: dataURL
-      });
-      alert("Bayrak kaydedildi!");
-      // Haritayı güncelle
-      await fetchAllCountries();
-      await loadUserProfile();
-    });
-
-    /*******************************************/
-    /* 5) Harita (amCharts) Kurulumu           */
-    /*******************************************/
-    am5.ready(function () {
-      let root = am5.Root.new("chartdiv");
-      root.setThemes([am5themes_Animated.new(root)]);
-
-      mapChart = root.container.children.push(
-        am5map.MapChart.new(root, {
-          projection: am5map.geoMercator(),
-          panX: "translateX",    // sürükleme
-          panY: "translateY",
-          wheelX: "zoomX",       // fare tekeri zoom
-          wheelY: "zoomY",
-          minZoomLevel: 1,
-          maxZoomLevel: 10
-        })
-      );
-
-      // ZoomControl (+ / - butonları)
-      let zoomControl = am5map.ZoomControl.new(root, {});
-      mapChart.set("zoomControl", zoomControl);
-
-      // Dünya serisi
-      worldSeries = mapChart.series.push(
-        am5map.MapPolygonSeries.new(root, {
-          geoJSON: am5geodata_worldLow,
-          exclude: ["AQ"] // Antarktika hariç
-        })
-      );
-
-      // Default stil
-      let colors = am5.ColorSet.new(root, {});
-      worldSeries.mapPolygons.template.setAll({
-        tooltipText: "{name}",
-        interactive: true,
-        fill: am5.color(0xcccccc)
-      });
-      worldSeries.mapPolygons.template.states.create("hover", {
-        fill: colors.getIndex(2)
-      });
-
-      // Tıklanınca ülke modal aç
-      worldSeries.mapPolygons.template.events.on("click", (ev) => {
-        let dataItem = ev.target.dataItem;
-        let data = dataItem.dataContext;
-        selectedCountryId = data.id;  // "TR", "US", vb.
-        openCountryDetailModal(selectedCountryId);
-      });
-    });
-
-    /*******************************************/
-    /* 6) Ülke Detay Modal                     */
-    /*******************************************/
-    async function openCountryDetailModal(countryId) {
-      if (!countryId) return;
-      // Firestore'da yoksa ekle
-      if (!countriesCache[countryId]) {
-        await db.collection("countries").doc(countryId).set({
-          name: countryId,
-          price: 750,
-          ownerId: null
-        });
-        await fetchAllCountries();
-      }
-      const countryData = countriesCache[countryId];
-      // Modal doldur
-      document.getElementById("countryNameSpan").textContent = countryData.name || countryId;
-      document.getElementById("countryPriceSpan").textContent = countryData.price || 750;
-      if (countryData.ownerId) {
-        let ownerData = await getUserDoc(countryData.ownerId);
-        document.getElementById("countryOwnerSpan").textContent =
-          ownerData ? ownerData.username : "Bilinmiyor";
-      } else {
-        document.getElementById("countryOwnerSpan").textContent = "Sahipsiz";
-      }
-
-      // Modal göster
-      const modal = new bootstrap.Modal(document.getElementById("countryDetailModal"));
-      modal.show();
+      if(running) animationId = requestAnimationFrame(animate);
+      else document.getElementById('startBtn').textContent = "Tekrar Başlat";
     }
 
-    // Satın Al
-    document.getElementById("buyCountryBtn").addEventListener("click", async () => {
-      if (!currentUser || !selectedCountryId) return;
-      const countryRef = db.collection("countries").doc(selectedCountryId);
-      const countryDoc = await countryRef.get();
-      if (!countryDoc.exists) return alert("Ülke bulunamadı!");
-
-      const countryData = countryDoc.data();
-      if (countryData.ownerId && countryData.ownerId === currentUser.uid) {
-        return alert("Bu ülke zaten sizin!");
-      }
-
-      // Kullanıcı verisi
-      const userRef = db.collection("users").doc(currentUser.uid);
-      const userDoc = await userRef.get();
-      if (!userDoc.exists) return alert("Kullanıcı verisi yok!");
-
-      const userData = userDoc.data();
-      const price = countryData.price || 750;
-      if (userData.balance < price) {
-        return alert("Yetersiz bakiye!");
-      }
-
-      // Satın al
-      await countryRef.update({ ownerId: currentUser.uid });
-      await userRef.update({
-        balance: userData.balance - price,
-        ownedCountries: [...(userData.ownedCountries || []), selectedCountryId]
-      });
-
-      alert((countryData.name || selectedCountryId) + " ülkesini satın aldınız!");
-      bootstrap.Modal.getInstance(document.getElementById("countryDetailModal")).hide();
-
-      // Verileri tekrar yükle
-      await fetchAllCountries();
-      await loadUserProfile();
-    });
-
-    /*******************************************/
-    /* 7) Firestore'dan Ülkeleri/Kullanıcıları  */
-    /*    çek ve Haritayı Güncelle             */
-    /*******************************************/
-    async function fetchAllCountries() {
-      const snap = await db.collection("countries").get();
-      snap.forEach(doc => {
-        countriesCache[doc.id] = doc.data();
-      });
-      // Haritadaki polygonları güncelle
-      if (worldSeries) {
-        worldSeries.mapPolygons.each(async (polygon) => {
-          let dataContext = polygon.dataItem.dataContext;
-          let cId = dataContext.id;
-          const cData = countriesCache[cId];
-          if (!cData) {
-            // henüz yoksa
-            polygon.set("fill", am5.color(0xcccccc));
-            polygon.set("fillPattern", null);
-            return;
-          }
-          // Sahip varsa
-          if (cData.ownerId) {
-            let ownerData = await getUserDoc(cData.ownerId);
-            if (ownerData && ownerData.flagData) {
-              applyFlagToPolygon(polygon, ownerData.flagData);
-            } else {
-              polygon.set("fill", am5.color(0xffd700)); // Basit sarı
-              polygon.set("fillPattern", null);
-            }
-          } else {
-            polygon.set("fill", am5.color(0xcccccc));
-            polygon.set("fillPattern", null);
-          }
+    document.getElementById('startBtn').onclick = function() {
+      if(running) return;
+      running = true;
+      t = 0;
+      balls = [];
+      blackholes = [];
+      for(let i=0;i<BH_COUNT;i++) {
+        let angle = ANGLES[i];
+        blackholes.push({
+          x: ARENA.x + ARENA.r * 0.74 * Math.cos(angle),
+          y: ARENA.y - ARENA.r * 0.74 * Math.sin(angle),
+          r: BLACK_HOLE_INIT_R,
+          growAnim: 0,
         });
       }
-    }
-
-    // Kullanıcı verisi (cache)
-    async function getUserDoc(uid) {
-      if (usersCache[uid]) {
-        return usersCache[uid];
-      }
-      const userSnap = await db.collection("users").doc(uid).get();
-      if (userSnap.exists) {
-        usersCache[uid] = userSnap.data();
-        return usersCache[uid];
-      }
-      return null;
-    }
-
-    // Poligon üzerine base64 pattern
-    function applyFlagToPolygon(polygon, dataURL) {
-      let root = polygon._root;
-      let pattern = am5.ImagePattern.new(root, {
-        width: 200,   // pattern boyutu
-        height: 200,
-        src: dataURL,
-        repetition: "repeat"
+      let angle = Math.random()*Math.PI*2;
+      let speed = (1.2+Math.random()*1.2) * 1.4;
+      balls.push({
+        x: ARENA.x + Math.cos(angle)*180,
+        y: ARENA.y + Math.sin(angle)*180,
+        vx: Math.cos(angle+Math.PI/2)*speed,
+        vy: Math.sin(angle+Math.PI/2)*speed,
+        r: NEON_MAIN_R,
+        color: neonColor(Math.floor(Math.random()*60)),
+        colorSeed: Math.random(),
+        isMain: true,
+        exploded: false,
+        exploding: 0,
+        explodeAt: (performance.now()/1000) + 3,
+        createdAt: performance.now()/1000,
+        growStart: NEON_MAIN_R
       });
-      // Beyaz bir fill verip pattern uygula
-      polygon.set("fill", am5.color(0xffffff));
-      polygon.set("fillPattern", pattern);
-    }
+      this.textContent = "Devam Ediyor...";
+      updateCounter();
+      animate(0);
 
-    // Sayfa yüklendiğinde
-    window.addEventListener("DOMContentLoaded", () => {
-      // Canvas vb. init tamam. 
-      // Geri kalan iş, onAuthStateChanged tetiklenince çalışacaktır.
-    });
+      // Müzik başlat (her zaman buton tıklamasında aktifleşir)
+      let bg = document.getElementById('bgMusic');
+      bg.volume = 0.13;
+      bg.currentTime = 0;
+      bg.play();
+
+      if (timerId) clearTimeout(timerId);
+      timerId = setTimeout(()=>{
+        running = false;
+        balls = [];
+        updateCounter();
+        document.getElementById('startBtn').textContent = "Tekrar Başlat";
+        document.getElementById('bgMusic').pause();
+      }, 100000);
+    };
   </script>
 </body>
 </html>
