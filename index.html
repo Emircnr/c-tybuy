@@ -1,19 +1,334 @@
 <!DOCTYPE html>
-<html>
-  <body>
-    <button id="btn">SESİ DUYMAK İÇİN TIKLA</button>
-    <audio id="s" src="https://cdn.pixabay.com/audio/2022/03/15/audio_12618.mp3"></audio>
-    <script>
-      document.getElementById('btn').onclick = function() {
-        var ses = document.getElementById('s');
-        ses.currentTime = 0;
-        ses.volume = 1;
-        ses.play().then(function(){ 
-          // Başarılıysa bir şey yapmaya gerek yok
-        }).catch(function(e){
-          alert("Tarayıcı sesi engelledi! Farklı tarayıcı dene veya bilgisayar sesini kontrol et!");
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Tek Büyük Arena - 5 Karadelik</title>
+  <style>
+    html, body {
+      height: 100%; margin: 0; padding: 0;
+      background: radial-gradient(ellipse at center, #232b41 70%, #10141c 100%);
+      overflow: hidden;
+    }
+    body {
+      width: 100vw; height: 100vh;
+      position: relative;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    #canvas {
+      display: block;
+      margin: 0 auto;
+      background: transparent;
+      border-radius: 50%;
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    #startBtn {
+      position: absolute;
+      right: 30px; bottom: 28px;
+      z-index: 10;
+      padding: 19px 53px;
+      font-size: 1.15rem;
+      border-radius: 19px;
+      border: none;
+      background: linear-gradient(90deg,#7be2ff 0%,#fff7 97%);
+      color: #171c29;
+      font-weight: bold;
+      box-shadow: 0 4px 29px #96e7ff7d;
+      cursor: pointer;
+      transition: background .13s, box-shadow .13s, transform .13s;
+      letter-spacing: 1.04px;
+    }
+    #startBtn:hover {
+      background: linear-gradient(92deg,#1ec3ff 0%,#e8fafd 100%);
+      box-shadow: 0 4px 40px #b8f8fff1;
+      transform: scale(1.07);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width="1080" height="1080"></canvas>
+  <button id="startBtn">Başlat</button>
+  <script>
+    // Ana ayarlar
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    // Tek büyük arena çemberi
+    const ARENA = { x: w/2, y: h/2, r: 440 };
+    const BH_COUNT = 5;
+    const BH_AURAS = [
+      "#48eaff", "#e86dff", "#fff247", "#ffac40", "#48ff93"
+    ];
+    const ANGLES = Array.from({length: BH_COUNT}, (_,i)=>Math.PI/2 + i*2*Math.PI/BH_COUNT);
+    const BLACK_HOLE_INIT_R = 48;
+    const NEON_MAIN_R = 31;
+    const NEON_CHILD_R = 14;
+    const MIN_BH_R = 22;
+    const MAX_BALLS = 500;
+    const FPS_LIMIT = 60;
+
+    let blackholes = [];
+    let balls = [], running = false, animationId = null, timerId = null, t = 0, lastFrame = 0;
+    let enableSpawn = true;
+
+    const BALL_COLORS = [
+      "#1976d2", "#ec407a", "#00897b", "#f4511e", "#6d4c41", "#3949ab", "#00acc1", "#ffa000"
+    ];
+
+    function neonColor(i) {
+      return BALL_COLORS[i % BALL_COLORS.length];
+    }
+
+    // Yalnızca tek büyük arena çemberi çiz
+    function drawArena() {
+      ctx.save();
+      ctx.clearRect(0,0,w,h);
+      ctx.beginPath();
+      ctx.arc(ARENA.x, ARENA.y, ARENA.r, 0, Math.PI*2);
+      let grad = ctx.createRadialGradient(ARENA.x, ARENA.y, ARENA.r*0.1, ARENA.x, ARENA.y, ARENA.r);
+      grad.addColorStop(0, "#fafdff");
+      grad.addColorStop(0.75, "#c4d8ec");
+      grad.addColorStop(1, "#a4b9d2");
+      ctx.fillStyle = grad;
+      ctx.shadowColor = "#d0ebff";
+      ctx.shadowBlur = 38;
+      ctx.fill();
+      ctx.lineWidth = 17;
+      ctx.strokeStyle = "#82caff";
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawBlackHole(bh, auraColor, pulseT) {
+      ctx.save();
+      // Halo
+      let grad = ctx.createRadialGradient(bh.x, bh.y, bh.r*1.03, bh.x, bh.y, bh.r*1.42);
+      grad.addColorStop(0, "#fff0");
+      grad.addColorStop(0.19, auraColor+"33");
+      grad.addColorStop(0.5, auraColor+"99");
+      grad.addColorStop(0.9, auraColor+"13");
+      grad.addColorStop(1, "#fff0");
+      ctx.beginPath();
+      ctx.arc(bh.x, bh.y, bh.r*1.42, 0, Math.PI*2);
+      ctx.globalAlpha = 0.33;
+      ctx.fillStyle = grad;
+      ctx.shadowColor = auraColor;
+      ctx.shadowBlur = 28;
+      ctx.fill();
+
+      // Siyah merkez
+      ctx.beginPath();
+      ctx.arc(bh.x, bh.y, bh.r, 0, Math.PI*2);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#000";
+      ctx.shadowColor = "#222";
+      ctx.shadowBlur = 8;
+      ctx.fill();
+
+      // Yutma animasyonu
+      if (bh.growAnim > 0.07) {
+        ctx.beginPath();
+        ctx.arc(bh.x, bh.y, bh.r*1.13 + Math.sin(pulseT*13)*2*bh.growAnim, 0, Math.PI*2);
+        ctx.strokeStyle = "#fff";
+        ctx.globalAlpha = 0.13*bh.growAnim;
+        ctx.lineWidth = 7*bh.growAnim;
+        ctx.shadowBlur = 15*bh.growAnim;
+        ctx.stroke();
+        bh.growAnim *= 0.89;
+      }
+      ctx.restore();
+    }
+
+    function drawBalls(now) {
+      for(let i=0;i<balls.length;i++) {
+        let ball = balls[i];
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.r+5, 0, Math.PI*2);
+        ctx.globalAlpha = 0.18 + 0.11*Math.sin(now/1010+ball.colorSeed*4.2);
+        ctx.shadowColor = ball.color;
+        ctx.shadowBlur = 12 + 7*Math.sin(now/600+ball.colorSeed*1.3);
+        ctx.fillStyle = ball.color;
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
+        ctx.globalAlpha = 0.97;
+        ctx.fillStyle = ball.color;
+        ctx.shadowColor = ball.color;
+        ctx.shadowBlur = 6;
+        ctx.fill();
+
+        ctx.globalAlpha = 0.12;
+        ctx.beginPath();
+        ctx.arc(ball.x-ball.r/3, ball.y-ball.r/4, ball.r/3.7, 0, Math.PI*2);
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+        ctx.restore();
+
+        if (ball.exploding > 0.07) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(ball.x, ball.y, ball.r+ball.exploding*10, 0, Math.PI*2);
+          ctx.strokeStyle = "#fff";
+          ctx.globalAlpha = 0.09*ball.exploding;
+          ctx.lineWidth = 5*ball.exploding;
+          ctx.shadowColor = ball.color;
+          ctx.shadowBlur = 8*ball.exploding;
+          ctx.stroke();
+          ctx.restore();
+          ball.exploding *= 0.81;
+        }
+      }
+    }
+
+    function isInBlackHole(ball, bh) {
+      let dx = ball.x - bh.x, dy = ball.y - bh.y;
+      return Math.hypot(dx, dy) < bh.r - 2;
+    }
+    function reflectBall(ball) {
+      let dx = ball.x - ARENA.x, dy = ball.y - ARENA.y;
+      let dist = Math.hypot(dx, dy);
+      if (dist >= ARENA.r - ball.r - 10) {
+        let nx = dx / dist, ny = dy / dist;
+        let dot = ball.vx * nx + ball.vy * ny;
+        ball.vx -= 2 * dot * nx;
+        ball.vy -= 2 * dot * ny;
+        let speed = Math.hypot(ball.vx, ball.vy);
+        let angle = Math.atan2(ball.vy, ball.vx) + (Math.random()-0.5)*0.13;
+        ball.vx = Math.cos(angle)*speed*0.97;
+        ball.vy = Math.sin(angle)*speed*0.97;
+        let over = dist - (ARENA.r - ball.r - 10) + 1;
+        ball.x -= nx*over;
+        ball.y -= ny*over;
+      }
+    }
+
+    function spawnBalls(ball, now) {
+      if (!enableSpawn || balls.length >= MAX_BALLS) return;
+      let angle0 = Math.random()*Math.PI*2;
+      for(let k=0;k<3;k++) {
+        let angle = angle0 + k*(2*Math.PI/3) + (Math.random()-0.5)*0.10;
+        let speed = (1.17 + Math.random()*1.12) * 1.45;
+        let r = NEON_CHILD_R * (0.91 + Math.random()*0.21);
+        let colorSeed = Math.random();
+        let color = neonColor(Math.floor(Math.random()*60));
+        balls.push({
+          x: ball.x, y: ball.y,
+          vx: Math.cos(angle)*speed,
+          vy: Math.sin(angle)*speed,
+          r: r,
+          color,
+          colorSeed,
+          exploded: false,
+          exploding: 0,
+          explodeAt: (performance.now()/1000) + 3 + Math.random()*3,
+          createdAt: performance.now()/1000,
+          growStart: ball.r,
+          isMain: false
         });
       }
-    </script>
-  </body>
+    }
+
+    function animate(now) {
+      if(now - lastFrame < 1000/FPS_LIMIT) {
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrame = now;
+      t = now/1000;
+      enableSpawn = balls.length < MAX_BALLS;
+
+      for(let i=balls.length-1;i>=0;i--) {
+        let ball = balls[i];
+        if (!ball.exploded && t > ball.explodeAt) {
+          ball.exploded = true;
+          ball.exploding = 1;
+          if(enableSpawn) spawnBalls(ball, now);
+          balls.splice(i,1);
+          continue;
+        }
+        if (!ball.exploded) {
+          let duration = ball.explodeAt - ball.createdAt;
+          let maxGrow = (ball.isMain ? NEON_MAIN_R*1.45 : NEON_CHILD_R*1.31);
+          let growth = (maxGrow - ball.r) / (duration * 60);
+          if(ball.r < maxGrow) ball.r += Math.max(growth, 0.05);
+          ball.x += ball.vx;
+          ball.y += ball.vy;
+          ball.vx *= 0.997;
+          ball.vy *= 0.997;
+          reflectBall(ball);
+
+          let eaten = false;
+          for(let b=0; b<BH_COUNT; b++){
+            if(isInBlackHole(ball, blackholes[b])){
+              let delta = ball.r*0.030*1.16; // Orta hızda büyüme
+              blackholes[b].r += delta;
+              blackholes[b].growAnim = 1.11;
+              for(let j=0;j<BH_COUNT;j++) {
+                if(j!==b) blackholes[j].r = Math.max(MIN_BH_R, blackholes[j].r - delta/(BH_COUNT-1));
+              }
+              balls.splice(i,1);
+              eaten = true;
+              break;
+            }
+          }
+          if(eaten) continue;
+        }
+      }
+      drawArena();
+      for(let i=0;i<BH_COUNT;i++) drawBlackHole(blackholes[i], BH_AURAS[i], t+0.33*i);
+      drawBalls(now);
+
+      if(running) animationId = requestAnimationFrame(animate);
+      else document.getElementById('startBtn').textContent = "Başlat";
+    }
+
+    document.getElementById('startBtn').onclick = function() {
+      if(running) return;
+      running = true;
+      t = 0;
+      balls = [];
+      blackholes = [];
+      for(let i=0;i<BH_COUNT;i++) {
+        let angle = ANGLES[i];
+        blackholes.push({
+          x: ARENA.x + ARENA.r * 0.72 * Math.cos(angle),
+          y: ARENA.y - ARENA.r * 0.72 * Math.sin(angle),
+          r: BLACK_HOLE_INIT_R,
+          growAnim: 0,
+        });
+      }
+      let angle = Math.random()*Math.PI*2;
+      let speed = (1.2+Math.random()*1.2) * 1.4;
+      balls.push({
+        x: ARENA.x + Math.cos(angle)*180,
+        y: ARENA.y + Math.sin(angle)*180,
+        vx: Math.cos(angle+Math.PI/2)*speed,
+        vy: Math.sin(angle+Math.PI/2)*speed,
+        r: NEON_MAIN_R,
+        color: neonColor(Math.floor(Math.random()*60)),
+        colorSeed: Math.random(),
+        isMain: true,
+        exploded: false,
+        exploding: 0,
+        explodeAt: (performance.now()/1000) + 3,
+        createdAt: performance.now()/1000,
+        growStart: NEON_MAIN_R
+      });
+      this.textContent = "Devam Ediyor...";
+      animate(0);
+
+      if (timerId) clearTimeout(timerId);
+      timerId = setTimeout(()=>{
+        running = false;
+        balls = [];
+        document.getElementById('startBtn').textContent = "Başlat";
+      }, 100000);
+    };
+  </script>
+</body>
 </html>
