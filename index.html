@@ -1,7 +1,19 @@
 <!DOCTYPE html>
 <html>
   <body>
-    <button onclick="document.getElementById('s').play()">SESİ DUYMAK İÇİN TIKLA</button>
+    <button id="btn">SESİ DUYMAK İÇİN TIKLA</button>
     <audio id="s" src="https://cdn.pixabay.com/audio/2022/03/15/audio_12618.mp3"></audio>
+    <script>
+      document.getElementById('btn').onclick = function() {
+        var ses = document.getElementById('s');
+        ses.currentTime = 0;
+        ses.volume = 1;
+        ses.play().then(function(){ 
+          // Başarılıysa bir şey yapmaya gerek yok
+        }).catch(function(e){
+          alert("Tarayıcı sesi engelledi! Farklı tarayıcı dene veya bilgisayar sesini kontrol et!");
+        });
+      }
+    </script>
   </body>
 </html>
