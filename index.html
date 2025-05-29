@@ -2,255 +2,355 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Renkli Mini Baloncuk Oyunu</title>
+  <title>Dijital Neon Baloncuk Canlı Görsel</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
+    html,body {
+      height: 100%;
+      margin: 0; padding: 0;
+      background: #141726;
+      overflow: hidden;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
     body {
-      background: #181e26;
-      color: #fff;
-      font-family: Arial, sans-serif;
+      width: 100vw; height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      min-height: 100vh;
-      margin: 0;
-      padding: 0;
-    }
-    h1 {
-      margin-top: 32px;
-      margin-bottom: 8px;
-      letter-spacing: 1px;
-    }
-    #info {
-      margin-bottom: 18px;
-      font-size: 1.12em;
-      letter-spacing: .3px;
-    }
-    #startBtn {
-      padding: 15px 34px;
-      font-size: 18px;
-      border-radius: 11px;
-      border: none;
-      background: #5a7cff;
-      color: white;
-      font-weight: bold;
-      margin-bottom: 16px;
-      cursor: pointer;
-      box-shadow: 0 4px 14px #0004;
-      transition: background .18s, box-shadow .18s;
-    }
-    #startBtn:hover {
-      background: #2b336e;
-      box-shadow: 0 2px 6px #0006;
-    }
-    #arena {
-      width: 600px;
-      height: 600px;
-      background: #23273a;
-      border: 6px solid #6fc5ff;
-      border-radius: 50%;
-      margin-bottom: 22px;
       position: relative;
+      min-height: 100vh;
+      min-width: 100vw;
       overflow: hidden;
-      box-shadow: 0 8px 24px #0007;
+    }
+    #neon-bg {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      left: 0; top: 0;
+      z-index: 0;
+      pointer-events: none;
+      filter: blur(18px) brightness(1.07) saturate(1.4);
+      background: radial-gradient(ellipse at 40% 30%, #3ae6ff60 0%, #315ee770 52%, #0d0f23 100%);
+      animation: bgmove 18s linear infinite alternate;
+    }
+    @keyframes bgmove {
+      0% { background-position: 60% 0%;}
+      50% { background-position: 40% 60%;}
+      100% { background-position: 90% 100%;}
+    }
+    #arena-wrap {
+      width: min(94vw, 650px);
+      height: min(94vw, 650px);
+      max-width: 96vw; max-height: 96vw;
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-top: 44px;
+      position: relative;
+      z-index: 2;
+      pointer-events: none;
+    }
+    #arena {
+      width: 100%; height: 100%;
+      aspect-ratio: 1/1;
+      border-radius: 50%;
+      border: 7px solid #4ef2fe70;
+      box-shadow: 0 0 60px #46d8ff1f, 0 0 100px #00ffe555 inset;
+      position: relative;
+      background: radial-gradient(ellipse at 58% 41%, #273855c7 0%, #202c3a 94%, #131726 100%);
+      overflow: hidden;
+      z-index: 2;
+    }
+    #counter {
+      font-size: 1.25em;
+      letter-spacing: 1px;
+      color: #d0f6ff;
+      margin-top: 8px;
+      margin-bottom: -30px;
+      text-shadow: 0 1px 12px #00f5ff60, 0 0 1px #fff, 0 0 2px #0ff9;
+      z-index: 9;
+      user-select: none;
+      position: relative;
+      transition: color .15s;
+    }
+    #title {
+      color: #eafffa;
+      font-size: 2.1em;
+      margin-top: 22px;
+      letter-spacing: 1.6px;
+      text-shadow: 0 2px 28px #37e8ff43, 0 1px 0px #fff9;
+      font-weight: 500;
+      z-index: 10;
+      user-select: none;
+    }
+    #desc {
+      color: #b0e2e7;
+      margin-bottom: 10px;
+      margin-top: 10px;
+      letter-spacing: .7px;
+      font-size: 1.07em;
+      z-index: 10;
+      user-select: none;
+      text-shadow: 0 1px 16px #fff3;
     }
     .bubble {
       position: absolute;
-      width: 11px;
-      height: 11px;
       border-radius: 50%;
-      border: 1.3px solid #fff8;
-      box-shadow: 0 1.3px 5px #0006;
-      will-change: transform;
-      transition: box-shadow .08s;
+      pointer-events: none;
+      opacity: 0.87;
+      filter: brightness(1.08) saturate(1.2);
+      will-change: transform, box-shadow, opacity;
+      transition: box-shadow .09s;
+      z-index: 4;
     }
-    #counter {
-      margin-bottom: 10px;
-      font-size: 1.12em;
+    .bubble.glow {
+      box-shadow: 0 0 16px 4px #fff6, 0 0 40px 16px #fff2;
+      animation: glowflicker .9s infinite alternate;
+    }
+    @keyframes glowflicker {
+      0% { box-shadow: 0 0 12px 3px #fff7, 0 0 36px 14px #fff2; }
+      100% { box-shadow: 0 0 20px 8px #fff8, 0 0 50px 24px #fff2; }
+    }
+    .bubble-pop {
+      animation: popfade .32s linear forwards;
+    }
+    @keyframes popfade {
+      0% { opacity: 1; transform: scale(1);}
+      100% { opacity: 0; transform: scale(2.2);}
+    }
+    .pop-effect {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
+      opacity: 0.65;
+      filter: blur(1.3px) brightness(2.2);
+      z-index: 99;
+      animation: popblast .35s cubic-bezier(.45,.1,.68,1.1) forwards;
+    }
+    @keyframes popblast {
+      0% { opacity: 0.8; transform: scale(1);}
+      60% { opacity: 0.33; transform: scale(2);}
+      100% { opacity: 0; transform: scale(2.8);}
+    }
+    /* Mobil uyum */
+    @media (max-width: 700px) {
+      #arena-wrap { margin-top: 15vw;}
+      #title { font-size: 1.25em;}
     }
   </style>
 </head>
 <body>
-  <h1>Renkli Mini Baloncuk Oyunu</h1>
-  <div id="info">Başlat'a basınca, baloncuklar kenara çarptıkça 2'ye katlanır.<br>Her baloncuk rastgele 5 farklı renkten biri. %80 yavaş ve minik! <br>100 saniye boyunca devam eder. Üst limit: 20.000 baloncuk!</div>
-  <div id="counter">Baloncuk: <span id="bubbleCount">0</span></div>
-  <button id="startBtn">Başlat</button>
-  <div id="arena"></div>
-
+  <div id="neon-bg"></div>
+  <div id="title">NEON BUBBLE ∞ LOOP</div>
+  <div id="desc">Renkli baloncuklar çarpıp çoğalıyor, <b>sonsuzca</b> dans ediyor.<br>Kendi kendine devam eden bir dijital canlı görsel!</div>
+  <div id="counter">Baloncuklar: <span id="bubbleCount">0</span></div>
+  <div id="arena-wrap">
+    <div id="arena"></div>
+  </div>
   <script>
-    // Ayarlar
-    const ARENA_SIZE = 600;
+    // Ayarlar ve renk paleti
+    const ARENA_SIZE = Math.min(window.innerWidth * 0.93, 640);
     const ARENA_RADIUS = ARENA_SIZE / 2;
-    const BUBBLE_SIZE = 11; // %50 küçük
-    const BUBBLE_RADIUS = BUBBLE_SIZE / 2;
-    const GAME_DURATION = 100 * 1000; // 100 saniye
-    const MAX_BUBBLES = 20000;
-
-    // 5 farklı renk (görsel olarak kontrastlı seçildi)
+    const MAX_BUBBLES = 17000;
+    const BUBBLE_MIN = 9, BUBBLE_MAX = 26;
+    const SPEED_MIN = 0.5, SPEED_MAX = 2.0;
+    const AUTO_SPAWN_INTERVAL = 2500; // yeni baloncuk üretme periyodu (ms)
+    const BIRTH_RATE = 2; // her otomatik girişte kaç tane baloncuk girsin
     const COLORS = [
-      "linear-gradient(135deg,#FFD166 60%,#FC7E5E 100%)",
-      "linear-gradient(135deg,#7DE2FC 60%,#B9B6E5 100%)",
-      "linear-gradient(135deg,#8AFFA7 60%,#00C9A7 100%)",
-      "linear-gradient(135deg,#FFD6E0 60%,#FFB5C2 100%)",
-      "linear-gradient(135deg,#FFF689 60%,#F9B53D 100%)"
+      ['#FFDAA6','#FF7BC2'],
+      ['#43F4FF','#4866F7'],
+      ['#FFD166','#FC7E5E'],
+      ['#C3FF68','#00B27F'],
+      ['#FFD6E0','#FFB5C2'],
+      ['#FBFF49','#F9902D'],
+      ['#7DE2FC','#B9B6E5'],
+      ['#AC7FFF','#F64FCA']
     ];
 
-    const arena = document.getElementById('arena');
-    const startBtn = document.getElementById('startBtn');
-    const counter = document.getElementById('bubbleCount');
+    // Bubble list
     let bubbles = [];
-    let running = false;
-    let animationId = null;
-    let gameTimeout = null;
+    const arena = document.getElementById('arena');
+    const bubbleCountSpan = document.getElementById('bubbleCount');
+    let running = true, animationId = null;
 
-    function updateCounter() {
-      counter.textContent = bubbles.length;
+    // Arena boyutu
+    function setArenaSize() {
+      let w = Math.min(window.innerWidth * 0.94, 640);
+      arena.style.width = w + 'px';
+      arena.style.height = w + 'px';
+    }
+    setArenaSize();
+    window.addEventListener('resize', setArenaSize);
+
+    // Baloncuk nesnesi oluşturucu
+    function createBubble(x, y, dx, dy, size, colorIdx, born = false) {
+      let div = document.createElement('div');
+      div.className = 'bubble glow';
+      div.style.width = size+'px';
+      div.style.height = size+'px';
+      div.style.left = (x-size/2)+'px';
+      div.style.top = (y-size/2)+'px';
+      // Renk gradyan efekti
+      let color = COLORS[colorIdx%COLORS.length];
+      div.style.background = `radial-gradient(circle at 65% 35%, ${color[0]} 55%, ${color[1]} 100%)`;
+      div.style.boxShadow = `0 0 18px 0px ${color[0]}70, 0 0 45px 2px ${color[1]}50`;
+      div.style.opacity = (0.67 + Math.random()*0.3).toFixed(2);
+      arena.appendChild(div);
+
+      return {
+        el: div,
+        x: x, y: y,
+        dx: dx, dy: dy,
+        size: size,
+        colorIdx: colorIdx,
+        justBorn: born,
+        lastPop: Date.now(),
+      };
     }
 
-    // Baloncuk oluştur
-    function createBubble(x, y, dx, dy, colorIndex = null) {
-      const el = document.createElement('div');
-      el.className = 'bubble';
-      // Renk seç
-      let idx = colorIndex !== null ? colorIndex : Math.floor(Math.random()*COLORS.length);
-      el.style.background = COLORS[idx];
-      el.dataset.colorIndex = idx;
-      el.style.left = (x - BUBBLE_RADIUS) + 'px';
-      el.style.top = (y - BUBBLE_RADIUS) + 'px';
-      arena.appendChild(el);
-
-      return { el, x, y, dx, dy, colorIndex: idx };
+    // Baloncuk patlama efekti
+    function popEffect(x, y, colorIdx, size) {
+      let fx = document.createElement('div');
+      fx.className = 'pop-effect';
+      let color = COLORS[colorIdx%COLORS.length];
+      fx.style.width = size+'px';
+      fx.style.height = size+'px';
+      fx.style.left = (x-size/2)+'px';
+      fx.style.top = (y-size/2)+'px';
+      fx.style.background = `radial-gradient(circle at 50% 60%, #fff9 28%, ${color[1]}80 65%, ${color[0]}60 100%)`;
+      fx.style.boxShadow = `0 0 24px 2px ${color[1]}80`;
+      arena.appendChild(fx);
+      setTimeout(()=>fx.remove(), 380);
     }
 
-    // Baloncukları temizle
-    function clearBubbles() {
-      for (let b of bubbles) {
-        b.el.remove();
+    // Bubble kenara çarptı mı?
+    function isHittingCircleEdge(b) {
+      let cx = ARENA_RADIUS, cy = ARENA_RADIUS;
+      let dist = Math.hypot(b.x - cx, b.y - cy);
+      return (dist + b.size/2) >= ARENA_RADIUS;
+    }
+
+    // Baloncuk yönünü sek
+    function bounceBubble(b) {
+      let cx = ARENA_RADIUS, cy = ARENA_RADIUS;
+      let vx = b.x - cx, vy = b.y - cy;
+      let norm = Math.hypot(vx, vy);
+      let nx = vx / norm, ny = vy / norm;
+      let dot = b.dx * nx + b.dy * ny;
+      b.dx = b.dx - 2 * dot * nx;
+      b.dy = b.dy - 2 * dot * ny;
+      // Rastgelelik
+      let angleNoise = (Math.random()-0.5) * 0.4;
+      let speed = Math.hypot(b.dx, b.dy);
+      let angle = Math.atan2(b.dy, b.dx) + angleNoise;
+      b.dx = Math.cos(angle) * speed;
+      b.dy = Math.sin(angle) * speed;
+    }
+
+    // Baloncuk üretimi (ilk başlatma ve arada otomatik doğanlar)
+    function spawnBubble(center = false) {
+      let size = BUBBLE_MIN + Math.random()*(BUBBLE_MAX-BUBBLE_MIN);
+      let colorIdx = Math.floor(Math.random()*COLORS.length);
+      let angle, speed, x, y;
+      if(center) {
+        x = ARENA_RADIUS; y = ARENA_RADIUS;
+        angle = Math.random()*Math.PI*2;
+        speed = SPEED_MIN + Math.random()*SPEED_MAX;
+      } else {
+        // Kenardan rastgele bir doğuş
+        let theta = Math.random()*Math.PI*2;
+        x = ARENA_RADIUS + (ARENA_RADIUS - size/2 - 1) * Math.cos(theta);
+        y = ARENA_RADIUS + (ARENA_RADIUS - size/2 - 1) * Math.sin(theta);
+        angle = theta + Math.PI + (Math.random()-0.5)*0.7;
+        speed = SPEED_MIN + Math.random()*SPEED_MAX*0.85;
       }
-      bubbles = [];
-      updateCounter();
+      let dx = Math.cos(angle) * speed;
+      let dy = Math.sin(angle) * speed;
+      let bubble = createBubble(x, y, dx, dy, size, colorIdx, true);
+      bubbles.push(bubble);
     }
 
-    // Çemberin kenarına çarpma kontrolü
-    function isHittingCircleEdge(bubble) {
-      const cx = ARENA_RADIUS;
-      const cy = ARENA_RADIUS;
-      const bx = bubble.x;
-      const by = bubble.y;
-      const dist = Math.hypot(bx - cx, by - cy);
-      return (dist + BUBBLE_RADIUS) >= ARENA_RADIUS;
-    }
+    // Başlangıçta birkaç baloncuk doğur
+    for(let i=0;i<8;i++) spawnBubble(true);
 
-    // Baloncuğun kenardan nasıl sekeceğini hesapla
-    function bounceOffCircle(bubble) {
-      const cx = ARENA_RADIUS;
-      const cy = ARENA_RADIUS;
-      const vx = bubble.x - cx;
-      const vy = bubble.y - cy;
-      const norm = Math.hypot(vx, vy);
-      const nx = vx / norm;
-      const ny = vy / norm;
-      const dot = bubble.dx * nx + bubble.dy * ny;
-      bubble.dx = bubble.dx - 2 * dot * nx;
-      bubble.dy = bubble.dy - 2 * dot * ny;
-      // Küçük bir rasgelelik
-      const angleNoise = (Math.random()-0.5) * 0.6;
-      const speed = Math.hypot(bubble.dx, bubble.dy);
-      const angle = Math.atan2(bubble.dy, bubble.dx) + angleNoise;
-      bubble.dx = Math.cos(angle) * speed;
-      bubble.dy = Math.sin(angle) * speed;
-    }
-
-    // Oyunu başlat
-    startBtn.onclick = () => {
-      startBtn.disabled = true;
-      startBtn.textContent = "Oyun Başladı...";
-      clearBubbles();
-      running = true;
-
-      // İlk baloncuğu merkezde başlat, rastgele bir yön
-      const angle = Math.random() * Math.PI * 2;
-      // %80 yavaş
-      const speed = 3.4 * 0.2;
-      const dx = Math.cos(angle) * speed;
-      const dy = Math.sin(angle) * speed;
-      const colorIndex = Math.floor(Math.random()*COLORS.length);
-      const startBubble = createBubble(ARENA_RADIUS, ARENA_RADIUS, dx, dy, colorIndex);
-      bubbles.push(startBubble);
-      updateCounter();
-
-      animate();
-
-      gameTimeout = setTimeout(() => {
-        running = false;
-        cancelAnimationFrame(animationId);
-        startBtn.disabled = false;
-        startBtn.textContent = "Yeniden Başlat";
-      }, GAME_DURATION);
-    };
+    // Düzenli aralıkla yeni baloncuk üretimi
+    setInterval(()=>{
+      if(!running) return;
+      if(bubbles.length<MAX_BUBBLES-8) {
+        for(let j=0;j<BIRTH_RATE;j++) spawnBubble(false);
+      }
+    }, AUTO_SPAWN_INTERVAL);
 
     // Animasyon döngüsü
     function animate() {
       let newBubbles = [];
-
-      for (let b of bubbles) {
+      for(let b of bubbles) {
+        // Hareket
         b.x += b.dx;
         b.y += b.dy;
 
+        // Sınır kontrol
         let hit = false;
-        if (isHittingCircleEdge(b)) {
-          bounceOffCircle(b);
+        if(isHittingCircleEdge(b)) {
+          bounceBubble(b);
           hit = true;
         }
 
         // DOM güncelle
-        b.el.style.left = (b.x - BUBBLE_RADIUS) + 'px';
-        b.el.style.top = (b.y - BUBBLE_RADIUS) + 'px';
+        b.el.style.left = (b.x - b.size/2) + 'px';
+        b.el.style.top = (b.y - b.size/2) + 'px';
 
-        if (hit) {
-          // Çarpınca iki yeni baloncuk üret (her biri farklı rastgele yön ve renk)
-          for (let i = 0; i < 2; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            // %80 yavaş
-            const speed = (2.6 + Math.random() * 2.8) * 0.2;
-            const dx = Math.cos(angle) * speed;
-            const dy = Math.sin(angle) * speed;
-            // Kenara çok yakın olduğundan çemberin içine biraz it
-            const norm = Math.hypot(b.x - ARENA_RADIUS, b.y - ARENA_RADIUS);
-            const pullBackRatio = ((ARENA_RADIUS - BUBBLE_RADIUS - 2) / norm);
-            const newX = ARENA_RADIUS + (b.x - ARENA_RADIUS) * pullBackRatio;
-            const newY = ARENA_RADIUS + (b.y - ARENA_RADIUS) * pullBackRatio;
-            const colorIndex = Math.floor(Math.random()*COLORS.length);
-            const clone = createBubble(newX, newY, dx, dy, colorIndex);
-            newBubbles.push(clone);
+        // İlk doğuşta minik fade-in efekti
+        if(b.justBorn) {
+          b.el.style.opacity = "0.1";
+          setTimeout(()=>{if(b.el) b.el.style.opacity="0.83";}, 10);
+          b.justBorn = false;
+        }
+
+        // Çarptıysa çoğalt
+        if(hit && bubbles.length < MAX_BUBBLES-2) {
+          // Patlama efekti
+          popEffect(b.x, b.y, b.colorIdx, b.size*1.15);
+
+          // Çoğalma (daha küçük ve rastgele renkli yeni iki baloncuk)
+          for(let i=0;i<2;i++) {
+            let angle = Math.random()*Math.PI*2;
+            let speed = (SPEED_MIN + Math.random()*SPEED_MAX)*1.1;
+            let newSize = Math.max(BUBBLE_MIN, b.size*(0.82+Math.random()*0.23));
+            let dx = Math.cos(angle)*speed, dy=Math.sin(angle)*speed;
+            // kenardan hafif içeri
+            let norm = Math.hypot(b.x-ARENA_RADIUS, b.y-ARENA_RADIUS);
+            let pullBack = ((ARENA_RADIUS - newSize/2 - 2) / norm);
+            let newX = ARENA_RADIUS + (b.x-ARENA_RADIUS)*pullBack;
+            let newY = ARENA_RADIUS + (b.y-ARENA_RADIUS)*pullBack;
+            let newColorIdx = Math.floor(Math.random()*COLORS.length);
+            let bb = createBubble(newX, newY, dx, dy, newSize, newColorIdx);
+            newBubbles.push(bb);
           }
-          // Eskiyi sil (DOM)
-          b.el.remove();
+          // Eskiyi fade-out ile yok et
+          b.el.classList.add("bubble-pop");
+          setTimeout(()=>b.el.remove(),320);
         } else {
           newBubbles.push(b);
         }
       }
-
       bubbles = newBubbles;
-      updateCounter();
 
-      if (bubbles.length > MAX_BUBBLES) {
-        running = false;
-        alert(`Baloncuk limiti (${MAX_BUBBLES}) aşıldı! Oyun otomatik durdu.`);
-        cancelAnimationFrame(animationId);
-        clearTimeout(gameTimeout);
-        startBtn.disabled = false;
-        startBtn.textContent = "Yeniden Başlat";
+      // Sayaç güncelle
+      bubbleCountSpan.textContent = bubbles.length;
+
+      // Limit aşımı
+      if(bubbles.length > MAX_BUBBLES) {
+        running=false;
+        alert("Baloncuk limiti aşıldı!");
         return;
       }
-
-      if (running) {
-        animationId = requestAnimationFrame(animate);
-      }
+      if(running) animationId = requestAnimationFrame(animate);
     }
+    animate();
+
+    // Otomatik sonsuza kadar devam eder (yeniden başlatma vs. gerek yok)
   </script>
 </body>
 </html>
