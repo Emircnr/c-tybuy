@@ -1,374 +1,164 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8">
-  <title>Karadelik Arenası - Hızlı Patlayan Toplar</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <style>
-    html, body {
-      height: 100%; margin: 0; padding: 0;
-      background: radial-gradient(ellipse at center, #232b41 70%, #10141c 100%);
-      overflow: hidden;
-      touch-action: none;
-    }
-    body {
-      width: 100vw; height: 100vh;
-      position: relative;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      overscroll-behavior: contain;
-    }
-    #canvas {
-      display: block;
-      position: absolute;
-      left: 50%; top: 50%;
-      transform: translate(-50%, -50%);
-      background: transparent;
-      border-radius: 50%;
-      touch-action: none;
-    }
-    #startBtn {
-      position: absolute;
-      right: 7vw; bottom: 4vh;
-      z-index: 10;
-      padding: 1vw 4vw;
-      min-width: 110px;
-      font-size: clamp(1rem,2.5vw,1.4rem);
-      border-radius: 10px;
-      border: none;
-      background: linear-gradient(90deg,#7be2ff 0%,#fff7 97%);
-      color: #171c29;
-      font-weight: bold;
-      box-shadow: 0 4px 29px #96e7ff7d;
-      cursor: pointer;
-      transition: background .13s, box-shadow .13s, transform .13s;
-      letter-spacing: 1.04px;
-      outline: none;
-      user-select: none;
-    }
-    #startBtn:hover, #startBtn:active {
-      background: linear-gradient(92deg,#1ec3ff 0%,#e8fafd 100%);
-      box-shadow: 0 4px 40px #b8f8fff1;
-      transform: scale(1.07);
-    }
-    @media (max-width: 700px) {
-      #startBtn {
-        right: 50%; bottom: 3vh;
-        left: 50%;
-        transform: translate(50%,0);
-        padding: 5vw 16vw;
-        font-size: 1.12rem;
-        min-width: 120px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <canvas id="canvas"></canvas>
-  <button id="startBtn">Başlat</button>
-  <script>
-    // Responsive canvas
-    let arena = { x: 0, y: 0, r: 0 };
-    let canvas = document.getElementById('canvas');
-    let ctx = canvas.getContext('2d');
 
-    function resizeCanvas() {
-      let size = Math.min(window.innerWidth, window.innerHeight) * 0.94;
-      size = Math.max(size, 240);
-      canvas.width = canvas.height = size;
-      arena.x = size / 2;
-      arena.y = size / 2;
-      arena.r = size * 0.41;
-    }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    const BH_COUNT = 5;
-    const BH_AURAS = [
-      "#48eaff", "#e86dff", "#fff247", "#ffac40", "#48ff93"
-    ];
-    const BLACK_HOLE_INIT_RATIO = 48/1080;
-    const NEON_MAIN_RATIO = 31/1080;
-    const NEON_CHILD_RATIO = 14/1080;
-    const MIN_BH_RATIO = 22/1080;
-    const MAX_BALLS = 500;
-    const FPS_LIMIT = 60;
-
-    const BALL_COLORS = [
-      "#1976d2", "#ec407a", "#00897b", "#f4511e", "#6d4c41", "#3949ab", "#00acc1", "#ffa000"
+      "linear-gradient(135deg,#FFD166 60%,#FC7E5E 100%)",
+      "linear-gradient(135deg,#7DE2FC 60%,#B9B6E5 100%)",
+      "linear-gradient(135deg,#8AFFA7 60%,#00C9A7 100%)",
+      "linear-gradient(135deg,#FFD6E0 60%,#FFB5C2 100%)",
+      "linear-gradient(135deg,#FFF689 60%,#F9B53D 100%)"
     ];
 
-    let ANGLES = Array.from({length: BH_COUNT}, (_,i)=>Math.PI/2 + i*2*Math.PI/BH_COUNT);
-    let blackholes = [];
-    let balls = [], running = false, animationId = null, timerId = null, t = 0, lastFrame = 0;
-    let enableSpawn = true;
+    const arena = document.getElementById('arena');
+    const startBtn = document.getElementById('startBtn');
+    const counter = document.getElementById('bubbleCount');
+    let bubbles = [];
+    let running = false;
+    let animationId = null;
+    let gameTimeout = null;
 
-    function neonColor(i) {
-      return BALL_COLORS[i % BALL_COLORS.length];
+    function updateCounter() {
+      counter.textContent = bubbles.length;
     }
 
-    function drawArena() {
-      ctx.save();
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.beginPath();
-      ctx.arc(arena.x, arena.y, arena.r, 0, Math.PI*2);
-      let grad = ctx.createRadialGradient(arena.x, arena.y, arena.r*0.1, arena.x, arena.y, arena.r);
-      grad.addColorStop(0, "#fafdff");
-      grad.addColorStop(0.75, "#c4d8ec");
-      grad.addColorStop(1, "#a4b9d2");
-      ctx.fillStyle = grad;
-      ctx.shadowColor = "#d0ebff";
-      ctx.shadowBlur = 38;
-      ctx.fill();
-      ctx.lineWidth = Math.max(12, arena.r*0.04);
-      ctx.strokeStyle = "#82caff";
-      ctx.stroke();
-      ctx.restore();
+    // Baloncuk oluştur
+    function createBubble(x, y, dx, dy, colorIndex = null) {
+      const el = document.createElement('div');
+      el.className = 'bubble';
+      // Renk seç
+      let idx = colorIndex !== null ? colorIndex : Math.floor(Math.random()*COLORS.length);
+      el.style.background = COLORS[idx];
+      el.dataset.colorIndex = idx;
+      el.style.left = (x - BUBBLE_RADIUS) + 'px';
+      el.style.top = (y - BUBBLE_RADIUS) + 'px';
+      arena.appendChild(el);
+
+      return { el, x, y, dx, dy, colorIndex: idx };
     }
 
-    function drawBlackHole(bh, auraColor, pulseT) {
-      ctx.save();
-      let grad = ctx.createRadialGradient(bh.x, bh.y, bh.r*1.03, bh.x, bh.y, bh.r*1.42);
-      grad.addColorStop(0, "#fff0");
-      grad.addColorStop(0.19, auraColor+"33");
-      grad.addColorStop(0.5, auraColor+"99");
-      grad.addColorStop(0.9, auraColor+"13");
-      grad.addColorStop(1, "#fff0");
-      ctx.beginPath();
-      ctx.arc(bh.x, bh.y, bh.r*1.42, 0, Math.PI*2);
-      ctx.globalAlpha = 0.33;
-      ctx.fillStyle = grad;
-      ctx.shadowColor = auraColor;
-      ctx.shadowBlur = 28;
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.arc(bh.x, bh.y, bh.r, 0, Math.PI*2);
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = "#000";
-      ctx.shadowColor = "#222";
-      ctx.shadowBlur = 8;
-      ctx.fill();
-
-      if (bh.growAnim > 0.07) {
-        ctx.beginPath();
-        ctx.arc(bh.x, bh.y, bh.r*1.13 + Math.sin(pulseT*13)*2*bh.growAnim, 0, Math.PI*2);
-        ctx.strokeStyle = "#fff";
-        ctx.globalAlpha = 0.13*bh.growAnim;
-        ctx.lineWidth = 7*bh.growAnim;
-        ctx.shadowBlur = 15*bh.growAnim;
-        ctx.stroke();
-        bh.growAnim *= 0.89;
+    // Baloncukları temizle
+    function clearBubbles() {
+      for (let b of bubbles) {
+        b.el.remove();
       }
-      ctx.restore();
+      bubbles = [];
+      updateCounter();
     }
 
-    function drawBalls(now) {
-      for(let i=0;i<balls.length;i++) {
-        let ball = balls[i];
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.r+5, 0, Math.PI*2);
-        ctx.globalAlpha = 0.18 + 0.11*Math.sin(now/1010+ball.colorSeed*4.2);
-        ctx.shadowColor = ball.color;
-        ctx.shadowBlur = 12 + 7*Math.sin(now/600+ball.colorSeed*1.3);
-        ctx.fillStyle = ball.color;
-        ctx.fill();
-        ctx.restore();
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
-        ctx.globalAlpha = 0.97;
-        ctx.fillStyle = ball.color;
-        ctx.shadowColor = ball.color;
-        ctx.shadowBlur = 6;
-        ctx.fill();
-
-        ctx.globalAlpha = 0.12;
-        ctx.beginPath();
-        ctx.arc(ball.x-ball.r/3, ball.y-ball.r/4, ball.r/3.7, 0, Math.PI*2);
-        ctx.fillStyle = "#fff";
-        ctx.fill();
-        ctx.restore();
-
-        if (ball.exploding > 0.07) {
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(ball.x, ball.y, ball.r+ball.exploding*10, 0, Math.PI*2);
-          ctx.strokeStyle = "#fff";
-          ctx.globalAlpha = 0.09*ball.exploding;
-          ctx.lineWidth = 5*ball.exploding;
-          ctx.shadowColor = ball.color;
-          ctx.shadowBlur = 8*ball.exploding;
-          ctx.stroke();
-          ctx.restore();
-          ball.exploding *= 0.81;
-        }
-      }
+    // Çemberin kenarına çarpma kontrolü
+    function isHittingCircleEdge(bubble) {
+      const cx = ARENA_RADIUS;
+      const cy = ARENA_RADIUS;
+      const bx = bubble.x;
+      const by = bubble.y;
+      const dist = Math.hypot(bx - cx, by - cy);
+      return (dist + BUBBLE_RADIUS) >= ARENA_RADIUS;
     }
 
-    function isInBlackHole(ball, bh) {
-      let dx = ball.x - bh.x, dy = ball.y - bh.y;
-      return Math.hypot(dx, dy) < bh.r - 2;
-    }
-    function reflectBall(ball) {
-      let dx = ball.x - arena.x, dy = ball.y - arena.y;
-      let dist = Math.hypot(dx, dy);
-      if (dist >= arena.r - ball.r - 10) {
-        let nx = dx / dist, ny = dy / dist;
-        let dot = ball.vx * nx + ball.vy * ny;
-        ball.vx -= 2 * dot * nx;
-        ball.vy -= 2 * dot * ny;
-        let speed = Math.hypot(ball.vx, ball.vy);
-        let angle = Math.atan2(ball.vy, ball.vx) + (Math.random()-0.5)*0.13;
-        ball.vx = Math.cos(angle)*speed*0.97;
-        ball.vy = Math.sin(angle)*speed*0.97;
-        let over = dist - (arena.r - ball.r - 10) + 1;
-        ball.x -= nx*over;
-        ball.y -= ny*over;
-      }
+    // Baloncuğun kenardan nasıl sekeceğini hesapla
+    function bounceOffCircle(bubble) {
+      const cx = ARENA_RADIUS;
+      const cy = ARENA_RADIUS;
+      const vx = bubble.x - cx;
+      const vy = bubble.y - cy;
+      const norm = Math.hypot(vx, vy);
+      const nx = vx / norm;
+      const ny = vy / norm;
+      const dot = bubble.dx * nx + bubble.dy * ny;
+      bubble.dx = bubble.dx - 2 * dot * nx;
+      bubble.dy = bubble.dy - 2 * dot * ny;
+      // Küçük bir rasgelelik
+      const angleNoise = (Math.random()-0.5) * 0.6;
+      const speed = Math.hypot(bubble.dx, bubble.dy);
+      const angle = Math.atan2(bubble.dy, bubble.dx) + angleNoise;
+      bubble.dx = Math.cos(angle) * speed;
+      bubble.dy = Math.sin(angle) * speed;
     }
 
-    function spawnBalls(ball, now) {
-      if (!enableSpawn || balls.length >= MAX_BALLS) return;
-      let angle0 = Math.random()*Math.PI*2;
-      for(let k=0;k<3;k++) {
-        let angle = angle0 + k*(2*Math.PI/3) + (Math.random()-0.5)*0.10;
-        let speed = (1.17 + Math.random()*1.12) * arena.r * 0.0033;
-        let r = NEON_CHILD_RATIO * canvas.width * (0.91 + Math.random()*0.21);
-        let colorSeed = Math.random();
-        let color = neonColor(Math.floor(Math.random()*60));
-        let nowSec = performance.now()/1000;
-        let duration = 1 + Math.random(); // 1-2 saniye arasında
-        balls.push({
-          x: ball.x, y: ball.y,
-          vx: Math.cos(angle)*speed,
-          vy: Math.sin(angle)*speed,
-          r: r,
-          color,
-          colorSeed,
-          exploded: false,
-          exploding: 0,
-          explodeAt: nowSec + duration,
-          createdAt: nowSec,
-          growStart: ball.r,
-          isMain: false
-        });
-      }
-    }
-
-    function animate(now) {
-      if(now - lastFrame < 1000/FPS_LIMIT) {
-        animationId = requestAnimationFrame(animate);
-        return;
-      }
-      lastFrame = now;
-      t = now/1000;
-      enableSpawn = balls.length < MAX_BALLS;
-
-      for(let i=balls.length-1;i>=0;i--) {
-        let ball = balls[i];
-        if (!ball.exploded && t > ball.explodeAt) {
-          ball.exploded = true;
-          ball.exploding = 1;
-          if(enableSpawn) spawnBalls(ball, now);
-          balls.splice(i,1);
-          continue;
-        }
-        if (!ball.exploded) {
-          let duration = ball.explodeAt - ball.createdAt;
-          let mainR = NEON_MAIN_RATIO * canvas.width;
-          let childR = NEON_CHILD_RATIO * canvas.width;
-          let maxGrow = (ball.isMain ? mainR*1.45 : childR*1.31);
-          let growth = (maxGrow - ball.r) / (duration * 60);
-          if(ball.r < maxGrow) ball.r += Math.max(growth, 0.05);
-          ball.x += ball.vx;
-          ball.y += ball.vy;
-          ball.vx *= 0.997;
-          ball.vy *= 0.997;
-          reflectBall(ball);
-
-          let eaten = false;
-          for(let b=0; b<BH_COUNT; b++){
-            if(isInBlackHole(ball, blackholes[b])){
-              let delta = ball.r * 0.030 * 1.16;
-              blackholes[b].r += delta;
-              blackholes[b].growAnim = 1.11;
-              for(let j=0;j<BH_COUNT;j++) {
-                if(j!==b) blackholes[j].r = Math.max(MIN_BH_RATIO*canvas.width, blackholes[j].r - delta/(BH_COUNT-1));
-              }
-              balls.splice(i,1);
-              eaten = true;
-              break;
-            }
-          }
-          if(eaten) continue;
-        }
-      }
-      drawArena();
-      for(let i=0;i<BH_COUNT;i++) drawBlackHole(blackholes[i], BH_AURAS[i], t+0.33*i);
-      drawBalls(now);
-
-      if(running) animationId = requestAnimationFrame(animate);
-      else document.getElementById('startBtn').textContent = "Başlat";
-    }
-
-    function resetGameVars() {
-      let size = canvas.width;
-      ANGLES = Array.from({length: BH_COUNT}, (_,i)=>Math.PI/2 + i*2*Math.PI/BH_COUNT);
-      blackholes = [];
-      for(let i=0;i<BH_COUNT;i++) {
-        let angle = ANGLES[i];
-        blackholes.push({
-          x: arena.x + arena.r * 0.72 * Math.cos(angle),
-          y: arena.y - arena.r * 0.72 * Math.sin(angle),
-          r: BLACK_HOLE_INIT_RATIO * size,
-          growAnim: 0,
-        });
-      }
-      balls = [];
-      let angle = Math.random()*Math.PI*2;
-      let speed = (1.2+Math.random()*1.2) * arena.r * 0.0037;
-      let nowSec = performance.now()/1000;
-      let duration = 1 + Math.random(); // ilk top için de 1-2 saniye
-      balls.push({
-        x: arena.x + Math.cos(angle)*arena.r*0.4,
-        y: arena.y + Math.sin(angle)*arena.r*0.4,
-        vx: Math.cos(angle+Math.PI/2)*speed,
-        vy: Math.sin(angle+Math.PI/2)*speed,
-        r: NEON_MAIN_RATIO * size,
-        color: neonColor(Math.floor(Math.random()*60)),
-        colorSeed: Math.random(),
-        isMain: true,
-        exploded: false,
-        exploding: 0,
-        explodeAt: nowSec + duration,
-        createdAt: nowSec,
-        growStart: NEON_MAIN_RATIO * size
-      });
-    }
-
-    document.getElementById('startBtn').onclick = function() {
-      if(running) return;
-      resizeCanvas();
+    // Oyunu başlat
+    startBtn.onclick = () => {
+      startBtn.disabled = true;
+      startBtn.textContent = "Oyun Başladı...";
+      clearBubbles();
       running = true;
-      t = 0;
-      resetGameVars();
-      this.textContent = "Devam Ediyor...";
-      animate(0);
 
-      if (timerId) clearTimeout(timerId);
-      timerId = setTimeout(()=>{
+      // İlk baloncuğu merkezde başlat, rastgele bir yön
+      const angle = Math.random() * Math.PI * 2;
+      // %80 yavaş
+      const speed = 3.4 * 0.2;
+      const dx = Math.cos(angle) * speed;
+      const dy = Math.sin(angle) * speed;
+      const colorIndex = Math.floor(Math.random()*COLORS.length);
+      const startBubble = createBubble(ARENA_RADIUS, ARENA_RADIUS, dx, dy, colorIndex);
+      bubbles.push(startBubble);
+      updateCounter();
+
+      animate();
+
+      gameTimeout = setTimeout(() => {
         running = false;
-        balls = [];
-        document.getElementById('startBtn').textContent = "Başlat";
-      }, 100000);
+        cancelAnimationFrame(animationId);
+        startBtn.disabled = false;
+        startBtn.textContent = "Yeniden Başlat";
+      }, GAME_DURATION);
     };
 
-    window.addEventListener('resize', ()=>{
-      resizeCanvas();
-      if (running) resetGameVars();
-    });
+    // Animasyon döngüsü
+    function animate() {
+      let newBubbles = [];
+
+      for (let b of bubbles) {
+        b.x += b.dx;
+        b.y += b.dy;
+
+        let hit = false;
+        if (isHittingCircleEdge(b)) {
+          bounceOffCircle(b);
+          hit = true;
+        }
+
+        // DOM güncelle
+        b.el.style.left = (b.x - BUBBLE_RADIUS) + 'px';
+        b.el.style.top = (b.y - BUBBLE_RADIUS) + 'px';
+
+        if (hit) {
+          // Çarpınca iki yeni baloncuk üret (her biri farklı rastgele yön ve renk)
+          for (let i = 0; i < 2; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            // %80 yavaş
+            const speed = (2.6 + Math.random() * 2.8) * 0.2;
+            const dx = Math.cos(angle) * speed;
+            const dy = Math.sin(angle) * speed;
+            // Kenara çok yakın olduğundan çemberin içine biraz it
+            const norm = Math.hypot(b.x - ARENA_RADIUS, b.y - ARENA_RADIUS);
+            const pullBackRatio = ((ARENA_RADIUS - BUBBLE_RADIUS - 2) / norm);
+            const newX = ARENA_RADIUS + (b.x - ARENA_RADIUS) * pullBackRatio;
+            const newY = ARENA_RADIUS + (b.y - ARENA_RADIUS) * pullBackRatio;
+            const colorIndex = Math.floor(Math.random()*COLORS.length);
+            const clone = createBubble(newX, newY, dx, dy, colorIndex);
+            newBubbles.push(clone);
+          }
+          // Eskiyi sil (DOM)
+          b.el.remove();
+        } else {
+          newBubbles.push(b);
+        }
+      }
+
+      bubbles = newBubbles;
+      updateCounter();
+
+      if (bubbles.length > MAX_BUBBLES) {
+        running = false;
+        alert(Baloncuk limiti (${MAX_BUBBLES}) aşıldı! Oyun otomatik durdu.);
+        cancelAnimationFrame(animationId);
+        clearTimeout(gameTimeout);
+        startBtn.disabled = false;
+        startBtn.textContent = "Yeniden Başlat";
+        return;
+      }
+
+      if (running) {
+        animationId = requestAnimationFrame(animate);
+      }
+    }
   </script>
 </body>
 </html>
