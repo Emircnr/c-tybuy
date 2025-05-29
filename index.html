@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Responsive Karadelik Arenası</title>
+  <title>Karadelik Arenası - Hızlı Patlayan Toplar</title>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <style>
     html, body {
@@ -25,16 +25,15 @@
       background: transparent;
       border-radius: 50%;
       touch-action: none;
-      /* Box shadow is kept for nice effect */
     }
     #startBtn {
       position: absolute;
       right: 7vw; bottom: 4vh;
       z-index: 10;
-      padding: 4vw 10vw;
+      padding: 1vw 4vw;
       min-width: 110px;
       font-size: clamp(1rem,2.5vw,1.4rem);
-      border-radius: 19px;
+      border-radius: 10px;
       border: none;
       background: linear-gradient(90deg,#7be2ff 0%,#fff7 97%);
       color: #171c29;
@@ -51,8 +50,6 @@
       box-shadow: 0 4px 40px #b8f8fff1;
       transform: scale(1.07);
     }
-
-    /* Mobilde buton yukarı taşınır, canvas altında kalmaz */
     @media (max-width: 700px) {
       #startBtn {
         right: 50%; bottom: 3vh;
@@ -69,30 +66,27 @@
   <canvas id="canvas"></canvas>
   <button id="startBtn">Başlat</button>
   <script>
-    // Responsive canvas ayarı
+    // Responsive canvas
     let arena = { x: 0, y: 0, r: 0 };
     let canvas = document.getElementById('canvas');
     let ctx = canvas.getContext('2d');
 
-    // Dinamik boyutlandırma (hem mobil hem masaüstü)
     function resizeCanvas() {
-      // Ekranın %90'ını kaplasın, her zaman kare kalsın
       let size = Math.min(window.innerWidth, window.innerHeight) * 0.94;
-      size = Math.max(size, 240); // Minimum boyut
+      size = Math.max(size, 240);
       canvas.width = canvas.height = size;
       arena.x = size / 2;
       arena.y = size / 2;
-      arena.r = size * 0.41; // (eski oranlara göre)
+      arena.r = size * 0.41;
     }
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Oyun mantığı (kodun kalanını responsive boyutlara göre güncelledim)
     const BH_COUNT = 5;
     const BH_AURAS = [
       "#48eaff", "#e86dff", "#fff247", "#ffac40", "#48ff93"
     ];
-    const BLACK_HOLE_INIT_RATIO = 48/1080;  // Eski ana boyuta göre oran
+    const BLACK_HOLE_INIT_RATIO = 48/1080;
     const NEON_MAIN_RATIO = 31/1080;
     const NEON_CHILD_RATIO = 14/1080;
     const MIN_BH_RATIO = 22/1080;
@@ -244,6 +238,8 @@
         let r = NEON_CHILD_RATIO * canvas.width * (0.91 + Math.random()*0.21);
         let colorSeed = Math.random();
         let color = neonColor(Math.floor(Math.random()*60));
+        let nowSec = performance.now()/1000;
+        let duration = 1 + Math.random(); // 1-2 saniye arasında
         balls.push({
           x: ball.x, y: ball.y,
           vx: Math.cos(angle)*speed,
@@ -253,8 +249,8 @@
           colorSeed,
           exploded: false,
           exploding: 0,
-          explodeAt: (performance.now()/1000) + 3 + Math.random()*3,
-          createdAt: performance.now()/1000,
+          explodeAt: nowSec + duration,
+          createdAt: nowSec,
           growStart: ball.r,
           isMain: false
         });
@@ -295,7 +291,7 @@
           let eaten = false;
           for(let b=0; b<BH_COUNT; b++){
             if(isInBlackHole(ball, blackholes[b])){
-              let delta = ball.r * 0.030 * 1.16; // orta hızlı büyüme
+              let delta = ball.r * 0.030 * 1.16;
               blackholes[b].r += delta;
               blackholes[b].growAnim = 1.11;
               for(let j=0;j<BH_COUNT;j++) {
@@ -333,6 +329,8 @@
       balls = [];
       let angle = Math.random()*Math.PI*2;
       let speed = (1.2+Math.random()*1.2) * arena.r * 0.0037;
+      let nowSec = performance.now()/1000;
+      let duration = 1 + Math.random(); // ilk top için de 1-2 saniye
       balls.push({
         x: arena.x + Math.cos(angle)*arena.r*0.4,
         y: arena.y + Math.sin(angle)*arena.r*0.4,
@@ -344,15 +342,15 @@
         isMain: true,
         exploded: false,
         exploding: 0,
-        explodeAt: (performance.now()/1000) + 3,
-        createdAt: performance.now()/1000,
+        explodeAt: nowSec + duration,
+        createdAt: nowSec,
         growStart: NEON_MAIN_RATIO * size
       });
     }
 
     document.getElementById('startBtn').onclick = function() {
       if(running) return;
-      resizeCanvas(); // anlık boyut güncelle
+      resizeCanvas();
       running = true;
       t = 0;
       resetGameVars();
@@ -367,7 +365,6 @@
       }, 100000);
     };
 
-    // Oyun ekranı dönüp yeniden boyutlanınca da canlı kalsın
     window.addEventListener('resize', ()=>{
       resizeCanvas();
       if (running) resetGameVars();
