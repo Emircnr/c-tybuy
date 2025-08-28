@@ -1,107 +1,42 @@
 <!DOCTYPE html>
 <html lang="tr" class="theme-dark">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Arbitraj Radarı — Gate.io ⇄ Binance (USDT)</title>
-<style>
-/* ==== Temalar ==== */
-.theme-dark{
-  --bg:#0b1220; --panel:#111a2b; --panel2:#0f1626; --text:#e6edf6;
-  --muted:#9fb0ca; --accent:#60a5fa; --border:#17243e;
-  --headerStart:#0e172a; --headerEnd:#0b1220;
-  --chipBg:#1a243e; --chipBorder:#2a3d64;
-  --greenBg:#0f2a1b; --greenBd:#184a2b; --greenTx:#b6f7c8;
-}
-.theme-light{
-  --bg:#ffffff; --panel:#f3f6fb; --panel2:#ffffff; --text:#0b1220;
-  --muted:#4a5568; --accent:#2563eb; --border:#d7deea;
-  --headerStart:#eaf1ff; --headerEnd:#ffffff;
-  --chipBg:#eef3ff; --chipBorder:#c8d6f5;
-  --greenBg:#e9f8ef; --greenBd:#b9e5c8; --greenTx:#166534;
-}
-
-/* ==== Kişiselleştirilebilir değişkenler ==== */
-:root{
-  --table-font:18px;
-  --cell-pad-y:12px;
-  --cell-pad-x:10px;
-  --row-gap:6px;
-  --cell-radius:12px;
-  --container-max:1100px;
-  --col-coin:28%;
-  --col-al:27%;
-  --col-sat:27%;
-  --col-pct:18%;
-  --card-font:22px;
-}
-
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(180deg,var(--headerStart),var(--headerEnd));border-bottom:1px solid var(--border)}
-header h1{margin:0;font-size:20px}
-header .sub{color:var(--muted);font-size:12px}
-header .rightBox{display:flex;gap:14px;align-items:center}
-
-.btn{background:var(--accent);color:#091220;border:none;border-radius:10px;padding:10px 12px;font-weight:600;cursor:pointer}
-.ghost{background:var(--panel);color:var(--text);border:1px solid var(--border)}
-.mono{font-variant-numeric:tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
-.muted{color:var(--muted)}
-.hint{font-size:12px;margin-top:6px}
-
-/* En Yüksek Fark — sade satır */
-.hiWrap{padding:10px 16px}
-.hidden{display:none}
-.hiLine{
-  font-size:var(--card-font);font-weight:800;letter-spacing:.2px;
-  background:var(--panel2);border:1px solid var(--border);
-  border-left:6px solid #22c55e;border-radius:14px;padding:10px 14px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap
-}
-.hiGreen{background:var(--greenBg);border:1px solid var(--greenBd);color:var(--greenTx);
-  border-radius:999px;padding:4px 10px;font-weight:800}
-
-/* Kontroller */
-.controls{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;padding:12px 16px;background:var(--panel);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.ctrl{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:10px}
-.ctrl label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
-.row{display:flex;gap:8px;align-items:center}
-input[type="text"], input[type="number"], select{
-  width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);
-  border-radius:10px;padding:10px 12px;font-size:14px;outline:none
-}
-input[type="range"]{width:100%}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.chip{display:inline-flex;gap:6px;align-items:center;background:var(--chipBg);border:1px solid var(--chipBorder);border-radius:999px;padding:5px 10px;font-size:12px}
-.chip button{all:unset;cursor:pointer;color:#4f79ff}
-
-/* TABLO */
-.tableWrap{padding:12px 16px;max-width:var(--container-max);margin:0 auto}
-table{width:100%;border-collapse:separate;border-spacing:0 var(--row-gap);table-layout:fixed}
-thead th{font-size:calc(var(--table-font) - 4px);color:var(--muted);text-align:center;padding:0 8px}
-thead th:first-child{text-align:left}
-tbody tr{background:var(--panel2);border:1px solid var(--border)}
-tbody td{padding:var(--cell-pad-y) var(--cell-pad-x);font-size:var(--table-font)}
-tbody tr td:first-child{border-top-left-radius:var(--cell-radius);border-bottom-left-radius:var(--cell-radius)}
-tbody tr td:last-child{border-top-right-radius:var(--cell-radius);border-bottom-right-radius:var(--cell-radius)}
-.coinCell{display:flex;align-items:center;gap:10px}
-.coinSym{font-weight:800}
-.alCell,.satCell,.pctCell{text-align:center;font-weight:800}
-
-/* Kaynak bazlı renkler (CSP uyumlu: class ile) */
-.src-gate{background:green !important}
-.src-binance{background:orange !important}
-
-/* Kişiselleştir paneli */
-.customWrap{padding:10px 16px}
-.customPanel{background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:14px;display:grid;gap:12px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.rowLabel{font-size:12px;color:var(--muted);margin-bottom:4px}
-.kv{display:flex;align-items:center;gap:8px}
-.kv .val{font-size:12px;color:var(--muted);min-width:48px;text-align:right}
-.footerBtns{display:flex;gap:8px;justify-content:flex-end}
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Arbitraj Radarı — Gate.io ⇄ Binance (USDT)</title>
+  <style>
+  .theme-dark{--bg:#0b1220;--panel:#111a2b;--panel2:#0f1626;--text:#e6edf6;--muted:#9fb0ca;--accent:#60a5fa;--border:#17243e;--headerStart:#0e172a;--headerEnd:#0b1220;--chipBg:#1a243e;--chipBorder:#2a3d64;--greenBg:#0f2a1b;--greenBd:#184a2b;--greenTx:#b6f7c8}
+  .theme-light{--bg:#fff;--panel:#f3f6fb;--panel2:#fff;--text:#0b1220;--muted:#4a5568;--accent:#2563eb;--border:#d7deea;--headerStart:#eaf1ff;--headerEnd:#fff;--chipBg:#eef3ff;--chipBorder:#c8d6f5;--greenBg:#e9f8ef;--greenBd:#b9e5c8;--greenTx:#166534}
+  :root{--table-font:18px;--cell-pad-y:12px;--cell-pad-x:10px;--row-gap:6px;--cell-radius:12px;--container-max:1100px;--col-coin:28%;--col-al:27%;--col-sat:27%;--col-pct:18%;--card-font:22px}
+  *{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(180deg,var(--headerStart),var(--headerEnd));border-bottom:1px solid var(--border)}
+  header h1{margin:0;font-size:20px}header .sub{color:var(--muted);font-size:12px}header .rightBox{display:flex;gap:14px;align-items:center}
+  .btn{background:var(--accent);color:#091220;border:none;border-radius:10px;padding:10px 12px;font-weight:600;cursor:pointer}.ghost{background:var(--panel);color:var(--text);border:1px solid var(--border)}
+  .mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace}.muted{color:var(--muted)}.hint{font-size:12px;margin-top:6px}
+  .hiWrap{padding:10px 16px}.hidden{display:none}
+  .hiLine{font-size:var(--card-font);font-weight:800;letter-spacing:.2px;background:var(--panel2);border:1px solid var(--border);border-left:6px solid #22c55e;border-radius:14px;padding:10px 14px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .hiGreen{background:var(--greenBg);border:1px solid var(--greenBd);color:var(--greenTx);border-radius:999px;padding:4px 10px;font-weight:800}
+  .controls{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;padding:12px 16px;background:var(--panel);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .ctrl{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:10px}.ctrl label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+  .row{display:flex;gap:8px;align-items:center}
+  input[type="text"],input[type="number"],select{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 12px;font-size:14px;outline:none}
+  input[type="range"]{width:100%}.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{display:inline-flex;gap:6px;align-items:center;background:var(--chipBg);border:1px solid var(--chipBorder);border-radius:999px;padding:5px 10px;font-size:12px}
+  .chip button{all:unset;cursor:pointer;color:#4f79ff}
+  .tableWrap{padding:12px 16px;max-width:var(--container-max);margin:0 auto}
+  table{width:100%;border-collapse:separate;border-spacing:0 var(--row-gap);table-layout:fixed}
+  thead th{font-size:calc(var(--table-font) - 4px);color:var(--muted);text-align:center;padding:0 8px}thead th:first-child{text-align:left}
+  tbody tr{background:var(--panel2);border:1px solid var(--border)}
+  tbody td{padding:var(--cell-pad-y) var(--cell-pad-x);font-size:var(--table-font)}
+  tbody tr td:first-child{border-top-left-radius:var(--cell-radius);border-bottom-left-radius:var(--cell-radius)}
+  tbody tr td:last-child{border-top-right-radius:var(--cell-radius);border-bottom-right-radius:var(--cell-radius)}
+  .coinCell{display:flex;align-items:center;gap:10px}.coinSym{font-weight:800}.alCell,.satCell,.pctCell{text-align:center;font-weight:800}
+  .src-gate{background:green !important}.src-binance{background:orange !important}
+  .customWrap{padding:10px 16px}.customPanel{background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:14px;display:grid;gap:12px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .rowLabel{font-size:12px;color:var(--muted);margin-bottom:4px}.kv{display:flex;align-items:center;gap:8px}.kv .val{font-size:12px;color:var(--muted);min-width:48px;text-align:right}
+  .footerBtns{display:flex;gap:8px;justify-content:flex-end}
+  </style>
 </head>
 <body>
 <header>
@@ -117,10 +52,8 @@ tbody tr td:last-child{border-top-right-radius:var(--cell-radius);border-bottom-
   </div>
 </header>
 
-<!-- Yerleşim kancaları -->
 <div id="anchorTop"></div>
 
-<!-- EN YÜKSEK FARK — Gate.io aksiyonu -->
 <section id="hiWrap" class="hiWrap">
   <div class="hiLine" role="status" aria-live="polite">
     <span id="hiCoin">—</span>
@@ -169,57 +102,19 @@ tbody tr td:last-child{border-top-right-radius:var(--cell-radius);border-bottom-
   </div>
 </section>
 
-<!-- KİŞİSELLEŞTİR paneli -->
 <section id="customWrap" class="customWrap hidden" aria-label="Kişiselleştirme Paneli">
   <div class="customPanel">
+    <!-- (Kişiselleştirme kontrolleri – aynı) -->
     <div class="grid3">
-      <div>
-        <div class="rowLabel"><label for="ui_tableFont">Tablo Yazı Boyutu</label></div>
-        <div class="kv">
-          <input id="ui_tableFont" type="range" min="14" max="26" step="1">
-          <span class="val" id="ui_tableFont_val"></span>
-        </div>
-      </div>
-      <div>
-        <div class="rowLabel"><label for="ui_padY">Satır İç Boşluk (Y)</label></div>
-        <div class="kv">
-          <input id="ui_padY" type="range" min="6" max="24" step="1">
-          <span class="val" id="ui_padY_val"></span>
-        </div>
-      </div>
-      <div>
-        <div class="rowLabel"><label for="ui_padX">Satır İç Boşluk (X)</label></div>
-        <div class="kv">
-          <input id="ui_padX" type="range" min="6" max="24" step="1">
-          <span class="val" id="ui_padX_val"></span>
-        </div>
-      </div>
+      <div><div class="rowLabel"><label for="ui_tableFont">Tablo Yazı Boyutu</label></div><div class="kv"><input id="ui_tableFont" type="range" min="14" max="26" step="1"><span class="val" id="ui_tableFont_val"></span></div></div>
+      <div><div class="rowLabel"><label for="ui_padY">Satır İç Boşluk (Y)</label></div><div class="kv"><input id="ui_padY" type="range" min="6" max="24" step="1"><span class="val" id="ui_padY_val"></span></div></div>
+      <div><div class="rowLabel"><label for="ui_padX">Satır İç Boşluk (X)</label></div><div class="kv"><input id="ui_padX" type="range" min="6" max="24" step="1"><span class="val" id="ui_padX_val"></span></div></div>
     </div>
-
     <div class="grid3">
-      <div>
-        <div class="rowLabel"><label for="ui_rowGap">Satır Boşluğu (Gap)</label></div>
-        <div class="kv">
-          <input id="ui_rowGap" type="range" min="0" max="20" step="1">
-          <span class="val" id="ui_rowGap_val"></span>
-        </div>
-      </div>
-      <div>
-        <div class="rowLabel"><label for="ui_radius">Köşe Radius</label></div>
-        <div class="kv">
-          <input id="ui_radius" type="range" min="0" max="24" step="1">
-          <span class="val" id="ui_radius_val"></span>
-        </div>
-      </div>
-      <div>
-        <div class="rowLabel"><label for="ui_maxW">Tablo Genişliği (px)</label></div>
-        <div class="kv">
-          <input id="ui_maxW" type="range" min="800" max="1600" step="10">
-          <span class="val" id="ui_maxW_val"></span>
-        </div>
-      </div>
+      <div><div class="rowLabel"><label for="ui_rowGap">Satır Boşluğu (Gap)</label></div><div class="kv"><input id="ui_rowGap" type="range" min="0" max="20" step="1"><span class="val" id="ui_rowGap_val"></span></div></div>
+      <div><div class="rowLabel"><label for="ui_radius">Köşe Radius</label></div><div class="kv"><input id="ui_radius" type="range" min="0" max="24" step="1"><span class="val" id="ui_radius_val"></span></div></div>
+      <div><div class="rowLabel"><label for="ui_maxW">Tablo Genişliği (px)</label></div><div class="kv"><input id="ui_maxW" type="range" min="800" max="1600" step="10"><span class="val" id="ui_maxW_val"></span></div></div>
     </div>
-
     <div>
       <div class="rowLabel">Sütun Genişlikleri (%) — toplam 100</div>
       <div class="grid4">
@@ -230,34 +125,14 @@ tbody tr td:last-child{border-top-right-radius:var(--cell-radius);border-bottom-
       </div>
       <div class="muted" id="ui_colSum"></div>
     </div>
-
     <div class="grid2">
-      <div>
-        <div class="rowLabel"><label for="ui_cardFont">En Yüksek Fark Kartı Yazı Boyutu</label></div>
-        <div class="kv">
-          <input id="ui_cardFont" type="range" min="16" max="36" step="1">
-          <span class="val" id="ui_cardFont_val"></span>
-        </div>
-      </div>
-      <div>
-        <div class="rowLabel"><label for="ui_hiPos">En Yüksek Fark Kartı Konumu</label></div>
-        <select id="ui_hiPos">
-          <option value="top">Üstte (Başlık altında)</option>
-          <option value="afterControls">Kontrollerin altında</option>
-          <option value="afterTable">Tablonun altında</option>
-          <option value="hidden">Gizli</option>
-        </select>
+      <div><div class="rowLabel"><label for="ui_cardFont">En Yüksek Fark Kartı Yazı Boyutu</label></div><div class="kv"><input id="ui_cardFont" type="range" min="16" max="36" step="1"><span class="val" id="ui_cardFont_val"></span></div></div>
+      <div><div class="rowLabel"><label for="ui_hiPos">En Yüksek Fark Kartı Konumu</label></div>
+        <select id="ui_hiPos"><option value="top">Üstte</option><option value="afterControls">Kontrollerin altında</option><option value="afterTable">Tablonun altında</option><option value="hidden">Gizli</option></select>
       </div>
     </div>
-
-    <div class="grid3">
-      <label class="kv"><input id="ui_showBTC" type="checkbox" checked> <span>BTC Fiyatını Göster</span></label>
-      <div></div><div></div>
-    </div>
-
-    <div class="footerBtns">
-      <button id="ui_reset" class="btn ghost" type="button">Varsayılanlara Dön</button>
-    </div>
+    <div class="grid3"><label class="kv"><input id="ui_showBTC" type="checkbox" checked> <span>BTC Fiyatını Göster</span></label><div></div><div></div></div>
+    <div class="footerBtns"><button id="ui_reset" class="btn ghost" type="button">Varsayılanlara Dön</button></div>
   </div>
 </section>
 
@@ -271,14 +146,7 @@ tbody tr td:last-child{border-top-right-radius:var(--cell-radius);border-bottom-
       <col id="colSat"  style="width:var(--col-sat);">
       <col id="colPct"  style="width:var(--col-pct);">
     </colgroup>
-    <thead>
-      <tr>
-        <th style="text-align:left" scope="col">Coin</th>
-        <th scope="col">AL</th>
-        <th scope="col">SAT</th>
-        <th scope="col">% Fark</th>
-      </tr>
-    </thead>
+    <thead><tr><th style="text-align:left" scope="col">Coin</th><th scope="col">AL</th><th scope="col">SAT</th><th scope="col">% Fark</th></tr></thead>
     <tbody id="tbody"></tbody>
   </table>
 </section>
@@ -286,22 +154,17 @@ tbody tr td:last-child{border-top-right-radius:var(--cell-radius);border-bottom-
 <div id="anchorAfterTable"></div>
 
 <script>
+/* ===== Proxy adresini BURAYA yaz ===== */
+const PROXY_BASE = "https://arbi-proxy.yourname.workers.dev"; // ← kendi Worker URL'in
+
 /* ========= Yardımcılar + Kalıcı Hafıza ========= */
 const $ = (s) => document.querySelector(s);
-const LS = {
-  get(key, def){ try{ const v = localStorage.getItem(key); return v==null ? def : JSON.parse(v);}catch{ return def; } },
-  set(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch{} }
-};
-function norm(sym){
-  if(!sym) return '';
-  return sym.trim().toUpperCase()
-    .replace(/İ/g,'I').replace(/İ/g,'I')
-    .replace(/Ç/g,'C').replace(/Ğ/g,'G').replace(/Ö/g,'O').replace(/Ş/g,'S').replace(/Ü/g,'U');
-}
-function fmtFixedTR(n, d=2){ if(n==null || !isFinite(n)) return '—'; return Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d, maximumFractionDigits:d}); }
-function fmtPctTR(n, d=2){ if(n==null || !isFinite(n)) return '—'; return '%'+Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d, maximumFractionDigits:d}); }
-function fmt4(n){ return (n==null||!isFinite(n)) ? '—' : Number(n).toFixed(4); }
-function nowStr(){ return new Date().toLocaleTimeString('tr-TR'); }
+const LS = { get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch{return d}}, set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}} };
+function norm(s){ if(!s) return ""; return s.trim().toUpperCase().replace(/İ/g,"I").replace(/İ/g,"I").replace(/Ç/g,"C").replace(/Ğ/g,"G").replace(/Ö/g,"O").replace(/Ş/g,"S").replace(/Ü/g,"U"); }
+function fmtFixedTR(n,d=2){ return (n==null||!isFinite(n))?"—":Number(n).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function fmtPctTR(n,d=2){ return (n==null||!isFinite(n))?"—":"%"+Number(n).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function fmt4(n){ return (n==null||!isFinite(n))?"—":Number(n).toFixed(4); }
+function nowStr(){ return new Date().toLocaleTimeString("tr-TR"); }
 
 /* ========= Durum ========= */
 let watched = new Set(LS.get('gatebin:watched', []));
@@ -310,348 +173,148 @@ let minPctFilter = Number(LS.get('gatebin:minpct', 0.00));
 let themeMode = LS.get('gatebin:theme', 'dark');
 let hiOn = LS.get('gatebin:hiOn', true);
 
-const UI_DEFAULTS = {
-  tableFont: 18, padY: 12, padX: 10, rowGap: 6, radius: 12, maxW: 1100,
-  col: { coin:28, al:27, sat:27, pct:18 },
-  cardFont: 22, hiPos: 'top', showBTC: true
-};
-let UI = Object.assign({}, UI_DEFAULTS, LS.get('gatebin:UI', UI_DEFAULTS));
-if(!UI.col) UI.col = { coin:28, al:27, sat:27, pct:18 };
+const UI_DEFAULTS = { tableFont:18,padY:12,padX:10,rowGap:6,radius:12,maxW:1100,col:{coin:28,al:27,sat:27,pct:18},cardFont:22,hiPos:'top',showBTC:true };
+let UI = Object.assign({}, UI_DEFAULTS, LS.get('gatebin:UI', UI_DEFAULTS)); if(!UI.col) UI.col={coin:28,al:27,sat:27,pct:18};
 
-let timer = null, updating = false, errors = 0;
+let timer=null, updating=false, errors=0;
 
 /* ========= Elemanlar ========= */
-const elLast = $('#last'), elCnt = $('#cnt'), elErr = $('#err'),
-      elBody = $('#tbody'), elRngLbl = $('#rngLbl'), elRng = $('#rng'), elMin = $('#minPct'),
-      elThemeSel = $('#themeSel'), elBtc = $('#btc'), elBtcBox = $('#btcBox'),
-      elHiWrap = $('#hiWrap'), elHiCoin = $('#hiCoin'), elHiAct = $('#hiAct'),
-      elHiPrice = $('#hiPrice'), elHiPct = $('#hiPct'), elHiToggle = $('#toggleHi'),
-      elCustomWrap = $('#customWrap'), elCustomToggle = $('#toggleCustom');
+const elLast=$('#last'), elCnt=$('#cnt'), elErr=$('#err'), elBody=$('#tbody'), elRngLbl=$('#rngLbl'), elRng=$('#rng'), elMin=$('#minPct'),
+      elThemeSel=$('#themeSel'), elBtc=$('#btc'), elBtcBox=$('#btcBox'),
+      elHiWrap=$('#hiWrap'), elHiCoin=$('#hiCoin'), elHiAct=$('#hiAct'), elHiPrice=$('#hiPrice'), elHiPct=$('#hiPct'),
+      elHiToggle=$('#toggleHi'), elCustomWrap=$('#customWrap'), elCustomToggle=$('#toggleCustom');
 
-/* ========= Ağ (timeout + abort) ========= */
-function gateTicker(sym){ // Gate v4: /spot/tickers?currency_pair=BTC_USDT
-  return `https://api.gateio.ws/api/v4/spot/tickers?currency_pair=${encodeURIComponent(sym)}_USDT`;
-}
-function binanceBook(sym){ // Binance book ticker
-  return `https://api.binance.com/api/v3/ticker/bookTicker?symbol=${encodeURIComponent(sym)}USDT`;
-}
-const BINANCE_BTC_PRICE = 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT';
+/* ========= Ağ (proxy) ========= */
+function gateTicker(sym){ return `${PROXY_BASE}/api/gate/ticker?symbol=${encodeURIComponent(sym)}`; }
+function binanceBook(sym){ return `${PROXY_BASE}/api/binance/book?symbol=${encodeURIComponent(sym)}`; }
+const BINANCE_BTC_PRICE = `${PROXY_BASE}/api/binance/price?symbol=BTCUSDT`;
 
-async function jget(url, timeoutMs=4000){
-  const ctrl = new AbortController();
-  const t = setTimeout(()=>ctrl.abort(), timeoutMs);
+async function jget(url, timeoutMs=4500){
+  const ctrl = new AbortController(); const t=setTimeout(()=>ctrl.abort(), timeoutMs);
   try{
-    const res = await fetch(url, {signal: ctrl.signal, cache:'no-store'});
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    return await res.json();
+    const r = await fetch(url,{signal:ctrl.signal,cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return await r.json();
   } finally { clearTimeout(t); }
 }
 function parseGateTicker(json){
-  // Gate: array döner, [ { lowest_ask:"", highest_bid:"", ... } ]
   if(!Array.isArray(json) || !json[0]) return {bid:NaN, ask:NaN};
-  const d = json[0];
-  return { bid: parseFloat(d.highest_bid), ask: parseFloat(d.lowest_ask) };
+  const d=json[0]; return { bid: parseFloat(d.highest_bid), ask: parseFloat(d.lowest_ask) };
 }
 
-/* ========= Mantık (Gate.io ↔ Binance, USDT) ========= */
+/* ========= Mantık ========= */
 async function tick(){
-  if(updating) return;
-  updating = true;
+  if(updating) return; updating=true;
   try{
-    // BTC canlı (opsiyonel)
     if(UI.showBTC){
-      try{
-        const btc = await jget(BINANCE_BTC_PRICE, 3500);
-        const p = parseFloat(btc.price);
-        if(isFinite(p)) elBtc.textContent = fmtFixedTR(p, 2);
-      }catch(e){}
+      try{ const btc=await jget(BINANCE_BTC_PRICE, 4000); const p=parseFloat(btc.price); if(isFinite(p)) elBtc.textContent=fmtFixedTR(p,2); }catch(e){}
     }
-
-    if(watched.size===0){
-      elBody.innerHTML = '';
-      updateHighlight([]);
-      elLast.textContent = nowStr();
-      return;
-    }
+    if(watched.size===0){ elBody.innerHTML=''; updateHighlight([]); elLast.textContent=nowStr(); return; }
 
     const syms = Array.from(watched);
-    const jobs = syms.map(async (sym)=>{
+    const jobs = syms.map(async(sym)=>{
       try{
         const s = norm(sym);
-        const gJson = await jget(gateTicker(s), 3500);
+        const gJson = await jget(gateTicker(s), 4000);
         const gBest = parseGateTicker(gJson);
+        const bJson = await jget(binanceBook(s), 4000);
+        const bBid = parseFloat(bJson.bidPrice), bAsk = parseFloat(bJson.askPrice);
 
-        const bJson = await jget(binanceBook(s), 3500);
-        const bBid = parseFloat(bJson.bidPrice);
-        const bAsk = parseFloat(bJson.askPrice);
+        const diff1 = gBest.bid - bAsk;   // Binance'den al, Gate'te sat
+        const diff2 = bBid - gBest.ask;   // Gate'ten al, Binance'de sat
 
-        // diff1 = Gate_bid - Binance_ask  (Binance'den al, Gate'te sat)
-        // diff2 = Binance_bid - Gate_ask  (Gate'ten al, Binance'de sat)
-        const diff1 = gBest.bid - bAsk;
-        const diff2 = bBid - gBest.ask;
-
-        let show=false, low=0, high=0, pct=0, lowSrc='', highSrc='';
-        let gateAction=null, gatePrice=null;
-
-        if((diff1>0 || diff2>0) && isFinite(gBest.bid) && isFinite(gBest.ask) && isFinite(bBid) && isFinite(bAsk)){
-          show = true;
-          if(diff1 > diff2){
-            pct = (diff1 / bAsk) * 100;
-            low = bAsk; high = gBest.bid; lowSrc='Binance'; highSrc='Gate';
-            gateAction = 'SAT'; gatePrice = gBest.bid;
-          }else{
-            pct = (diff2 / gBest.ask) * 100;
-            low = gBest.ask; high = bBid; lowSrc='Gate'; highSrc='Binance';
-            gateAction = 'AL'; gatePrice = gBest.ask;
-          }
+        let show=false, low=0, high=0, pct=0, lowSrc='', highSrc='', gateAction=null, gatePrice=null;
+        if((diff1>0 || diff2>0) && isFinite(gBest.bid)&&isFinite(gBest.ask)&&isFinite(bBid)&&isFinite(bAsk)){
+          show=true;
+          if(diff1>diff2){ pct=(diff1/bAsk)*100; low=bAsk; high=gBest.bid; lowSrc='Binance'; highSrc='Gate'; gateAction='SAT'; gatePrice=gBest.bid; }
+          else{ pct=(diff2/gBest.ask)*100; low=gBest.ask; high=bBid; lowSrc='Gate'; highSrc='Binance'; gateAction='AL'; gatePrice=gBest.ask; }
         }
-        return {sym: s, show, low, high, pct, lowSrc, highSrc, gateAction, gatePrice};
-      }catch(e){
-        errors++; elErr.textContent = String(errors);
-        return null;
-      }
+        return {sym:s, show, low, high, pct, lowSrc, highSrc, gateAction, gatePrice};
+      }catch(e){ errors++; elErr.textContent=String(errors); return null; }
     });
 
     let rows = await Promise.all(jobs);
-    rows = rows.filter(r => r && r.show && isFinite(r.pct) && r.pct >= (Number(minPctFilter)||0));
+    rows = rows.filter(r=>r && r.show && isFinite(r.pct) && r.pct >= (Number(minPctFilter)||0));
     rows.sort((a,b)=> b.pct - a.pct);
-    draw(rows);
-    updateHighlight(rows);
-    elLast.textContent = nowStr();
-  } finally{
-    updating = false;
-  }
+    draw(rows); updateHighlight(rows); elLast.textContent=nowStr();
+  } finally { updating=false; }
 }
 
-/* ========= Çizim ========= */
+/* ========= Çizim & En yüksek fark ========= */
 function draw(rows){
-  const frag = document.createDocumentFragment();
+  const frag=document.createDocumentFragment();
   rows.forEach(r=>{
-    const tr = document.createElement('tr');
+    const tr=document.createElement('tr');
 
-    // Coin
-    const tdCoin = document.createElement('td');
-    tdCoin.className = 'coinCell';
-    const sym = document.createElement('span'); sym.className='coinSym'; sym.textContent = r.sym;
-    tdCoin.appendChild(sym);
-    tr.appendChild(tdCoin);
+    const tdCoin=document.createElement('td'); tdCoin.className='coinCell';
+    const sym=document.createElement('span'); sym.className='coinSym'; sym.textContent=r.sym; tdCoin.appendChild(sym); tr.appendChild(tdCoin);
 
-    // AL
-    const tdL = document.createElement('td'); tdL.className='mono alCell ' + (r.lowSrc==='Binance' ? 'src-binance' : 'src-gate');
-    tdL.textContent = fmt4(r.low);
-    tr.appendChild(tdL);
+    const tdL=document.createElement('td'); tdL.className='mono alCell '+(r.lowSrc==='Binance'?'src-binance':'src-gate'); tdL.textContent=fmt4(r.low); tr.appendChild(tdL);
+    const tdH=document.createElement('td'); tdH.className='mono satCell '+(r.highSrc==='Gate'?'src-gate':'src-binance'); tdH.textContent=fmt4(r.high); tr.appendChild(tdH);
 
-    // SAT
-    const tdH = document.createElement('td'); tdH.className='mono satCell ' + (r.highSrc==='Gate' ? 'src-gate' : 'src-binance');
-    tdH.textContent = fmt4(r.high);
-    tr.appendChild(tdH);
-
-    // % Fark
-    const tdP = document.createElement('td'); tdP.className='mono pctCell';
-    tdP.textContent = fmtPctTR(r.pct, 2);
-    tr.appendChild(tdP);
-
+    const tdP=document.createElement('td'); tdP.className='mono pctCell'; tdP.textContent=fmtPctTR(r.pct,2); tr.appendChild(tdP);
     frag.appendChild(tr);
   });
-  elBody.innerHTML = '';
-  elBody.appendChild(frag);
+  elBody.innerHTML=''; elBody.appendChild(frag);
 }
-
-/* ========= En Yüksek Fark (yalnız Gate bilgisi) ========= */
 function updateHighlight(rows){
   if(!hiOn || UI.hiPos==='hidden'){ elHiWrap.classList.add('hidden'); return; }
-  elHiWrap.classList.remove('hidden');
-  placeHi(UI.hiPos);
-
-  if(!rows.length){
-    elHiCoin.textContent='—'; elHiAct.textContent='GATE • —'; elHiPrice.textContent='—'; elHiPct.textContent='—';
-    return;
-  }
-  const r = rows[0];
-  elHiCoin.textContent = r.sym;
-  elHiAct.textContent = `GATE • ${r.gateAction==='AL'?'AL':'SAT'}`;
-  elHiPrice.textContent = `${fmtFixedTR(r.gatePrice, 4)} USDT`;
-  elHiPct.textContent = fmtPctTR(r.pct, 2);
+  elHiWrap.classList.remove('hidden'); placeHi(UI.hiPos);
+  if(!rows.length){ elHiCoin.textContent='—'; elHiAct.textContent='GATE • —'; elHiPrice.textContent='—'; elHiPct.textContent='—'; return; }
+  const r=rows[0]; elHiCoin.textContent=r.sym; elHiAct.textContent=`GATE • ${r.gateAction==='AL'?'AL':'SAT'}`; elHiPrice.textContent=`${fmtFixedTR(r.gatePrice,4)} USDT`; elHiPct.textContent=fmtPctTR(r.pct,2);
 }
 
-/* ========= Tema ========= */
-function applyTheme(mode){
-  const html = document.documentElement;
-  html.classList.remove('theme-dark','theme-light');
-  html.classList.add(mode==='light' ? 'theme-light' : 'theme-dark');
-  elThemeSel.value = (mode==='light' ? 'light' : 'dark');
-  LS.set('gatebin:theme', (mode==='light' ? 'light' : 'dark'));
-}
-
-/* ========= Kişiselleştirme ========= */
+/* ========= Tema & Kişiselleştirme ========= */
+function applyTheme(mode){ const html=document.documentElement; html.classList.remove('theme-dark','theme-light'); html.classList.add(mode==='light'?'theme-light':'theme-dark'); elThemeSel.value=(mode==='light'?'light':'dark'); LS.set('gatebin:theme', (mode==='light'?'light':'dark')); }
 function applyUI(u){
-  const root = document.documentElement.style;
-  root.setProperty('--table-font', u.tableFont+'px');
-  root.setProperty('--cell-pad-y', u.padY+'px');
-  root.setProperty('--cell-pad-x', u.padX+'px');
-  root.setProperty('--row-gap', u.rowGap+'px');
-  root.setProperty('--cell-radius', u.radius+'px');
-  root.setProperty('--container-max', u.maxW+'px');
-  root.setProperty('--col-coin', (u.col.coin||28)+'%');
-  root.setProperty('--col-al',   (u.col.al||27)+'%');
-  root.setProperty('--col-sat',  (u.col.sat||27)+'%');
-  root.setProperty('--col-pct',  (u.col.pct||18)+'%');
-  root.setProperty('--card-font', u.cardFont+'px');
-
-  $('#btcBox').style.display = u.showBTC ? '' : 'none';
-  placeHi(u.hiPos);
-
-  // Panel metinleri
-  $('#ui_tableFont_val').textContent = u.tableFont+'px';
-  $('#ui_padY_val').textContent = u.padY+'px';
-  $('#ui_padX_val').textContent = u.padX+'px';
-  $('#ui_rowGap_val').textContent = u.rowGap+'px';
-  $('#ui_radius_val').textContent = u.radius+'px';
-  $('#ui_maxW_val').textContent = u.maxW+'px';
-  $('#ui_cardFont_val').textContent = u.cardFont+'px';
-
-  // Inputs
-  $('#ui_tableFont').value = u.tableFont;
-  $('#ui_padY').value = u.padY;
-  $('#ui_padX').value = u.padX;
-  $('#ui_rowGap').value = u.rowGap;
-  $('#ui_radius').value = u.radius;
-  $('#ui_maxW').value = u.maxW;
-  $('#ui_cardFont').value = u.cardFont;
-  $('#ui_colCoin').value = u.col.coin;
-  $('#ui_colAl').value = u.col.al;
-  $('#ui_colSat').value = u.col.sat;
-  $('#ui_colPct').value = u.col.pct;
-  $('#ui_hiPos').value = u.hiPos;
-  $('#ui_showBTC').checked = !!u.showBTC;
-
-  const sum = (+u.col.coin)+(+u.col.al)+(+u.col.sat)+(+u.col.pct);
-  const ok = Math.round(sum)===100;
-  $('#ui_colSum').textContent = 'Toplam: '+sum.toFixed(0)+'% ' + (ok?'✓':'(100 olmalı — otomatik normalize edilir)');
+  const root=document.documentElement.style;
+  root.setProperty('--table-font',u.tableFont+'px'); root.setProperty('--cell-pad-y',u.padY+'px'); root.setProperty('--cell-pad-x',u.padX+'px');
+  root.setProperty('--row-gap',u.rowGap+'px'); root.setProperty('--cell-radius',u.radius+'px'); root.setProperty('--container-max',u.maxW+'px');
+  root.setProperty('--col-coin',(u.col.coin||28)+'%'); root.setProperty('--col-al',(u.col.al||27)+'%'); root.setProperty('--col-sat',(u.col.sat||27)+'%'); root.setProperty('--col-pct',(u.col.pct||18)+'%');
+  root.setProperty('--card-font',u.cardFont+'px');
+  $('#btcBox').style.display=u.showBTC?'':'none'; placeHi(u.hiPos);
+  $('#ui_tableFont_val').textContent=u.tableFont+'px'; $('#ui_padY_val').textContent=u.padY+'px'; $('#ui_padX_val').textContent=u.padX+'px'; $('#ui_rowGap_val').textContent=u.rowGap+'px'; $('#ui_radius_val').textContent=u.radius+'px'; $('#ui_maxW_val').textContent=u.maxW+'px'; $('#ui_cardFont_val').textContent=u.cardFont+'px';
+  $('#ui_tableFont').value=u.tableFont; $('#ui_padY').value=u.padY; $('#ui_padX').value=u.padX; $('#ui_rowGap').value=u.rowGap; $('#ui_radius').value=u.radius; $('#ui_maxW').value=u.maxW; $('#ui_cardFont').value=u.cardFont;
+  $('#ui_colCoin').value=u.col.coin; $('#ui_colAl').value=u.col.al; $('#ui_colSat').value=u.col.sat; $('#ui_colPct').value=u.col.pct; $('#ui_hiPos').value=u.hiPos; $('#ui_showBTC').checked=!!u.showBTC;
+  const sum=(+u.col.coin)+(+u.col.al)+(+u.col.sat)+(+u.col.pct); $('#ui_colSum').textContent='Toplam: '+sum.toFixed(0)+'% '+(Math.round(sum)===100?'✓':'(100 olmalı — otomatik normalize edilir)');
 }
 function saveUI(){ LS.set('gatebin:UI', UI); }
-function normalizeCols(){
-  let {coin,al,sat,pct} = UI.col;
-  let sum = coin+al+sat+pct;
-  if(sum<=0) { UI.col={coin:28,al:27,sat:27,pct:18}; return; }
-  UI.col.coin = +(coin*100/sum).toFixed(0);
-  UI.col.al   = +(al*100/sum).toFixed(0);
-  UI.col.sat  = +(sat*100/sum).toFixed(0);
-  UI.col.pct  = 100 - UI.col.coin - UI.col.al - UI.col.sat;
-}
-function placeHi(pos){
-  const wrap = elHiWrap;
-  if(pos==='hidden'){ wrap.classList.add('hidden'); return; }
-  wrap.classList.remove('hidden');
-  if(pos==='top')                $('#anchorTop').after(wrap);
-  else if(pos==='afterControls') $('#anchorAfterControls').after(wrap);
-  else if(pos==='afterTable')    $('#anchorAfterTable').after(wrap);
-}
+function normalizeCols(){ let {coin,al,sat,pct}=UI.col; let sum=coin+al+sat+pct; if(sum<=0){UI.col={coin:28,al:27,sat:27,pct:18}; return;} UI.col.coin=+(coin*100/sum).toFixed(0); UI.col.al=+(al*100/sum).toFixed(0); UI.col.sat=+(sat*100/sum).toFixed(0); UI.col.pct=100-UI.col.coin-UI.col.al-UI.col.sat; }
+function placeHi(pos){ const w=elHiWrap; if(pos==='hidden'){w.classList.add('hidden');return;} w.classList.remove('hidden'); if(pos==='top') $('#anchorTop').after(w); else if(pos==='afterControls') $('#anchorAfterControls').after(w); else if(pos==='afterTable') $('#anchorAfterTable').after(w); }
 
-/* ========= UI / Kontroller ========= */
-function renderChips(){
-  const wrap = $('#chips'); wrap.innerHTML='';
-  Array.from(watched).sort().forEach(sym=>{
-    const d = document.createElement('div'); d.className='chip';
-    const s = document.createElement('span'); s.textContent = sym;
-    const b = document.createElement('button'); b.type='button'; b.setAttribute('aria-label', sym+' sil'); b.textContent='×';
-    b.addEventListener('click', ()=>{
-      watched.delete(sym);
-      LS.set('gatebin:watched', Array.from(watched));
-      $('#cnt').textContent = String(watched.size);
-      renderChips();
-    });
-    d.appendChild(s); d.appendChild(b); wrap.appendChild(d);
-  });
-  $('#cnt').textContent = String(watched.size);
-}
-function schedule(ms){
-  refreshMs = Math.max(100, Math.min(4000, ms|0));
-  elRng.value = refreshMs;
-  elRngLbl.textContent = (refreshMs/1000).toFixed(1)+' sn';
-  LS.set('gatebin:interval', refreshMs);
-  if(timer) clearInterval(timer);
-  timer = setInterval(tick, refreshMs);
-}
+/* ========= UI / Eventler ========= */
+function renderChips(){ const wrap=$('#chips'); wrap.innerHTML=''; Array.from(watched).sort().forEach(sym=>{ const d=document.createElement('div'); d.className='chip'; const s=document.createElement('span'); s.textContent=sym; const b=document.createElement('button'); b.type='button'; b.setAttribute('aria-label', sym+' sil'); b.textContent='×'; b.addEventListener('click', ()=>{ watched.delete(sym); LS.set('gatebin:watched', Array.from(watched)); $('#cnt').textContent=String(watched.size); renderChips();}); d.appendChild(s); d.appendChild(b); wrap.appendChild(d); }); $('#cnt').textContent=String(watched.size); }
+function schedule(ms){ refreshMs=Math.max(100, Math.min(4000, ms|0)); elRng.value=refreshMs; elRngLbl.textContent=(refreshMs/1000).toFixed(1)+' sn'; LS.set('gatebin:interval', refreshMs); if(timer) clearInterval(timer); timer=setInterval(tick, refreshMs); }
 
-/* ========= Eventler ========= */
-$('#add').addEventListener('click', ()=>{
-  const raw = $('#coinIn').value;
-  const sym = norm(raw);
-  if(sym){
-    watched.add(sym);
-    LS.set('gatebin:watched', Array.from(watched));
-    renderChips();
-  }
-  $('#coinIn').value='';
-});
-$('#coinIn').addEventListener('keydown',(e)=>{ if(e.key==='Enter') $('#add').click(); });
-
-$('#clear').addEventListener('click', ()=>{
-  watched.clear();
-  LS.set('gatebin:watched', []);
-  renderChips(); elBody.innerHTML='';
-});
+$('#add').addEventListener('click', ()=>{ const raw=$('#coinIn').value; const sym=norm(raw); if(sym){ watched.add(sym); LS.set('gatebin:watched', Array.from(watched)); renderChips(); } $('#coinIn').value=''; });
+$('#coinIn').addEventListener('keydown', (e)=>{ if(e.key==='Enter') $('#add').click(); });
+$('#clear').addEventListener('click', ()=>{ watched.clear(); LS.set('gatebin:watched', []); renderChips(); elBody.innerHTML=''; });
 
 elRng.addEventListener('input', e=> schedule(Number(e.target.value)));
-elMin.addEventListener('input', e=>{
-  minPctFilter = Number(e.target.value)||0;
-  LS.set('gatebin:minpct', minPctFilter);
-});
+elMin.addEventListener('input', e=>{ minPctFilter=Number(e.target.value)||0; LS.set('gatebin:minpct', minPctFilter); });
 $('#themeSel').addEventListener('change', (e)=> applyTheme(e.target.value));
+elHiToggle.addEventListener('click', ()=>{ hiOn=!hiOn; LS.set('gatebin:hiOn', hiOn); elHiToggle.textContent='En Yüksek Fark: '+(hiOn?'Açık':'Kapalı'); elHiToggle.setAttribute('aria-pressed', hiOn?'true':'false'); updateHighlight([]); });
+elCustomToggle.addEventListener('click', ()=>{ const nowOpen = elCustomWrap.classList.toggle('hidden') ? false : true; elCustomToggle.textContent='Kişiselleştir: '+(nowOpen?'Açık':'Kapalı'); elCustomToggle.setAttribute('aria-expanded', nowOpen?'true':'false'); });
 
-elHiToggle.addEventListener('click', ()=>{
-  hiOn = !hiOn;
-  LS.set('gatebin:hiOn', hiOn);
-  elHiToggle.textContent = 'En Yüksek Fark: ' + (hiOn ? 'Açık' : 'Kapalı');
-  elHiToggle.setAttribute('aria-pressed', hiOn ? 'true':'false');
-  updateHighlight([]);
+['ui_tableFont','ui_padY','ui_padX','ui_rowGap','ui_radius','ui_maxW','ui_cardFont'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', (e)=>{ const map={ui_tableFont:'tableFont', ui_padY:'padY', ui_padX:'padX', ui_rowGap:'rowGap', ui_radius:'radius', ui_maxW:'maxW', ui_cardFont:'cardFont'}; UI[map[id]] = +e.target.value; applyUI(UI); saveUI(); });
 });
-elCustomToggle.addEventListener('click', ()=>{
-  const nowOpen = elCustomWrap.classList.toggle('hidden') ? false : true;
-  elCustomToggle.textContent = 'Kişiselleştir: ' + (nowOpen ? 'Açık' : 'Kapalı');
-  elCustomToggle.setAttribute('aria-expanded', nowOpen ? 'true':'false');
-});
-
-// Kişiselleştirme inputları
-$('#ui_tableFont').addEventListener('input', (e)=>{ UI.tableFont=+e.target.value; applyUI(UI); saveUI(); });
-$('#ui_padY').addEventListener('input', (e)=>{ UI.padY=+e.target.value; applyUI(UI); saveUI(); });
-$('#ui_padX').addEventListener('input', (e)=>{ UI.padX=+e.target.value; applyUI(UI); saveUI(); });
-$('#ui_rowGap').addEventListener('input', (e)=>{ UI.rowGap=+e.target.value; applyUI(UI); saveUI(); });
-$('#ui_radius').addEventListener('input', (e)=>{ UI.radius=+e.target.value; applyUI(UI); saveUI(); });
-$('#ui_maxW').addEventListener('input', (e)=>{ UI.maxW=+e.target.value; applyUI(UI); saveUI(); });
-$('#ui_cardFont').addEventListener('input', (e)=>{ UI.cardFont=+e.target.value; applyUI(UI); saveUI(); });
-$('#ui_hiPos').addEventListener('change', (e)=>{ UI.hiPos=e.target.value; applyUI(UI); saveUI(); });
-$('#ui_showBTC').addEventListener('change', (e)=>{ UI.showBTC=e.target.checked; applyUI(UI); saveUI(); });
 ['ui_colCoin','ui_colAl','ui_colSat','ui_colPct'].forEach(id=>{
-  $('#'+id).addEventListener('input',(e)=>{
-    const v = Math.max(10, Math.min(60, +e.target.value||0));
-    if(id==='ui_colCoin') UI.col.coin=v;
-    if(id==='ui_colAl')   UI.col.al=v;
-    if(id==='ui_colSat')  UI.col.sat=v;
-    if(id==='ui_colPct')  UI.col.pct=v;
-    normalizeCols();
-    applyUI(UI); saveUI();
-  });
+  document.getElementById(id).addEventListener('input',(e)=>{ const v=Math.max(10, Math.min(60, +e.target.value||0)); if(id==='ui_colCoin') UI.col.coin=v; if(id==='ui_colAl') UI.col.al=v; if(id==='ui_colSat') UI.col.sat=v; if(id==='ui_colPct') UI.col.pct=v; normalizeCols(); applyUI(UI); saveUI(); });
 });
-$('#ui_reset').addEventListener('click', ()=>{
-  UI = JSON.parse(JSON.stringify(UI_DEFAULTS));
-  applyUI(UI); saveUI();
-});
+$('#ui_hiPos').addEventListener('change', e=>{ UI.hiPos=e.target.value; applyUI(UI); saveUI(); });
+$('#ui_showBTC').addEventListener('change', e=>{ UI.showBTC=e.target.checked; applyUI(UI); saveUI(); });
+$('#ui_reset').addEventListener('click', ()=>{ UI = JSON.parse(JSON.stringify(UI_DEFAULTS)); applyUI(UI); saveUI(); });
 
 /* ========= Başlat ========= */
 (function init(){
-  applyTheme(themeMode);
-  renderChips();
-  applyUI(UI);
+  applyTheme(themeMode); renderChips(); applyUI(UI);
   elMin.value = isFinite(minPctFilter)? minPctFilter : 0.00;
   elHiToggle.textContent = 'En Yüksek Fark: ' + (hiOn ? 'Açık' : 'Kapalı');
   schedule(isFinite(refreshMs) ? refreshMs : 1000);
   elLast.textContent = nowStr();
-  // İlk veri çekimi
   tick();
-  // İzlenen coin yoksa saat çalışsın
-  setInterval(()=>{ if(watched.size===0) elLast.textContent = nowStr(); }, 1000);
+  setInterval(()=>{ if(watched.size===0) elLast.textContent=nowStr(); }, 1000);
 })();
 </script>
 </body>
