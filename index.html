@@ -1,356 +1,652 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="theme-dark">
 <head>
-  <meta charset="UTF-8">
-  <title>Dijital Neon Baloncuk Canlı Görsel</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <style>
-    html,body {
-      height: 100%;
-      margin: 0; padding: 0;
-      background: #141726;
-      overflow: hidden;
-      font-family: 'Segoe UI', Arial, sans-serif;
-    }
-    body {
-      width: 100vw; height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      position: relative;
-      min-height: 100vh;
-      min-width: 100vw;
-      overflow: hidden;
-    }
-    #neon-bg {
-      position: fixed;
-      width: 100vw;
-      height: 100vh;
-      left: 0; top: 0;
-      z-index: 0;
-      pointer-events: none;
-      filter: blur(18px) brightness(1.07) saturate(1.4);
-      background: radial-gradient(ellipse at 40% 30%, #3ae6ff60 0%, #315ee770 52%, #0d0f23 100%);
-      animation: bgmove 18s linear infinite alternate;
-    }
-    @keyframes bgmove {
-      0% { background-position: 60% 0%;}
-      50% { background-position: 40% 60%;}
-      100% { background-position: 90% 100%;}
-    }
-    #arena-wrap {
-      width: min(94vw, 650px);
-      height: min(94vw, 650px);
-      max-width: 96vw; max-height: 96vw;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 44px;
-      position: relative;
-      z-index: 2;
-      pointer-events: none;
-    }
-    #arena {
-      width: 100%; height: 100%;
-      aspect-ratio: 1/1;
-      border-radius: 50%;
-      border: 7px solid #4ef2fe70;
-      box-shadow: 0 0 60px #46d8ff1f, 0 0 100px #00ffe555 inset;
-      position: relative;
-      background: radial-gradient(ellipse at 58% 41%, #273855c7 0%, #202c3a 94%, #131726 100%);
-      overflow: hidden;
-      z-index: 2;
-    }
-    #counter {
-      font-size: 1.25em;
-      letter-spacing: 1px;
-      color: #d0f6ff;
-      margin-top: 8px;
-      margin-bottom: -30px;
-      text-shadow: 0 1px 12px #00f5ff60, 0 0 1px #fff, 0 0 2px #0ff9;
-      z-index: 9;
-      user-select: none;
-      position: relative;
-      transition: color .15s;
-    }
-    #title {
-      color: #eafffa;
-      font-size: 2.1em;
-      margin-top: 22px;
-      letter-spacing: 1.6px;
-      text-shadow: 0 2px 28px #37e8ff43, 0 1px 0px #fff9;
-      font-weight: 500;
-      z-index: 10;
-      user-select: none;
-    }
-    #desc {
-      color: #b0e2e7;
-      margin-bottom: 10px;
-      margin-top: 10px;
-      letter-spacing: .7px;
-      font-size: 1.07em;
-      z-index: 10;
-      user-select: none;
-      text-shadow: 0 1px 16px #fff3;
-    }
-    .bubble {
-      position: absolute;
-      border-radius: 50%;
-      pointer-events: none;
-      opacity: 0.87;
-      filter: brightness(1.08) saturate(1.2);
-      will-change: transform, box-shadow, opacity;
-      transition: box-shadow .09s;
-      z-index: 4;
-    }
-    .bubble.glow {
-      box-shadow: 0 0 16px 4px #fff6, 0 0 40px 16px #fff2;
-      animation: glowflicker .9s infinite alternate;
-    }
-    @keyframes glowflicker {
-      0% { box-shadow: 0 0 12px 3px #fff7, 0 0 36px 14px #fff2; }
-      100% { box-shadow: 0 0 20px 8px #fff8, 0 0 50px 24px #fff2; }
-    }
-    .bubble-pop {
-      animation: popfade .32s linear forwards;
-    }
-    @keyframes popfade {
-      0% { opacity: 1; transform: scale(1);}
-      100% { opacity: 0; transform: scale(2.2);}
-    }
-    .pop-effect {
-      position: absolute;
-      pointer-events: none;
-      border-radius: 50%;
-      opacity: 0.65;
-      filter: blur(1.3px) brightness(2.2);
-      z-index: 99;
-      animation: popblast .35s cubic-bezier(.45,.1,.68,1.1) forwards;
-    }
-    @keyframes popblast {
-      0% { opacity: 0.8; transform: scale(1);}
-      60% { opacity: 0.33; transform: scale(2);}
-      100% { opacity: 0; transform: scale(2.8);}
-    }
-    /* Mobil uyum */
-    @media (max-width: 700px) {
-      #arena-wrap { margin-top: 15vw;}
-      #title { font-size: 1.25em;}
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Arbitraj Radarı — OKX ⇄ Binance (USDT)</title>
+<style>
+  /* ===== Temalar ===== */
+  .theme-dark{
+    --bg:#0b1220; --panel:#111a2b; --panel2:#0f1626; --text:#e6edf6;
+    --muted:#9fb0ca; --accent:#60a5fa; --border:#17243e;
+    --headerStart:#0e172a; --headerEnd:#0b1220;
+    --chipBg:#1a243e; --chipBorder:#2a3d64;
+    --greenBg:#0f2a1b; --greenBd:#184a2b; --greenTx:#b6f7c8;
+  }
+  .theme-light{
+    --bg:#ffffff; --panel:#f3f6fb; --panel2:#ffffff; --text:#0b1220;
+    --muted:#4a5568; --accent:#2563eb; --border:#d7deea;
+    --headerStart:#eaf1ff; --headerEnd:#ffffff;
+    --chipBg:#eef3ff; --chipBorder:#c8d6f5;
+    --greenBg:#e9f8ef; --greenBd:#b9e5c8; --greenTx:#166534;
+  }
+
+  /* ===== KİŞİSELLEŞTİRME ile AYARLANAN DEĞİŞKENLER ===== */
+  :root{
+    --table-font:18px;
+    --cell-pad-y:12px;
+    --cell-pad-x:10px;
+    --row-gap:6px;
+    --cell-radius:12px;
+    --container-max:1100px;
+    --col-coin:28%;
+    --col-al:27%;
+    --col-sat:27%;
+    --col-pct:18%;
+    --card-font:22px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(180deg,var(--headerStart),var(--headerEnd));border-bottom:1px solid var(--border)}
+  header h1{margin:0;font-size:20px}
+  header .sub{color:var(--muted);font-size:12px}
+  header .rightBox{display:flex;gap:14px;align-items:center}
+  .btn{background:var(--accent);color:#091220;border:none;border-radius:10px;padding:10px 12px;font-weight:600;cursor:pointer}
+  .ghost{background:var(--panel);color:var(--text);border:1px solid var(--border)}
+
+  /* En Yüksek Fark — sade tek satır */
+  .hiWrap{padding:10px 16px}
+  .hidden{display:none}
+  .hiLine{
+    font-size:var(--card-font);font-weight:800;letter-spacing:.2px;
+    background:var(--panel2);border:1px solid var(--border);
+    border-left:6px solid #22c55e;border-radius:14px;padding:10px 14px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap
+  }
+  .hiGreen{background:var(--greenBg);border:1px solid var(--greenBd);color:var(--greenTx);
+    border-radius:999px;padding:4px 10px;font-weight:800}
+
+  /* Üst kontrol şeritleri */
+  .controls{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;padding:12px 16px;background:var(--panel);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .ctrl{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:10px}
+  .ctrl label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+  .row{display:flex;gap:8px;align-items:center}
+  input[type="text"], input[type="number"], select{
+    width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);
+    border-radius:10px;padding:10px 12px;font-size:14px;outline:none
+  }
+  input[type="range"]{width:100%}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{display:inline-flex;gap:6px;align-items:center;background:var(--chipBg);border:1px solid var(--chipBorder);border-radius:999px;padding:5px 10px;font-size:12px}
+  .chip button{all:unset;cursor:pointer;color:#4f79ff}
+
+  /* TABLO — kişiselleştirilebilir büyüklük/mesafe/genişlik */
+  .tableWrap{padding:12px 16px;max-width:var(--container-max);margin:0 auto}
+  table{width:100%;border-collapse:separate;border-spacing:0 var(--row-gap);table-layout:fixed}
+  thead th{font-size:calc(var(--table-font) - 4px);color:var(--muted);text-align:center;padding:0 8px}
+  thead th:first-child{text-align:left}
+  tbody tr{background:var(--panel2);border:1px solid var(--border)}
+  tbody td{padding:var(--cell-pad-y) var(--cell-pad-x);font-size:var(--table-font)}
+  tbody tr td:first-child{border-top-left-radius:var(--cell-radius);border-bottom-left-radius:var(--cell-radius)}
+  tbody tr td:last-child{border-top-right-radius:var(--cell-radius);border-bottom-right-radius:var(--cell-radius)}
+  .mono{font-variant-numeric:tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
+  .muted{color:var(--muted)}
+  .coinCell{display:flex;align-items:center;gap:10px}
+  .coinSym{font-weight:800}
+  .alCell,.satCell,.pctCell{text-align:center;font-weight:800}
+</style>
 </head>
 <body>
-  <div id="neon-bg"></div>
-  <div id="title">NEON BUBBLE ∞ LOOP</div>
-  <div id="desc">Renkli baloncuklar çarpıp çoğalıyor, <b>sonsuzca</b> dans ediyor.<br>Kendi kendine devam eden bir dijital canlı görsel!</div>
-  <div id="counter">Baloncuklar: <span id="bubbleCount">0</span></div>
-  <div id="arena-wrap">
-    <div id="arena"></div>
+<header>
+  <div>
+    <h1>Arbitraj Radarı — OKX ⇄ Binance (USDT)</h1>
+    <div class="sub">Son: <span id="last" class="mono">—</span></div>
   </div>
-  <script>
-    // Ayarlar ve renk paleti
-    const ARENA_SIZE = Math.min(window.innerWidth * 0.93, 640);
-    const ARENA_RADIUS = ARENA_SIZE / 2;
-    const MAX_BUBBLES = 17000;
-    const BUBBLE_MIN = 9, BUBBLE_MAX = 26;
-    const SPEED_MIN = 0.5, SPEED_MAX = 2.0;
-    const AUTO_SPAWN_INTERVAL = 2500; // yeni baloncuk üretme periyodu (ms)
-    const BIRTH_RATE = 2; // her otomatik girişte kaç tane baloncuk girsin
-    const COLORS = [
-      ['#FFDAA6','#FF7BC2'],
-      ['#43F4FF','#4866F7'],
-      ['#FFD166','#FC7E5E'],
-      ['#C3FF68','#00B27F'],
-      ['#FFD6E0','#FFB5C2'],
-      ['#FBFF49','#F9902D'],
-      ['#7DE2FC','#B9B6E5'],
-      ['#AC7FFF','#F64FCA']
-    ];
+  <div class="rightBox">
+    <div id="btcBox" class="sub">BTCUSDT: <span id="btc" class="mono">—</span></div>
+    <button id="toggleHi" class="btn ghost">En Yüksek Fark: Açık</button>
+    <button id="toggleCustom" class="btn ghost">Kişiselleştir: Kapalı</button>
+    <div class="sub">İzlenen: <span id="cnt">0</span> · Hata: <span id="err">0</span></div>
+  </div>
+</header>
 
-    // Bubble list
-    let bubbles = [];
-    const arena = document.getElementById('arena');
-    const bubbleCountSpan = document.getElementById('bubbleCount');
-    let running = true, animationId = null;
+<!-- Highlight kartı için yerleşim noktaları -->
+<div id="anchorTop"></div>
 
-    // Arena boyutu
-    function setArenaSize() {
-      let w = Math.min(window.innerWidth * 0.94, 640);
-      arena.style.width = w + 'px';
-      arena.style.height = w + 'px';
+<!-- EN YÜKSEK FARK — "ACM OKX AL 1.2345 USDT %0,23" -->
+<section id="hiWrap" class="hiWrap">
+  <div class="hiLine">
+    <span id="hiCoin">—</span>
+    <span class="hiGreen" id="hiAct">OKX • —</span>
+    <span id="hiPrice" class="mono">—</span>
+    <span id="hiPct" class="mono">—</span>
+  </div>
+</section>
+
+<section class="controls">
+  <div class="ctrl">
+    <label>Coin Ekle / Çıkar</label>
+    <div class="row">
+      <input id="coinIn" type="text" placeholder="Örn: ZIL, XAI, MINA"/>
+      <button id="add" class="btn">Ekle</button>
+      <button id="clear" class="btn ghost">Temizle</button>
+    </div>
+    <div id="chips" class="chips"></div>
+  </div>
+
+  <div class="ctrl">
+    <label>Yenileme Aralığı (0.1–4.0 sn)</label>
+    <div class="row">
+      <input id="rng" type="range" min="100" max="4000" step="100">
+      <div class="mono" id="rngLbl">—</div>
+    </div>
+    <div class="muted" style="font-size:12px;margin-top:6px">PyQt5 mantığı korunur; sadece periyot ayarlanır.</div>
+  </div>
+
+  <div class="ctrl">
+    <label>Min. % Fark (filtre)</label>
+    <div class="row">
+      <input id="minPct" type="number" step="0.01" min="0" value="0.00"/>
+    </div>
+    <div class="muted" style="font-size:12px;margin-top:6px">Bu eşiği aşmayan satırlar listelenmez.</div>
+  </div>
+
+  <div class="ctrl">
+    <label>Tema</label>
+    <div class="row">
+      <select id="themeSel">
+        <option value="dark">Koyu</option>
+        <option value="light">Açık</option>
+      </select>
+    </div>
+  </div>
+</section>
+
+<!-- KİŞİSELLEŞTİR paneli (aç/kapa) -->
+<section id="customWrap" class="customWrap hidden">
+  <div class="customPanel">
+    <div class="grid3">
+      <div>
+        <div class="rowLabel">Tablo Yazı Boyutu</div>
+        <div class="kv">
+          <input id="ui_tableFont" type="range" min="14" max="26" step="1">
+          <span class="val" id="ui_tableFont_val"></span>
+        </div>
+      </div>
+      <div>
+        <div class="rowLabel">Satır İç Boşluk (Y)</div>
+        <div class="kv">
+          <input id="ui_padY" type="range" min="6" max="24" step="1">
+          <span class="val" id="ui_padY_val"></span>
+        </div>
+      </div>
+      <div>
+        <div class="rowLabel">Satır İç Boşluk (X)</div>
+        <div class="kv">
+          <input id="ui_padX" type="range" min="6" max="24" step="1">
+          <span class="val" id="ui_padX_val"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid3">
+      <div>
+        <div class="rowLabel">Satır Boşluğu (Gap)</div>
+        <div class="kv">
+          <input id="ui_rowGap" type="range" min="0" max="20" step="1">
+          <span class="val" id="ui_rowGap_val"></span>
+        </div>
+      </div>
+      <div>
+        <div class="rowLabel">Köşe Radius</div>
+        <div class="kv">
+          <input id="ui_radius" type="range" min="0" max="24" step="1">
+          <span class="val" id="ui_radius_val"></span>
+        </div>
+      </div>
+      <div>
+        <div class="rowLabel">Tablo Genişliği (px)</div>
+        <div class="kv">
+          <input id="ui_maxW" type="range" min="800" max="1600" step="10">
+          <span class="val" id="ui_maxW_val"></span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="rowLabel">Sütun Genişlikleri (%) — toplam 100</div>
+      <div class="grid4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+        <div class="kv"><span class="val" style="min-width:auto">Coin</span><input id="ui_colCoin" type="number" min="10" max="60" step="1" style="width:80px"></div>
+        <div class="kv"><span class="val" style="min-width:auto">AL</span><input id="ui_colAl" type="number" min="10" max="60" step="1" style="width:80px"></div>
+        <div class="kv"><span class="val" style="min-width:auto">SAT</span><input id="ui_colSat" type="number" min="10" max="60" step="1" style="width:80px"></div>
+        <div class="kv"><span class="val" style="min-width:auto">% Fark</span><input id="ui_colPct" type="number" min="10" max="60" step="1" style="width:80px"></div>
+      </div>
+      <div class="muted" id="ui_colSum" style="font-size:12px;margin-top:4px"></div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <div class="rowLabel">En Yüksek Fark Kartı Yazı Boyutu</div>
+        <div class="kv">
+          <input id="ui_cardFont" type="range" min="16" max="36" step="1">
+          <span class="val" id="ui_cardFont_val"></span>
+        </div>
+      </div>
+      <div>
+        <div class="rowLabel">En Yüksek Fark Kartı Konumu</div>
+        <select id="ui_hiPos">
+          <option value="top">Üstte (Başlık altında)</option>
+          <option value="afterControls">Kontrollerin altında</option>
+          <option value="afterTable">Tablonun altında</option>
+          <option value="hidden">Gizli</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid3">
+      <label class="kv" style="gap:6px"><input id="ui_showBTC" type="checkbox" checked> BTC Fiyatını Göster</label>
+      <div></div><div></div>
+    </div>
+
+    <div class="footerBtns" style="display:flex;gap:8px;justify-content:flex-end">
+      <button id="ui_reset" class="btn ghost">Varsayılanlara Dön</button>
+    </div>
+  </div>
+</section>
+
+<!-- Kontrollerin altına yerleştirme için kanca -->
+<div id="anchorAfterControls"></div>
+
+<section class="tableWrap">
+  <table>
+    <colgroup>
+      <col id="colCoin" style="width:var(--col-coin);">
+      <col id="colAl"   style="width:var(--col-al);">
+      <col id="colSat"  style="width:var(--col-sat);">
+      <col id="colPct"  style="width:var(--col-pct);">
+    </colgroup>
+    <thead>
+      <tr>
+        <th style="text-align:left">Coin</th>
+        <th>AL</th>
+        <th>SAT</th>
+        <th>% Fark</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</section>
+
+<!-- Tablonun altına yerleştirme için kanca -->
+<div id="anchorAfterTable"></div>
+
+<script>
+/* ====== Yardımcılar + Kalıcı Hafıza ====== */
+const $ = s => document.querySelector(s);
+const LS = {
+  get(key, def){ try{ const v = localStorage.getItem(key); return v==null ? def : JSON.parse(v); }catch{ return def; } },
+  set(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch{} }
+};
+function norm(sym){
+  if(!sym) return '';
+  return sym.trim().toUpperCase()
+    .replaceAll('İ','I').replaceAll('İ','I')
+    .replaceAll('Ç','C').replaceAll('Ğ','G').replaceAll('Ö','O').replaceAll('Ş','S').replaceAll('Ü','U');
+}
+function fmtFixedTR(n, d=2){
+  if(n==null || !isFinite(n)) return '—';
+  return Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d, maximumFractionDigits:d});
+}
+function fmtPctTR(n, d=2){
+  if(n==null || !isFinite(n)) return '—';
+  return '%'+Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d, maximumFractionDigits:d});
+}
+function fmt4(n){ return (n==null||!isFinite(n)) ? '—' : Number(n).toFixed(4); }
+function nowStr(){ return new Date().toLocaleTimeString('tr-TR'); }
+
+/* ====== Durum ====== */
+let watched = new Set(LS.get('okxbin:watched', []));
+let refreshMs = Number(LS.get('okxbin:interval', 1000));
+let minPctFilter = Number(LS.get('okxbin:minpct', 0.00));
+let themeMode = LS.get('okxbin:theme', 'dark');
+let hiOn = LS.get('okxbin:hiOn', true);
+
+const UI_DEFAULTS = {
+  tableFont: 18,
+  padY: 12,
+  padX: 10,
+  rowGap: 6,
+  radius: 12,
+  maxW: 1100,
+  col: { coin:28, al:27, sat:27, pct:18 },
+  cardFont: 22,
+  hiPos: 'top',       // 'top' | 'afterControls' | 'afterTable' | 'hidden'
+  showBTC: true
+};
+let UI = Object.assign({}, UI_DEFAULTS, LS.get('okxbin:UI', UI_DEFAULTS));
+if(!UI.col) UI.col = { coin:28, al:27, sat:27, pct:18 };
+
+let timer = null, updating = false, errors = 0;
+
+const elLast = $('#last'), elCnt = $('#cnt'), elErr = $('#err'),
+      elBody = $('#tbody'), elRngLbl = $('#rngLbl'), elRng = $('#rng'), elMin = $('#minPct'),
+      elThemeSel = $('#themeSel'), elBtc = $('#btc'), elBtcBox = $('#btcBox'),
+      elHiWrap = $('#hiWrap'), elHiCoin = $('#hiCoin'), elHiAct = $('#hiAct'),
+      elHiPrice = $('#hiPrice'), elHiPct = $('#hiPct'), elHiToggle = $('#toggleHi'),
+      elCustomWrap = $('#customWrap'), elCustomToggle = $('#toggleCustom');
+
+/* ====== Ağ ====== */
+function okxTicker(sym){ return `https://www.okx.com/api/v5/market/ticker?instId=${encodeURIComponent(sym)}-USDT`; }
+function binanceBook(sym){ return `https://api.binance.com/api/v3/ticker/bookTicker?symbol=${encodeURIComponent(sym)}USDT`; }
+const BINANCE_BTC_PRICE = 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT';
+
+async function jget(url){
+  const res = await fetch(url, {cache:'no-store'});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+function parseOkxTicker(json){
+  // OKX ticker: { code:"0", data:[{ bidPx:"", askPx:"", ... }] }
+  if(!json || !json.data || !json.data[0]) return {bid:NaN, ask:NaN};
+  const d = json.data[0];
+  const bid = parseFloat(d.bidPx);
+  const ask = parseFloat(d.askPx);
+  return {bid, ask};
+}
+
+/* ====== Mantık (PyQt5 ile birebir, OKX↔Binance USDT) ====== */
+async function tick(){
+  if(updating) return;
+  updating = true;
+  try{
+    // BTC canlı (opsiyonel)
+    if(UI.showBTC){
+      try{
+        const btc = await jget(BINANCE_BTC_PRICE);
+        const p = parseFloat(btc.price);
+        if(isFinite(p)) elBtc.textContent = fmtFixedTR(p, 2);
+      }catch(e){}
     }
-    setArenaSize();
-    window.addEventListener('resize', setArenaSize);
 
-    // Baloncuk nesnesi oluşturucu
-    function createBubble(x, y, dx, dy, size, colorIdx, born = false) {
-      let div = document.createElement('div');
-      div.className = 'bubble glow';
-      div.style.width = size+'px';
-      div.style.height = size+'px';
-      div.style.left = (x-size/2)+'px';
-      div.style.top = (y-size/2)+'px';
-      // Renk gradyan efekti
-      let color = COLORS[colorIdx%COLORS.length];
-      div.style.background = `radial-gradient(circle at 65% 35%, ${color[0]} 55%, ${color[1]} 100%)`;
-      div.style.boxShadow = `0 0 18px 0px ${color[0]}70, 0 0 45px 2px ${color[1]}50`;
-      div.style.opacity = (0.67 + Math.random()*0.3).toFixed(2);
-      arena.appendChild(div);
-
-      return {
-        el: div,
-        x: x, y: y,
-        dx: dx, dy: dy,
-        size: size,
-        colorIdx: colorIdx,
-        justBorn: born,
-        lastPop: Date.now(),
-      };
+    if(watched.size===0){
+      elBody.innerHTML = '';
+      updateHighlight([]);
+      elLast.textContent = nowStr();
+      updating = false;
+      return;
     }
 
-    // Baloncuk patlama efekti
-    function popEffect(x, y, colorIdx, size) {
-      let fx = document.createElement('div');
-      fx.className = 'pop-effect';
-      let color = COLORS[colorIdx%COLORS.length];
-      fx.style.width = size+'px';
-      fx.style.height = size+'px';
-      fx.style.left = (x-size/2)+'px';
-      fx.style.top = (y-size/2)+'px';
-      fx.style.background = `radial-gradient(circle at 50% 60%, #fff9 28%, ${color[1]}80 65%, ${color[0]}60 100%)`;
-      fx.style.boxShadow = `0 0 24px 2px ${color[1]}80`;
-      arena.appendChild(fx);
-      setTimeout(()=>fx.remove(), 380);
-    }
+    const syms = Array.from(watched);
+    const jobs = syms.map(async sym=>{
+      const symbol = norm(sym);
+      const okxJson = await jget(okxTicker(symbol));
+      const okxBest = parseOkxTicker(okxJson);
 
-    // Bubble kenara çarptı mı?
-    function isHittingCircleEdge(b) {
-      let cx = ARENA_RADIUS, cy = ARENA_RADIUS;
-      let dist = Math.hypot(b.x - cx, b.y - cy);
-      return (dist + b.size/2) >= ARENA_RADIUS;
-    }
+      const bJson = await jget(binanceBook(symbol));
+      const bBid = parseFloat(bJson.bidPrice);
+      const bAsk = parseFloat(bJson.askPrice);
 
-    // Baloncuk yönünü sek
-    function bounceBubble(b) {
-      let cx = ARENA_RADIUS, cy = ARENA_RADIUS;
-      let vx = b.x - cx, vy = b.y - cy;
-      let norm = Math.hypot(vx, vy);
-      let nx = vx / norm, ny = vy / norm;
-      let dot = b.dx * nx + b.dy * ny;
-      b.dx = b.dx - 2 * dot * nx;
-      b.dy = b.dy - 2 * dot * ny;
-      // Rastgelelik
-      let angleNoise = (Math.random()-0.5) * 0.4;
-      let speed = Math.hypot(b.dx, b.dy);
-      let angle = Math.atan2(b.dy, b.dx) + angleNoise;
-      b.dx = Math.cos(angle) * speed;
-      b.dy = Math.sin(angle) * speed;
-    }
+      // PyQt5 hesapları (Paribu yerine OKX):
+      // diff1 = OKX_bid - Binance_ask  (Binance'den al, OKX'te sat)
+      // diff2 = Binance_bid - OKX_ask  (OKX'ten al, Binance'de sat)
+      const diff1 = okxBest.bid - bAsk;
+      const diff2 = bBid - okxBest.ask;
 
-    // Baloncuk üretimi (ilk başlatma ve arada otomatik doğanlar)
-    function spawnBubble(center = false) {
-      let size = BUBBLE_MIN + Math.random()*(BUBBLE_MAX-BUBBLE_MIN);
-      let colorIdx = Math.floor(Math.random()*COLORS.length);
-      let angle, speed, x, y;
-      if(center) {
-        x = ARENA_RADIUS; y = ARENA_RADIUS;
-        angle = Math.random()*Math.PI*2;
-        speed = SPEED_MIN + Math.random()*SPEED_MAX;
-      } else {
-        // Kenardan rastgele bir doğuş
-        let theta = Math.random()*Math.PI*2;
-        x = ARENA_RADIUS + (ARENA_RADIUS - size/2 - 1) * Math.cos(theta);
-        y = ARENA_RADIUS + (ARENA_RADIUS - size/2 - 1) * Math.sin(theta);
-        angle = theta + Math.PI + (Math.random()-0.5)*0.7;
-        speed = SPEED_MIN + Math.random()*SPEED_MAX*0.85;
-      }
-      let dx = Math.cos(angle) * speed;
-      let dy = Math.sin(angle) * speed;
-      let bubble = createBubble(x, y, dx, dy, size, colorIdx, true);
-      bubbles.push(bubble);
-    }
+      let show=false, low=0, high=0, pct=0, lowSrc='', highSrc='';
+      let okxAction=null, okxPrice=null;
 
-    // Başlangıçta birkaç baloncuk doğur
-    for(let i=0;i<8;i++) spawnBubble(true);
-
-    // Düzenli aralıkla yeni baloncuk üretimi
-    setInterval(()=>{
-      if(!running) return;
-      if(bubbles.length<MAX_BUBBLES-8) {
-        for(let j=0;j<BIRTH_RATE;j++) spawnBubble(false);
-      }
-    }, AUTO_SPAWN_INTERVAL);
-
-    // Animasyon döngüsü
-    function animate() {
-      let newBubbles = [];
-      for(let b of bubbles) {
-        // Hareket
-        b.x += b.dx;
-        b.y += b.dy;
-
-        // Sınır kontrol
-        let hit = false;
-        if(isHittingCircleEdge(b)) {
-          bounceBubble(b);
-          hit = true;
+      if((diff1>0 || diff2>0) && isFinite(okxBest.bid) && isFinite(okxBest.ask) && isFinite(bBid) && isFinite(bAsk)){
+        show = true;
+        if(diff1 > diff2){
+          pct = (diff1 / bAsk) * 100;
+          low = bAsk; high = okxBest.bid; lowSrc='Binance'; highSrc='OKX';
+          okxAction = 'SAT'; okxPrice = okxBest.bid;
+        }else{
+          pct = (diff2 / okxBest.ask) * 100;
+          low = okxBest.ask; high = bBid; lowSrc='OKX'; highSrc='Binance';
+          okxAction = 'AL'; okxPrice = okxBest.ask;
         }
-
-        // DOM güncelle
-        b.el.style.left = (b.x - b.size/2) + 'px';
-        b.el.style.top = (b.y - b.size/2) + 'px';
-
-        // İlk doğuşta minik fade-in efekti
-        if(b.justBorn) {
-          b.el.style.opacity = "0.1";
-          setTimeout(()=>{if(b.el) b.el.style.opacity="0.83";}, 10);
-          b.justBorn = false;
-        }
-
-        // Çarptıysa çoğalt
-        if(hit && bubbles.length < MAX_BUBBLES-2) {
-          // Patlama efekti
-          popEffect(b.x, b.y, b.colorIdx, b.size*1.15);
-
-          // Çoğalma (daha küçük ve rastgele renkli yeni iki baloncuk)
-          for(let i=0;i<2;i++) {
-            let angle = Math.random()*Math.PI*2;
-            let speed = (SPEED_MIN + Math.random()*SPEED_MAX)*1.1;
-            let newSize = Math.max(BUBBLE_MIN, b.size*(0.82+Math.random()*0.23));
-            let dx = Math.cos(angle)*speed, dy=Math.sin(angle)*speed;
-            // kenardan hafif içeri
-            let norm = Math.hypot(b.x-ARENA_RADIUS, b.y-ARENA_RADIUS);
-            let pullBack = ((ARENA_RADIUS - newSize/2 - 2) / norm);
-            let newX = ARENA_RADIUS + (b.x-ARENA_RADIUS)*pullBack;
-            let newY = ARENA_RADIUS + (b.y-ARENA_RADIUS)*pullBack;
-            let newColorIdx = Math.floor(Math.random()*COLORS.length);
-            let bb = createBubble(newX, newY, dx, dy, newSize, newColorIdx);
-            newBubbles.push(bb);
-          }
-          // Eskiyi fade-out ile yok et
-          b.el.classList.add("bubble-pop");
-          setTimeout(()=>b.el.remove(),320);
-        } else {
-          newBubbles.push(b);
-        }
       }
-      bubbles = newBubbles;
+      return {sym: symbol, show, low, high, pct, lowSrc, highSrc, okxAction, okxPrice};
+    });
 
-      // Sayaç güncelle
-      bubbleCountSpan.textContent = bubbles.length;
+    let rows = await Promise.all(jobs);
+    rows = rows.filter(r => r && r.show && isFinite(r.pct) && r.pct >= (Number(minPctFilter)||0));
+    rows.sort((a,b)=> b.pct - a.pct);
+    draw(rows);
+    updateHighlight(rows);
 
-      // Limit aşımı
-      if(bubbles.length > MAX_BUBBLES) {
-        running=false;
-        alert("Baloncuk limiti aşıldı!");
-        return;
-      }
-      if(running) animationId = requestAnimationFrame(animate);
-    }
-    animate();
+    elLast.textContent = nowStr();
+  }catch(e){
+    errors++; elErr.textContent = errors;
+  }finally{
+    updating = false;
+  }
+}
 
-    // Otomatik sonsuza kadar devam eder (yeniden başlatma vs. gerek yok)
-  </script>
+/* ====== Çizim ====== */
+function draw(rows){
+  const frag = document.createDocumentFragment();
+  rows.forEach(r=>{
+    const tr = document.createElement('tr');
+
+    // Coin
+    const tdCoin = document.createElement('td');
+    tdCoin.className = 'coinCell';
+    const sym = document.createElement('span'); sym.className='coinSym'; sym.textContent = r.sym;
+    tdCoin.appendChild(sym);
+    tr.appendChild(tdCoin);
+
+    // AL (düşük fiyat kaynağına göre renk) — OKX yeşil, Binance turuncu
+    const tdL = document.createElement('td'); tdL.className='mono alCell';
+    tdL.textContent = fmt4(r.low);
+    tdL.style.background = (r.lowSrc==='Binance') ? 'orange' : 'green';
+    tr.appendChild(tdL);
+
+    // SAT (yüksek fiyat) — OKX yeşil, Binance turuncu
+    const tdH = document.createElement('td'); tdH.className='mono satCell';
+    tdH.textContent = fmt4(r.high);
+    tdH.style.background = (r.highSrc==='OKX') ? 'green' : 'orange';
+    tr.appendChild(tdH);
+
+    // % Fark
+    const tdP = document.createElement('td'); tdP.className='mono pctCell';
+    tdP.textContent = fmtPctTR(r.pct, 2);
+    tr.appendChild(tdP);
+
+    frag.appendChild(tr);
+  });
+  elBody.innerHTML = '';
+  elBody.appendChild(frag);
+}
+
+/* ====== En Yüksek Fark (yalnız OKX bilgisi göster) ====== */
+function updateHighlight(rows){
+  if(!hiOn || UI.hiPos==='hidden'){ elHiWrap.classList.add('hidden'); return; }
+  elHiWrap.classList.remove('hidden');
+  placeHi(UI.hiPos);
+
+  if(!rows.length){
+    elHiCoin.textContent='—'; elHiAct.textContent='OKX • —'; elHiPrice.textContent='—'; elHiPct.textContent='—';
+    return;
+  }
+  const r = rows[0];
+  elHiCoin.textContent = r.sym;
+  const act = r.okxAction === 'AL' ? 'AL' : 'SAT';
+  elHiAct.textContent = `OKX • ${act}`;
+  elHiPrice.textContent = `${fmtFixedTR(r.okxPrice, 4)} USDT`;
+  elHiPct.textContent = fmtPctTR(r.pct, 2);
+}
+
+/* ====== Tema ====== */
+function applyTheme(mode){
+  const html = document.documentElement;
+  html.classList.remove('theme-dark','theme-light');
+  html.classList.add(mode==='light' ? 'theme-light' : 'theme-dark');
+  elThemeSel.value = (mode==='light' ? 'light' : 'dark');
+  LS.set('okxbin:theme', (mode==='light' ? 'light' : 'dark'));
+}
+
+/* ====== Kişiselleştirme ====== */
+function applyUI(u){
+  document.documentElement.style.setProperty('--table-font', u.tableFont+'px');
+  document.documentElement.style.setProperty('--cell-pad-y', u.padY+'px');
+  document.documentElement.style.setProperty('--cell-pad-x', u.padX+'px');
+  document.documentElement.style.setProperty('--row-gap', u.rowGap+'px');
+  document.documentElement.style.setProperty('--cell-radius', u.radius+'px');
+  document.documentElement.style.setProperty('--container-max', u.maxW+'px');
+  document.documentElement.style.setProperty('--col-coin', (u.col.coin||28)+'%');
+  document.documentElement.style.setProperty('--col-al',   (u.col.al||27)+'%');
+  document.documentElement.style.setProperty('--col-sat',  (u.col.sat||27)+'%');
+  document.documentElement.style.setProperty('--col-pct',  (u.col.pct||18)+'%');
+  document.documentElement.style.setProperty('--card-font', u.cardFont+'px');
+
+  // Görsel öğeler
+  $('#btcBox').style.display = u.showBTC ? '' : 'none';
+
+  // Konum
+  placeHi(u.hiPos);
+
+  // UI panel etiketleri ve inputlar
+  $('#ui_tableFont_val').textContent = u.tableFont+'px';
+  $('#ui_padY_val').textContent = u.padY+'px';
+  $('#ui_padX_val').textContent = u.padX+'px';
+  $('#ui_rowGap_val').textContent = u.rowGap+'px';
+  $('#ui_radius_val').textContent = u.radius+'px';
+  $('#ui_maxW_val').textContent = u.maxW+'px';
+  $('#ui_cardFont_val').textContent = u.cardFont+'px';
+
+  $('#ui_tableFont').value = u.tableFont;
+  $('#ui_padY').value = u.padY;
+  $('#ui_padX').value = u.padX;
+  $('#ui_rowGap').value = u.rowGap;
+  $('#ui_radius').value = u.radius;
+  $('#ui_maxW').value = u.maxW;
+  $('#ui_cardFont').value = u.cardFont;
+  $('#ui_colCoin').value = u.col.coin;
+  $('#ui_colAl').value = u.col.al;
+  $('#ui_colSat').value = u.col.sat;
+  $('#ui_colPct').value = u.col.pct;
+  $('#ui_hiPos').value = u.hiPos;
+  $('#ui_showBTC').checked = !!u.showBTC;
+
+  const sum = (+u.col.coin)+(+u.col.al)+(+u.col.sat)+(+u.col.pct);
+  const ok = Math.round(sum)===100;
+  $('#ui_colSum').textContent = 'Toplam: '+sum.toFixed(0)+'% ' + (ok?'✓':'(100 olmalı — otomatik normalize edilir)');
+}
+function saveUI(){ LS.set('okxbin:UI', UI); }
+function normalizeCols(){
+  let {coin,al,sat,pct} = UI.col;
+  let sum = coin+al+sat+pct;
+  if(sum<=0) { UI.col={coin:28,al:27,sat:27,pct:18}; return; }
+  UI.col.coin = +(coin*100/sum).toFixed(0);
+  UI.col.al   = +(al*100/sum).toFixed(0);
+  UI.col.sat  = +(sat*100/sum).toFixed(0);
+  UI.col.pct  = 100 - UI.col.coin - UI.col.al - UI.col.sat;
+}
+function placeHi(pos){
+  const wrap = elHiWrap;
+  if(pos==='hidden'){ wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+  if(pos==='top')              $('#anchorTop').after(wrap);
+  else if(pos==='afterControls') $('#anchorAfterControls').after(wrap);
+  else if(pos==='afterTable')    $('#anchorAfterTable').after(wrap);
+}
+
+/* ====== UI / Kontroller (kalıcı) ====== */
+function renderChips(){
+  const wrap = $('#chips'); wrap.innerHTML='';
+  Array.from(watched).sort().forEach(sym=>{
+    const d = document.createElement('div'); d.className='chip';
+    d.innerHTML = `<span>${sym}</span>`;
+    const b = document.createElement('button'); b.textContent='×';
+    b.onclick = ()=>{
+      watched.delete(sym);
+      LS.set('okxbin:watched', Array.from(watched));
+      elCnt.textContent = watched.size; renderChips();
+    };
+    d.appendChild(b); wrap.appendChild(d);
+  });
+  elCnt.textContent = watched.size;
+}
+function schedule(ms){
+  refreshMs = Math.max(100, Math.min(4000, ms|0));
+  elRng.value = refreshMs;
+  elRngLbl.textContent = (refreshMs/1000).toFixed(1)+' sn';
+  LS.set('okxbin:interval', refreshMs);
+  if(timer) clearInterval(timer);
+  timer = setInterval(tick, refreshMs);
+}
+
+/* ====== Eventler ====== */
+$('#add').onclick = ()=>{
+  const raw = $('#coinIn').value;
+  const sym = norm(raw);
+  if(sym){
+    watched.add(sym);
+    LS.set('okxbin:watched', Array.from(watched));
+    renderChips();
+  }
+  $('#coinIn').value='';
+};
+$('#coinIn').addEventListener('keydown',(e)=>{ if(e.key==='Enter') $('#add').click(); });
+
+$('#clear').onclick = ()=>{
+  watched.clear();
+  LS.set('okxbin:watched', []);
+  renderChips(); elBody.innerHTML='';
+};
+
+elRng.addEventListener('input', e=> schedule(Number(e.target.value)));
+elMin.addEventListener('input', e=>{
+  minPctFilter = Number(e.target.value)||0;
+  LS.set('okxbin:minpct', minPctFilter);
+});
+$('#themeSel').addEventListener('change', (e)=> applyTheme(e.target.value));
+
+elHiToggle.addEventListener('click', ()=>{
+  hiOn = !hiOn;
+  LS.set('okxbin:hiOn', hiOn);
+  elHiToggle.textContent = 'En Yüksek Fark: ' + (hiOn ? 'Açık' : 'Kapalı');
+  updateHighlight([]); // anlık uygula
+});
+elCustomToggle.addEventListener('click', ()=>{
+  const open = elCustomWrap.classList.toggle('hidden');
+  elCustomToggle.textContent = 'Kişiselleştir: ' + (open ? 'Kapalı' : 'Açık');
+});
+
+/* Kişiselleştirme inputları */
+$('#ui_tableFont').oninput = (e)=>{ UI.tableFont=+e.target.value; applyUI(UI); saveUI(); };
+$('#ui_padY').oninput = (e)=>{ UI.padY=+e.target.value; applyUI(UI); saveUI(); };
+$('#ui_padX').oninput = (e)=>{ UI.padX=+e.target.value; applyUI(UI); saveUI(); };
+$('#ui_rowGap').oninput = (e)=>{ UI.rowGap=+e.target.value; applyUI(UI); saveUI(); };
+$('#ui_radius').oninput = (e)=>{ UI.radius=+e.target.value; applyUI(UI); saveUI(); };
+$('#ui_maxW').oninput = (e)=>{ UI.maxW=+e.target.value; applyUI(UI); saveUI(); };
+$('#ui_cardFont').oninput = (e)=>{ UI.cardFont=+e.target.value; applyUI(UI); saveUI(); };
+$('#ui_hiPos').onchange = (e)=>{ UI.hiPos=e.target.value; applyUI(UI); saveUI(); };
+$('#ui_showBTC').onchange = (e)=>{ UI.showBTC=e.target.checked; applyUI(UI); saveUI(); };
+['ui_colCoin','ui_colAl','ui_colSat','ui_colPct'].forEach(id=>{
+  $('#'+id).addEventListener('input',(e)=>{
+    const v = Math.max(10, Math.min(60, +e.target.value||0));
+    if(id==='ui_colCoin') UI.col.coin=v;
+    if(id==='ui_colAl')   UI.col.al=v;
+    if(id==='ui_colSat')  UI.col.sat=v;
+    if(id==='ui_colPct')  UI.col.pct=v;
+    normalizeCols();
+    applyUI(UI); saveUI();
+  });
+});
+$('#ui_reset').onclick = ()=>{
+  UI = JSON.parse(JSON.stringify(UI_DEFAULTS));
+  applyUI(UI); saveUI();
+};
+
+/* ====== Başlat ====== */
+(function initFromStorage(){
+  applyTheme(themeMode);
+  renderChips();
+  applyUI(UI);
+  elMin.value = isFinite(minPctFilter)? minPctFilter : 0.00;
+  elHiToggle.textContent = 'En Yüksek Fark: ' + (hiOn ? 'Açık' : 'Kapalı');
+  schedule(isFinite(refreshMs) ? refreshMs : 1000);
+  elLast.textContent = nowStr();
+})();
+setInterval(()=>{ if(watched.size===0) elLast.textContent = nowStr(); }, 1000);
+
+/* ====== Döngü ====== */
+async function tick(){ /* tanım yukarıda */ } // placer
+// Gerçek tick tanımı yukarıda; setInterval schedule() onu çağırıyor.
+</script>
 </body>
 </html>
