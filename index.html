@@ -1,104 +1,89 @@
 <!doctype html>
 <html lang="tr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MEXC Spot ↔ Futures Fark İzleyici (USDT)</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>MEXC Spot ⇄ Futures Arb (USDT) — Yeşil: Spot, Turuncu: Futures</title>
 <style>
   :root{
-    --bg:#0b1220; --fg:#e6edf3; --muted:#9fb0c3; --card:#111a2d; --accent:#20c997;
-    --warn:#f0ad4e; --bad:#ff5a5a; --good:#2ecc71; --grid:#1a2438;
-    --rowFont:16px; --dense:10px; --gap:8px; --header:18px; --chip:14px; --scale:1;
+    --bg:#0b1220; --fg:#e6edf7; --muted:#9fb0c9; --panel:#0f1629; --panel2:#111a2e; --border:#1a2a4a;
+    --spot:#16a34a;      /* YEŞİL: SPOT */
+    --fut:#f59e0b;       /* TURUNCU: FUTURES */
+    --danger:#ef4444; --ok:#22c55e;
+    --fontRow:18px; --padY:12px; --padX:10px; --gap:8px; --radius:12px; --maxW:1200px;
   }
-  body.light{ --bg:#ffffff; --fg:#111; --muted:#444; --card:#f4f6f8; --accent:#0d6efd;
-              --grid:#e9ecef; --good:#198754; --warn:#6c757d; --bad:#dc3545; }
+  body.light{
+    --bg:#ffffff; --fg:#0b1220; --muted:#556176; --panel:#f3f6fb; --panel2:#ffffff; --border:#d8e1ef;
+    --spot:#16a34a; --fut:#d97706;
+  }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-  header{position:sticky;top:0;background:linear-gradient(180deg,var(--bg),rgba(0,0,0,0));
-         z-index:10;padding:14px 16px 8px;border-bottom:1px solid var(--grid)}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+  header{padding:14px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,var(--panel),transparent)}
+  .wrap{max-width:var(--maxW);margin:0 auto}
   .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-  .title{font-weight:700;font-size:20px;letter-spacing:.2px}
-  .clock{margin-left:auto;font-variant-tabular-nums:tabular-nums;color:var(--muted)}
-  .chip{background:var(--card);border:1px solid var(--grid);border-radius:999px;padding:6px 10px;
-        font-size:var(--chip);display:inline-flex;gap:8px;align-items:center}
-  .chip b{font-weight:700}
+  h1{margin:0;font-size:20px}
+  .legend{display:flex;gap:10px;align-items:center}
+  .dot{width:10px;height:10px;border-radius:50%}
+  .spot{background:var(--spot)} .fut{background:var(--fut)}
+  .chip{background:var(--panel2);border:1px solid var(--border);border-radius:999px;padding:6px 10px;font-size:12px;color:var(--muted);display:inline-flex;gap:8px;align-items:center}
+  .btn{border:1px solid var(--border);background:var(--panel2);color:var(--fg);padding:8px 12px;border-radius:10px;cursor:pointer}
+  .btn:hover{border-color:var(--spot)}
+  input,select{background:var(--panel2);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:8px 10px}
+  label{font-size:12px;color:var(--muted)}
   .controls{display:grid;grid-template-columns:repeat(6,minmax(180px,1fr));gap:10px;margin-top:10px}
-  .controls > div{background:var(--card);border:1px solid var(--grid);border-radius:14px;padding:10px}
-  .controls label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
-  .controls input[type="text"], .controls input[type="number"], .controls select{
-      width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--grid);
-      background:transparent;color:var(--fg);font-size:14px
-  }
-  .btn{cursor:pointer;border:1px solid var(--grid);background:var(--card);color:var(--fg);
-       padding:8px 12px;border-radius:10px}
-  .btn:hover{border-color:var(--accent)}
-  .wrap{max-width:1350px;margin:0 auto;padding:0 12px}
-  #topCard{margin:12px 0;padding:12px 14px;border-radius:16px;background:var(--card);
-           border:1px solid var(--grid);display:flex;align-items:center;gap:12px;min-height:52px}
-  #topCard .sym{font-weight:800;font-size:22px;letter-spacing:.3px}
-  #topCard .act{background:var(--good);color:#fff;border-radius:999px;padding:6px 10px;font-weight:800}
-  #topCard .price{font-weight:700}
-  #topCard .pct{font-weight:800}
+  .card{background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:10px}
+  #topCard{margin:12px 0;padding:12px 14px;border-radius:16px;background:var(--panel2);border:1px solid var(--border);display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
   #topCard.hidden{display:none}
-  table{width:100%;border-collapse:separate;border-spacing:0 8px;transform:scale(var(--scale));
-        transform-origin:top left}
-  thead th{font-size:calc(var(--header));text-align:left;color:var(--muted);padding:6px 10px}
-  tbody td{padding:var(--dense) 10px;background:var(--card);border-top:1px solid var(--grid);
-           border-bottom:1px solid var(--grid);font-size:calc(var(--rowFont))}
-  tbody tr{transition:background .15s}
-  tbody tr:hover td{background:rgba(255,255,255,0.03)}
-  td.c0{border-left:1px solid var(--grid);border-top-left-radius:12px;border-bottom-left-radius:12px;font-weight:700}
-  td.c3{border-right:1px solid var(--grid);border-top-right-radius:12px;border-bottom-right-radius:12px;font-weight:800}
-  .tag{display:inline-block;border-radius:8px;padding:4px 8px;font-size:12px;border:1px solid var(--grid);color:var(--muted)}
-  .al{background:var(--good);color:#fff;border-radius:10px;padding:4px 8px;font-weight:800}
-  .sat{background:var(--warn);color:#111;border-radius:10px;padding:4px 8px;font-weight:800}
-  .pctPos{color:var(--good)} .pctNeg{color:var(--bad)}
-  .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  details{margin-top:10px}
-  details > summary{cursor:pointer;list-style:none;padding:8px 12px;background:var(--card);
-                    border:1px solid var(--grid);border-radius:10px;width:max-content}
-  .custom-grid{margin-top:10px;display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:10px}
-  .custom-grid > div{background:var(--card);border:1px solid var(--grid);border-radius:12px;padding:10px}
-  .range{width:100%}
-  .pill{display:inline-flex;gap:8px;align-items:center}
+  #topBadge{font-weight:800;color:#091220;border-radius:999px;padding:6px 10px}
+  .bSpot{background:var(--spot)} .bFut{background:var(--fut)}
+  .mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  table{width:100%;border-collapse:separate;border-spacing:0 var(--gap)}
+  thead th{font-size:14px;color:var(--muted);text-align:left;padding:0 8px}
+  tbody td{padding:var(--padY) var(--padX);font-size:var(--fontRow);background:var(--panel2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  tbody tr td:first-child{border-top-left-radius:var(--radius);border-bottom-left-radius:var(--radius)}
+  tbody tr td:last-child{border-top-right-radius:var(--radius);border-bottom-right-radius:var(--radius)}
+  .alCell,.satCell,.pctCell{text-align:center;font-weight:800}
+  .src-spot{background:var(--spot) !important;color:#091220}
+  .src-fut{background:var(--fut) !important;color:#111}
+  .pctPos{color:var(--ok);font-weight:800} .pctNeg{color:var(--danger);font-weight:800}
+  .blink{animation:blink 1s ease-in-out 1} @keyframes blink{50%{opacity:.55}}
   .note{color:var(--muted);font-size:12px}
-  .blink{animation:blink 1.2s ease-in-out infinite}
-  @keyframes blink{50%{opacity:.55}}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
     <div class="row">
-      <div class="title">MEXC <b>Spot ↔ Futures</b> Fark İzleyici (USDT)</div>
-      <div id="btcTicker" class="chip" title="MEXC Futures BTC_USDT canlı">
-        <span>BTC_USDT</span><b id="btcPx">—</b><span class="note">futures</span>
+      <h1>MEXC Spot ⇄ Futures Fark (USDT)</h1>
+      <div class="legend chip"><span class="dot spot"></span>SPOT <span class="dot fut"></span>FUTURES</div>
+      <div class="chip">BTC (Futures): <b id="btc" class="mono">—</b></div>
+      <div class="chip">Son: <span id="clock" class="mono">—:—:—</span></div>
+      <div style="margin-left:auto" class="row">
+        <label>Tema</label>
+        <select id="themeSel"><option value="dark">Koyu</option><option value="light">Beyaz</option></select>
       </div>
-      <label class="pill chip"><input id="toggleTop" type="checkbox" checked /> En yüksek fark kartı</label>
-      <div class="clock" id="clock">—:—:—</div>
     </div>
 
-    <div id="topCard">
-      <span class="sym" id="topSym">—</span>
-      <span id="topAct" class="act">AL</span>
-      <span class="price" id="topPrice">—</span>
-      <span>•</span>
-      <span id="topPct" class="pct">%</span>
-      <span class="note" id="topHint">SPOT fiyatı & fark</span>
+    <div id="topCard" class="card">
+      <span id="topSym" style="font-weight:800;font-size:22px">—</span>
+      <span id="topBadge" class="bSpot">SPOT • —</span>
+      <span id="topPrice" class="mono" style="font-weight:700">—</span>
+      <span id="topPct" class="mono" style="font-weight:800">—</span>
+      <span class="note">En yüksek fark — AL/SAT kaynağına göre rozet rengi değişir.</span>
     </div>
 
     <div class="controls">
-      <div>
-        <label>Coin ekle (örn. <b>ETH</b> veya <b>ETH_USDT</b>)</label>
-        <div class="flex">
-          <input id="addSym" type="text" placeholder="Sembol..." />
-          <button class="btn" id="btnAdd">Ekle</button>
-          <button class="btn" id="btnClear">Tümünü Sil</button>
+      <div class="card">
+        <label for="addSym">Coin ekle (örn: <b>ETH</b> ya da <b>ETH_USDT</b>)</label>
+        <div class="row" style="margin-top:6px">
+          <input id="addSym" type="text" placeholder="Sembol"/>
+          <button id="btnAdd" class="btn">Ekle</button>
+          <button id="btnClear" class="btn">Tümünü Sil</button>
         </div>
-        <div class="note">Sadece eklediğiniz coinler için veri dinlenir.</div>
+        <div class="note" style="margin-top:6px">Sadece eklediklerin izlenir; liste kayıtlı kalır.</div>
       </div>
-      <div>
-        <label>Yenileme hızı (görsel)</label>
+      <div class="card">
+        <label for="speed">Görsel yenileme</label>
         <select id="speed">
           <option value="100">0.1 sn</option>
           <option value="200">0.2 sn</option>
@@ -108,481 +93,275 @@
           <option value="2000">2 sn</option>
           <option value="4000">4 sn</option>
         </select>
-        <div class="note">WebSocket sürekli akar; bu sadece DOM güncelleme sıklığıdır.</div>
+        <div class="note" style="margin-top:6px">WS sürekli akar; bu sadece DOM güncelleme hızıdır.</div>
       </div>
-      <div>
-        <label>Fark eşiği (%)</label>
-        <input id="thresh" type="number" step="0.01" value="0.10" />
-        <div class="note">Bu yüzdeyi <u>aşan</u> farklar listelenir.</div>
+      <div class="card">
+        <label for="thresh">Fark eşiği (%)</label>
+        <input id="thresh" type="number" step="0.01" value="0.10"/>
+        <div class="note" style="margin-top:6px">Bu yüzdeyi aşan farklar listelenir.</div>
       </div>
-      <div>
-        <label>Arka plan</label>
-        <select id="theme">
-          <option value="dark" selected>Koyu</option>
-          <option value="light">Beyaz</option>
-        </select>
-        <div class="note">Seçiminiz kaydedilir.</div>
-      </div>
-      <div>
-        <label>En çok fark (AL/SAT) yalnızca <b>SPOT</b> göster</label>
-        <div class="note">Üst kartta futures rengi/etiketi gösterilmez.</div>
-      </div>
-      <div>
-        <label>Ekstra</label>
-        <div class="flex">
-          <button class="btn" id="btnExport">Listeyi indir</button>
-          <button class="btn" id="btnImport">Liste içe al</button>
-          <input type="file" id="fileImport" accept="application/json" style="display:none" />
+      <div class="card">
+        <label>Listeyi dışa/içe aktar</label>
+        <div class="row" style="margin-top:6px">
+          <button id="btnExport" class="btn">Dışa aktar</button>
+          <button id="btnImport" class="btn">İçe al</button>
+          <input id="fileImport" type="file" accept="application/json" style="display:none"/>
         </div>
+      </div>
+      <div class="card">
+        <label>En yüksek fark kartı</label>
+        <div style="margin-top:6px" class="row">
+          <label class="row"><input type="checkbox" id="toggleTop" checked/> Göster</label>
+        </div>
+      </div>
+      <div class="card">
+        <label>Bilgi</label>
+        <div class="note" style="margin-top:6px">AL = ucuz taraf, SAT = pahalı taraf. Yeşil **SPOT**, turuncu **FUTURES**.</div>
       </div>
     </div>
-
-    <details id="custom">
-      <summary>💅 Tasarım / Kişiselleştirme</summary>
-      <div class="custom-grid">
-        <div>
-          <label>Satır yazı boyutu</label>
-          <input id="rowFont" class="range" type="range" min="12" max="28" value="16" />
-        </div>
-        <div>
-          <label>Satır yüksekliği (dolu/padding)</label>
-          <input id="dense" class="range" type="range" min="4" max="20" value="10" />
-        </div>
-        <div>
-          <label>Başlık yazı boyutu</label>
-          <input id="headerSize" class="range" type="range" min="14" max="28" value="18" />
-        </div>
-        <div>
-          <label>Tablo ölçek (zoom)</label>
-          <input id="scale" class="range" type="range" min="0.8" max="1.3" step="0.01" value="1" />
-        </div>
-      </div>
-    </details>
   </div>
 </header>
 
-<main class="wrap">
-  <table id="tbl">
+<main class="wrap" style="padding:12px 0">
+  <table>
     <thead>
-      <tr>
-        <th>Coin</th>
-        <th>AL (Spot)</th>
-        <th>SAT (Futures)</th>
-        <th>Fark / Yüzde</th>
-      </tr>
+      <tr><th>Coin</th><th>AL</th><th>SAT</th><th>% Fark</th></tr>
     </thead>
     <tbody id="tbody"></tbody>
   </table>
-  <p class="note" style="margin:14px 2px">
-    Not: Anlık arbitraj yapılabilirliği; bakiye, izinler, slipaj ve komisyonlara bağlıdır.
-  </p>
+  <p class="note" style="margin:10px 2px">Not: Net kârlılık komisyon, slipaj, teminat vb. faktörlere bağlıdır.</p>
 </main>
 
 <script>
-/* ============ Basit durum ============ */
+/* ===== Yardımcılar & durum ===== */
+const $ = s=>document.querySelector(s);
+const fmt=(n,d=4)=>isFinite(n)?(+n).toFixed(d):'—';
+const pct=(p)=>isFinite(p)?(p>=0?'+':'')+p.toFixed(3)+'%':'—';
+const now=()=>new Date().toLocaleTimeString('tr-TR',{hour12:false});
+
 const S = {
   coins: new Set(),
-  spot: new Map(),     // {bid, ask}
-  fut: new Map(),      // {bid, ask}
-  rows: [],
+  spot: new Map(),   // key: "BTCUSDT"  val: {bid,ask,ts}
+  fut:  new Map(),   // key: "BTC_USDT" val: {bid,ask,ts}
   ui: {
-    speed: +(localStorage.getItem('speed') || 1000),
-    thresh: +(localStorage.getItem('thresh') || 0.10),
-    theme: localStorage.getItem('theme') || 'dark',
-    rowFont: +(localStorage.getItem('rowFont') || 16),
-    dense: +(localStorage.getItem('dense') || 10),
-    header: +(localStorage.getItem('header') || 18),
-    scale: +(localStorage.getItem('scale') || 1),
-    top: JSON.parse(localStorage.getItem('top') || 'true')
+    speed:+(localStorage.getItem('mxf:speed')||1000),
+    thresh:+(localStorage.getItem('mxf:thresh')||0.10),
+    theme: localStorage.getItem('mxf:theme') || 'dark',
+    showTop: JSON.parse(localStorage.getItem('mxf:showTop')||'true')
   },
-  conns: { spot: [], fut: null },
-  maxPerWS: 28, // güvenli limit (MEXC spot: 30 yazıyor)
+  timers:{ render:null, clock:null },
+  conns:{ spot:[], fut:null },
+  spotMax:28
 };
 
-/* ============ Yardımcılar ============ */
-const $ = sel => document.querySelector(sel);
-const fmt = (n, d=4) => (isFinite(n)? (+n).toFixed(d) : '—');
-const pct = (p) => (isFinite(p)? (p>=0? '+' : '') + p.toFixed(3)+'%' : '—');
-const nowStr = ()=> new Date().toLocaleTimeString('tr-TR', {hour12:false});
-
-function saveState(){
-  localStorage.setItem('coins', JSON.stringify([...S.coins]));
-  localStorage.setItem('speed', S.ui.speed);
-  localStorage.setItem('thresh', S.ui.thresh);
-  localStorage.setItem('theme', S.ui.theme);
-  localStorage.setItem('rowFont', S.ui.rowFont);
-  localStorage.setItem('dense', S.ui.dense);
-  localStorage.setItem('header', S.ui.header);
-  localStorage.setItem('scale', S.ui.scale);
-  localStorage.setItem('top', S.ui.top);
+function save(){
+  localStorage.setItem('mxf:list', JSON.stringify([...S.coins]));
+  localStorage.setItem('mxf:speed', S.ui.speed);
+  localStorage.setItem('mxf:thresh', S.ui.thresh);
+  localStorage.setItem('mxf:theme', S.ui.theme);
+  localStorage.setItem('mxf:showTop', S.ui.showTop);
 }
-function loadState(){
+function load(){
   try{
-    const arr = JSON.parse(localStorage.getItem('coins')||'[]');
-    arr.forEach(sym=> S.coins.add(sym));
+    const arr=JSON.parse(localStorage.getItem('mxf:list')||'[]'); arr.forEach(x=>S.coins.add(x));
   }catch{}
 }
 
-/* ============ Protobuf minimal decoder (sadece gereken alanlar) ============ */
-/* PushDataV3ApiWrapper.proto:
-   1: channel (string, wt=2)
-   oneof body: 305: publicBookTicker (msg), 315: publicAggreBookTicker (msg)
-   3: symbol (string), 4: symbolId (string), 5: createTime (varint), 6: sendTime (varint)
-   Public(Book/Aggre)TickerV3Api:
-   1: bidPrice (string) 2: bidQuantity (string) 3: askPrice (string) 4: askQuantity (string)
-*/
-function readVarint(u8, i){
-  let x=0n, s=0n, pos=i;
-  while(true){
-    const b=u8[pos++];
-    x |= BigInt(b & 0x7f) << s;
-    if(!(b & 0x80)) break;
-    s += 7n;
-  }
-  return [Number(x), pos];
-}
-function readBytes(u8, i, len){ return [u8.slice(i, i+len), i+len]; }
-function readString(u8, i){
-  let len; [len,i]=readVarint(u8,i);
-  let bytes = u8.slice(i,i+len); i+=len;
-  return [new TextDecoder().decode(bytes), i];
-}
-function skip(u8, i, wireType){
-  if(wireType===0){ let _; [_,i]=readVarint(u8,i); return i; }
-  if(wireType===1){ return i+8; }
-  if(wireType===2){ let len; [len,i]=readVarint(u8,i); return i+len; }
-  if(wireType===5){ return i+4; }
-  return i;
-}
-function decodeBookTicker(u8){
-  let i=0, out={};
-  while(i<u8.length){
-    let key; [key,i]=readVarint(u8,i);
-    const field=key>>3, wt=key&7;
-    if(wt===2){
-      if(field===1){ let s; [s,i]=readString(u8,i); out.bidPrice=s; }
-      else if(field===2){ let s; [s,i]=readString(u8,i); out.bidQuantity=s; }
-      else if(field===3){ let s; [s,i]=readString(u8,i); out.askPrice=s; }
-      else if(field===4){ let s; [s,i]=readString(u8,i); out.askQuantity=s; }
-      else { let len; [len,i]=readVarint(u8,i); i+=len; }
-    } else { i = skip(u8,i,wt); }
-  }
-  return out;
-}
-function decodeWrapper(arrayBuf){
-  const u8 = new Uint8Array(arrayBuf);
-  let i=0, out={ channel:null, symbol:null, book:null };
-  while(i<u8.length){
-    let key; [key,i]=readVarint(u8,i);
-    const field=key>>3, wt=key&7;
-    if(field===1 && wt===2){ let s; [s,i]=readString(u8,i); out.channel=s; }
-    else if((field===305 || field===315) && wt===2){
-      let len; [len,i]=readVarint(u8,i);
-      const bytes = u8.slice(i,i+len); i+=len;
-      out.book = decodeBookTicker(bytes);
-    }
-    else if(field===3 && wt===2){ let s; [s,i]=readString(u8,i); out.symbol=s; }
-    else if(wt===2){ let len; [len,i]=readVarint(u8,i); i+=len; }
-    else if(wt===0){ let _; [_,i]=readVarint(u8,i); }
-    else if(wt===1){ i+=8; }
-    else if(wt===5){ i+=4; }
-  }
-  return out;
-}
+/* ===== Protobuf mini decoder (yalnızca gereken alanlar) ===== */
+function readVar(u8,i){let x=0n,s=0n,p=i;for(;;){const b=u8[p++];x|=BigInt(b&0x7f)<<s;if(!(b&0x80))break;s+=7n;}return [Number(x),p];}
+function readStr(u8,i){let len;[len,i]=readVar(u8,i);const b=u8.slice(i,i+len);i+=len;return [new TextDecoder().decode(b),i];}
+function skip(u8,i,wt){if(wt===0){let _;[_,i]=readVar(u8,i);return i;} if(wt===1)return i+8; if(wt===2){let l;[l,i]=readVar(u8,i);return i+l;} if(wt===5)return i+4; return i;}
+function decBook(u8){let i=0,o={};while(i<u8.length){let k;[k,i]=readVar(u8,i);const f=k>>3,w=k&7;if(w===2){if(f===1){let s;[s,i]=readStr(u8,i);o.bidPrice=s;}else if(f===2){let s;[s,i]=readStr(u8,i);o.bidQuantity=s;}else if(f===3){let s;[s,i]=readStr(u8,i);o.askPrice=s;}else if(f===4){let s;[s,i]=readStr(u8,i);o.askQuantity=s;}else{let l;[l,i]=readVar(u8,i);i+=l;}}else{i=skip(u8,i,w);} }return o;}
+function decWrap(buf){const u8=new Uint8Array(buf);let i=0,o={};while(i<u8.length){let k;[k,i]=readVar(u8,i);const f=k>>3,w=k&7;if(f===1&&w===2){let s;[s,i]=readStr(u8,i);o.channel=s;} else if((f===305||f===315)&&w===2){let l;[l,i]=readVar(u8,i);const b=u8.slice(i,i+l);i+=l;o.book=decBook(b);} else if(f===3&&w===2){let s;[s,i]=readStr(u8,i);o.symbol=s;} else if(w===2){let l;[l,i]=readVar(u8,i);i+=l;} else if(w===0){let _;[_,i]=readVar(u8,i);} else if(w===1){i+=8;} else if(w===5){i+=4;} }return o;}
+function chSym(ch){const p=String(ch).split('@');return p[p.length-1]||null;}
 
-/* ============ WebSocket yöneticileri ============ */
-// SPOT (protobuf): wss://wbs-api.mexc.com/ws , channel: spot@public.aggre.bookTicker.v3.api.pb@100ms@SYMBOL
-class SpotWS {
-  constructor(){ this.ws=null; this.syms=new Set(); this.alive=false; this.timer=null; }
+/* ===== WS: Spot (protobuf) ===== */
+class SpotWS{
+  constructor(){this.ws=null;this.list=new Set();this.timer=null;}
   connect(){
-    this.ws = new WebSocket('wss://wbs-api.mexc.com/ws');
-    this.ws.binaryType = 'arraybuffer';
-    this.ws.onopen = () => {
-      this.alive = true;
-      this.ping();
-      // yeniden abone ol
-      if(this.syms.size) this.subscribeBulk([...this.syms]);
-    };
-    this.ws.onmessage = (ev)=>{
-      if(typeof ev.data === 'string'){
-        // sub ack / pong vs
-        // ignore or log
-      }else{
-        const msg = decodeWrapper(ev.data);
-        if(msg?.book && (msg.symbol || this._extractSymbol(msg.channel))){
-          const sym = (msg.symbol || this._extractSymbol(msg.channel));
-          const bid = parseFloat(msg.book.bidPrice);
-          const ask = parseFloat(msg.book.askPrice);
-          if(isFinite(bid) && isFinite(ask)) S.spot.set(sym,{bid,ask,ts:Date.now()});
-        }
+    this.ws=new WebSocket('wss://wbs-api.mexc.com/ws'); this.ws.binaryType='arraybuffer';
+    this.ws.onopen=()=>{ this.ping(); if(this.list.size) this.subBulk([...this.list]); };
+    this.ws.onmessage=(ev)=>{
+      if(typeof ev.data==='string') return; // ack/pong vb.
+      const m=decWrap(ev.data);
+      if(m?.book){
+        const s=(m.symbol||chSym(m.channel)); if(!s) return;
+        const bid=parseFloat(m.book.bidPrice), ask=parseFloat(m.book.askPrice);
+        if(isFinite(bid)&&isFinite(ask)) S.spot.set(s,{bid,ask,ts:Date.now()});
       }
     };
-    this.ws.onclose = () => { this.alive=false; setTimeout(()=>this.connect(), 1000); };
-    this.ws.onerror = () => { try{this.ws.close();}catch{} };
+    this.ws.onclose=()=>setTimeout(()=>this.connect(),1000);
+    this.ws.onerror =()=>{ try{this.ws.close()}catch{} };
   }
-  _extractSymbol(channel){
-    // channel örn: spot@public.aggre.bookTicker.v3.api.pb@100ms@BTCUSDT
-    if(!channel) return null;
-    const parts = String(channel).split('@');
-    return parts[parts.length-1] || null;
-  }
-  ping(){
-    clearInterval(this.timer);
-    this.timer = setInterval(()=>{
-      try{ this.ws?.readyState===1 && this.ws.send(JSON.stringify({method:"PING"})); }catch{}
-    }, 20000);
-  }
-  subscribe(sym){
-    this.syms.add(sym);
-    if(this.ws?.readyState===1){
-      this.ws.send(JSON.stringify({method:"SUBSCRIPTION", params:[`spot@public.aggre.bookTicker.v3.api.pb@100ms@${sym.replace('_','')}`]}));
-    }
-  }
-  unsubscribe(sym){
-    this.syms.delete(sym);
-    if(this.ws?.readyState===1){
-      this.ws.send(JSON.stringify({method:"UNSUBSCRIPTION", params:[`spot@public.aggre.bookTicker.v3.api.pb@100ms@${sym.replace('_','')}`]}));
-    }
-  }
-  subscribeBulk(list){
-    // 30 sınırı sebebiyle zaten havuz yapacağız; bu sınıf tek WS için.
-    list.forEach(sym=>this.subscribe(sym));
-  }
+  ping(){ clearInterval(this.timer); this.timer=setInterval(()=>{ try{this.ws?.readyState===1&&this.ws.send(JSON.stringify({method:"PING"}));}catch{} },20000); }
+  sub(sym){ this.list.add(sym); if(this.ws?.readyState===1) this.ws.send(JSON.stringify({method:"SUBSCRIPTION", params:[`spot@public.aggre.bookTicker.v3.api.pb@100ms@${sym.replace('_','')}`]})); }
+  unsub(sym){ this.list.delete(sym); if(this.ws?.readyState===1) this.ws.send(JSON.stringify({method:"UNSUBSCRIPTION", params:[`spot@public.aggre.bookTicker.v3.api.pb@100ms@${sym.replace('_','')}`]})); }
+  subBulk(arr){ arr.forEach(s=>this.sub(s)); }
 }
-// FUTURES (JSON): wss://contract.mexc.com/edge , method: sub.ticker {symbol:"BTC_USDT"}
-class FuturesWS {
-  constructor(){ this.ws=null; this.syms=new Set(); this.timer=null; }
+
+/* ===== WS: Futures (JSON) ===== */
+class FutWS{
+  constructor(){this.ws=null;this.list=new Set();this.timer=null;}
   connect(){
-    this.ws = new WebSocket('wss://contract.mexc.com/edge');
-    this.ws.onopen = ()=>{
-      this.ping();
-      if(this.syms.size) this.subscribeBulk([...this.syms]);
-    };
-    this.ws.onmessage = (ev)=>{
+    this.ws=new WebSocket('wss://contract.mexc.com/edge');
+    this.ws.onopen=()=>{ this.ping(); if(this.list.size) this.subBulk([...this.list]); this.sub('BTC_USDT'); };
+    this.ws.onmessage=(ev)=>{
       try{
-        const j = JSON.parse(ev.data);
-        if(j.channel==="push.ticker" && j.data && j.symbol){
-          const sym=j.symbol;
-          const bid = +j.data.bid1;
-          const ask = +j.data.ask1;
-          if(isFinite(bid) && isFinite(ask)) S.fut.set(sym,{bid,ask,ts:Date.now()});
-          if(sym==="BTC_USDT"){
-            $('#btcPx').textContent = fmt(+j.data.lastPrice,2)+" USDT";
-            $('#btcTicker').classList.add('blink'); setTimeout(()=>$('#btcTicker').classList.remove('blink'), 200);
-          }
-        }else if(j.channel==="pong"){ /* ok */ }
+        const j=JSON.parse(ev.data);
+        if(j.channel==='push.ticker' && j.data && j.symbol){
+          const s=j.symbol; const bid=+j.data.bid1, ask=+j.data.ask1;
+          if(isFinite(bid)&&isFinite(ask)) S.fut.set(s,{bid,ask,ts:Date.now()});
+          if(s==='BTC_USDT'){ $('#btc').textContent=(+j.data.lastPrice).toFixed(2)+' USDT'; }
+        }
       }catch{}
     };
-    this.ws.onclose = ()=> setTimeout(()=>this.connect(), 1000);
-    this.ws.onerror = ()=> { try{this.ws.close();}catch{} };
+    this.ws.onclose =()=>setTimeout(()=>this.connect(),1000);
+    this.ws.onerror=()=>{ try{this.ws.close()}catch{} };
   }
-  ping(){
-    clearInterval(this.timer);
-    this.timer = setInterval(()=>{
-      try{ this.ws?.readyState===1 && this.ws.send(JSON.stringify({method:"ping"})); }catch{}
-    }, 20000);
-  }
-  subscribe(sym){
-    this.syms.add(sym);
-    if(this.ws?.readyState===1){
-      this.ws.send(JSON.stringify({method:"sub.ticker", param:{symbol:sym}}));
-    }
-  }
-  unsubscribe(sym){
-    this.syms.delete(sym);
-    if(this.ws?.readyState===1){
-      this.ws.send(JSON.stringify({method:"unsub.ticker", param:{symbol:sym}}));
-    }
-  }
-  subscribeBulk(list){ list.forEach(sym=>this.subscribe(sym)); }
+  ping(){ clearInterval(this.timer); this.timer=setInterval(()=>{ try{this.ws?.readyState===1&&this.ws.send(JSON.stringify({method:"ping"}));}catch{} },20000); }
+  sub(sym){ this.list.add(sym); if(this.ws?.readyState===1) this.ws.send(JSON.stringify({method:"sub.ticker", param:{symbol:sym}})); }
+  unsub(sym){ this.list.delete(sym); if(this.ws?.readyState===1) this.ws.send(JSON.stringify({method:"unsub.ticker", param:{symbol:sym}})); }
+  subBulk(arr){ arr.forEach(s=>this.sub(s)); }
 }
 
-/* ============ WS havuzu (spot için 30 sınırı) ============ */
-function ensureSpotConnForIndex(idx){
-  const pool = S.conns.spot;
-  const wsIdx = Math.floor(idx / S.maxPerWS);
-  while(pool.length <= wsIdx){
-    const ws = new SpotWS(); ws.connect(); pool.push(ws);
-  }
-  return pool[wsIdx];
-}
-function addSymbol(sym){
-  sym = normalize(sym);
-  if(S.coins.has(sym)) return;
-  const idx = S.coins.size;
-  S.coins.add(sym);
-  ensureSpotConnForIndex(idx).subscribe(sym);
-  if(!S.conns.fut){ S.conns.fut = new FuturesWS(); S.conns.fut.connect(); }
-  S.conns.fut.subscribe(sym);
-  saveState();
-  blinkTop();
-}
-function removeSymbol(sym){
-  sym = normalize(sym);
-  if(!S.coins.has(sym)) return;
-  const list = [...S.coins];
-  const idx = list.indexOf(sym);
-  // yeniden dağıtım basit olsun: tümünü kapatıp yeniden kurmak yerine ilgili bağlantılardan unsub
-  S.conns.spot.forEach(ws=> ws.unsubscribe(sym));
-  S.conns.fut?.unsubscribe(sym);
-  S.coins.delete(sym);
-  saveState();
-}
-function normalize(x){
-  x = x.trim().toUpperCase();
-  if(!x.includes('_')) x = x+'_USDT';
-  x = x.replace(/[^A-Z0-9_]/g,'');
-  return x;
+/* ===== WS havuzu (spot için 28/bağlantı) ===== */
+function spotConnFor(idx){
+  const pool=S.conns.spot; const need=Math.floor(idx/S.spotMax);
+  while(pool.length<=need){ const ws=new SpotWS(); ws.connect(); pool.push(ws); }
+  return pool[need];
 }
 
-/* ============ Tablo oluşturma ============ */
+/* ===== Liste/normalize ===== */
+function norm(x){ x=(x||'').trim().toUpperCase(); if(!x.includes('_')) x=x+'_USDT'; return x.replace(/[^A-Z0-9_]/g,''); }
+function addSym(v){
+  const sym=norm(v); if(!sym||S.coins.has(sym)) return;
+  const idx=S.coins.size; S.coins.add(sym);
+  spotConnFor(idx).sub(sym); if(!S.conns.fut){ S.conns.fut=new FutWS(); S.conns.fut.connect(); }
+  S.conns.fut.sub(sym); save(); blinkTop();
+}
+function delAll(){
+  S.conns.spot.forEach(ws=>{ [...S.coins].forEach(s=>ws.unsub(s)); });
+  if(S.conns.fut) [...S.coins].forEach(s=>S.conns.fut.unsub(s));
+  S.coins.clear(); save();
+}
+
+/* ===== Hesap & Çizim ===== */
 function computeRows(){
   const rows=[];
   for(const sym of S.coins){
-    const sp = S.spot.get(sym.replace('_','')) || S.spot.get(sym) || null; // wrapper bazen BTCUSDT sembol
+    // Spot key bazen BTCUSDT, bazen BTC_USDT -> ikisini de kontrol et
+    const sp = S.spot.get(sym.replace('_','')) || S.spot.get(sym) || null;
     const fu = S.fut.get(sym) || null;
-    if(!sp || !fu) continue;
-    const diff1 = fu.bid - sp.ask;             // spot AL + futures short
+    if(!sp||!fu) continue;
+
+    // İki yön: (1) spot AL + fut SAT  (2) fut AL + spot SAT
+    const diff1 = fu.bid - sp.ask;          // ucuz: spot (AL), pahalı: fut (SAT)
     const pct1  = diff1 / sp.ask * 100;
-    const diff2 = sp.bid - fu.ask;             // spot SAT + futures long (stok gerekir)
+    const diff2 = sp.bid - fu.ask;          // ucuz: fut (AL), pahalı: spot (SAT)
     const pct2  = diff2 / fu.ask * 100;
+
     if(pct1<=0 && pct2<=0) continue;
 
-    let lowPrice, highPrice, pct, act, actPrice;
+    let low,high,pct,lowSrc,highSrc,act,actPrice;
     if(pct1 >= pct2){
-      lowPrice = sp.ask; highPrice = fu.bid; pct = pct1; act = 'AL'; actPrice = sp.ask;
+      low=sp.ask; high=fu.bid; pct=pct1; lowSrc='spot'; highSrc='fut'; act='AL'; actPrice=sp.ask;
     }else{
-      lowPrice = fu.ask; highPrice = sp.bid; pct = pct2; act = 'SAT'; actPrice = sp.bid;
+      low=fu.ask; high=sp.bid; pct=pct2; lowSrc='fut'; highSrc='spot'; act='AL'; actPrice=lowSrc==='spot'?sp.ask:fu.ask;
+      // Üst kartta gösterilecek eylem metni, AL/SAT mantığına göre:
+      // burada zaten "AL" ucuz tarafta; kartta "SPOT • AL" ya da "FUTURES • AL" yazacağız.
     }
-    if(pct >= S.ui.thresh){
-      rows.push({sym, low:lowPrice, high:highPrice, pct, act, actPrice});
-    }
+    // Eğer ucuz tarafta AL varsa, pahalı tarafta doğal olarak SAT olur; tabloya SAT için high yazıyoruz
+    rows.push({sym, low, high, pct, lowSrc, highSrc, act, actPrice});
   }
-  rows.sort((a,b)=> b.pct - a.pct);
-  S.rows = rows;
+  rows.sort((a,b)=>b.pct-a.pct);
+  // filtre uygula
+  const thr = Number(S.ui.thresh)||0;
+  return rows.filter(r=> r.pct >= thr);
 }
+
 function render(){
-  computeRows();
-  // üst kart
-  const card = $('#topCard');
-  if(!S.ui.top || S.rows.length===0){ card.classList.add('hidden'); }
+  const rows = computeRows();
+  // Üst kart
+  const top = $('#topCard');
+  if(!S.ui.showTop || rows.length===0){ top.classList.add('hidden'); }
   else{
-    card.classList.remove('hidden');
-    const r = S.rows[0];
+    top.classList.remove('hidden');
+    const r=rows[0];
     $('#topSym').textContent = r.sym.split('_')[0];
-    $('#topAct').textContent = r.act; // sadece SPOT eylemi (AL/SAT)
-    $('#topPrice').textContent = fmt(r.actPrice, 4)+' USDT';
+    const isSpot = (r.lowSrc==='spot');
+    const badge = $('#topBadge');
+    badge.className = isSpot ? 'bSpot' : 'bFut';
+    badge.textContent = (isSpot ? 'SPOT' : 'FUTURES') + ' • AL';
+    $('#topPrice').textContent = fmt(r.low,4)+' USDT';
     $('#topPct').textContent = pct(r.pct);
-    $('#topHint').textContent = 'SPOT';
-    card.classList.add('blink'); setTimeout(()=>card.classList.remove('blink'), 150);
+    top.classList.add('blink'); setTimeout(()=>top.classList.remove('blink'), 300);
   }
 
-  // tablo
+  // Tablo
   const tb = $('#tbody'); tb.innerHTML='';
-  for(const r of S.rows){
+  for(const r of rows){
     const tr = document.createElement('tr');
-    const td0 = document.createElement('td'); td0.className='c0 c'; td0.textContent = r.sym;
-    const td1 = document.createElement('td');
-    td1.innerHTML = `<span class="al">AL</span> ${fmt(r.low,4)}`;
-    const td2 = document.createElement('td');
-    td2.innerHTML = `<span class="sat">SAT</span> ${fmt(r.high,4)}`;
-    const td3 = document.createElement('td'); td3.className='c3';
-    const cls = r.pct>=0? 'pctPos':'pctNeg';
-    td3.innerHTML = `<b class="${cls}">${pct(r.pct)}</b>`;
-    [td0,td1,td2,td3].forEach((td,i)=> td.classList.add('c'+i));
-    tr.append(td0,td1,td2,td3);
+
+    const tdC = document.createElement('td'); tdC.textContent = r.sym; tdC.style.fontWeight='800';
+    const tdL = document.createElement('td'); tdL.className='alCell mono ' + (r.lowSrc==='spot'?'src-spot':'src-fut'); tdL.textContent = fmt(r.low,4);
+    const tdH = document.createElement('td'); tdH.className='satCell mono ' + (r.highSrc==='spot'?'src-spot':'src-fut'); tdH.textContent = fmt(r.high,4);
+    const tdP = document.createElement('td'); tdP.className='pctCell mono'; tdP.innerHTML = `<span class="${r.pct>=0?'pctPos':'pctNeg'}">${pct(r.pct)}</span>`;
+
+    tr.append(tdC,tdL,tdH,tdP);
     tb.appendChild(tr);
   }
+  $('#clock').textContent = now();
 }
 
-/* ============ UI bağlama ============ */
-function applyTheme(){
-  document.body.classList.toggle('light', S.ui.theme==='light');
-  document.documentElement.style.setProperty('--rowFont', S.ui.rowFont+'px');
-  document.documentElement.style.setProperty('--dense', S.ui.dense+'px');
-  document.documentElement.style.setProperty('--header', S.ui.header+'px');
-  document.documentElement.style.setProperty('--scale', S.ui.scale);
-}
-$('#btnAdd').onclick = ()=>{
-  const v = $('#addSym').value.trim();
-  if(!v) return;
-  addSymbol(v);
-  $('#addSym').value='';
-  render();
-};
-$('#btnClear').onclick = ()=>{
-  if(!confirm('Tüm coinleri silmek istiyor musunuz?')) return;
-  [...S.coins].forEach(sym=> removeSymbol(sym));
-  render();
-};
-$('#speed').onchange = (e)=>{ S.ui.speed = +e.target.value; saveState(); restartTicker(); };
-$('#thresh').onchange = (e)=>{ S.ui.thresh = +e.target.value; saveState(); render(); };
-$('#theme').onchange = (e)=>{ S.ui.theme = e.target.value; saveState(); applyTheme(); };
-$('#toggleTop').onchange = (e)=>{ S.ui.top = e.target.checked; saveState(); render(); };
+/* ===== Tema & UI ===== */
+function applyTheme(){ document.body.classList.toggle('light', S.ui.theme==='light'); $('#themeSel').value=S.ui.theme; }
+function tickRender(){ clearInterval(S.timers.render); S.timers.render=setInterval(render, Math.max(100,Math.min(4000,S.ui.speed|0))); }
 
-$('#rowFont').oninput = e=>{ S.ui.rowFont=+e.target.value; saveState(); applyTheme(); };
-$('#dense').oninput = e=>{ S.ui.dense=+e.target.value; saveState(); applyTheme(); };
-$('#headerSize').oninput = e=>{ S.ui.header=+e.target.value; saveState(); applyTheme(); };
-$('#scale').oninput = e=>{ S.ui.scale=+e.target.value; saveState(); applyTheme(); };
-
+/* ===== Eventler ===== */
+$('#btnAdd').onclick = ()=>{ const v=$('#addSym').value.trim(); if(!v) return; addSym(v); $('#addSym').value=''; render(); };
+$('#addSym').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#btnAdd').click(); });
+$('#btnClear').onclick = ()=>{ if(confirm('Tüm coinleri sil?')){ delAll(); render(); } };
+$('#speed').onchange = e=>{ S.ui.speed=+e.target.value; save(); tickRender(); };
+$('#thresh').onchange = e=>{ S.ui.thresh=+e.target.value; save(); render(); };
+$('#themeSel').onchange = e=>{ S.ui.theme=e.target.value; save(); applyTheme(); };
 $('#btnExport').onclick = ()=>{
   const data = JSON.stringify({coins:[...S.coins]}, null, 2);
   const blob = new Blob([data], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'mexc-coins.json';
-  a.click(); URL.revokeObjectURL(a.href);
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='mexc-list.json'; a.click(); URL.revokeObjectURL(a.href);
 };
 $('#btnImport').onclick = ()=> $('#fileImport').click();
-$('#fileImport').onchange = async (e)=>{
-  const file = e.target.files?.[0]; if(!file) return;
-  const txt = await file.text();
-  try{
-    const obj = JSON.parse(txt);
-    if(Array.isArray(obj.coins)){
-      obj.coins.forEach(s=> addSymbol(s));
-      render();
-    }
-  }catch(err){ alert('Geçersiz dosya'); }
+$('#fileImport').onchange = async e=>{
+  const f=e.target.files?.[0]; if(!f) return;
+  try{ const txt=await f.text(); const obj=JSON.parse(txt); if(Array.isArray(obj.coins)) obj.coins.forEach(s=>addSym(s)); render(); }catch{ alert('Geçersiz dosya'); }
 };
+$('#toggleTop').onchange = e=>{ S.ui.showTop = e.target.checked; save(); render(); };
 
-/* canlı saat */
-setInterval(()=> $('#clock').textContent = nowStr(), 1000);
-function restartTicker(){ clearInterval(window.__uiTimer); window.__uiTimer = setInterval(render, S.ui.speed); }
-
-/* ufak anim */
-function blinkTop(){ const el = $('#topCard'); el.classList.add('blink'); setTimeout(()=> el.classList.remove('blink'), 200); }
-
-/* ============ Başlat ============ */
+/* ===== Başlat ===== */
 (function init(){
-  loadState();
-  // tema ve kontrolleri yükle
+  load();
+  // kontrolleri doldur
   $('#speed').value = String(S.ui.speed);
   $('#thresh').value = String(S.ui.thresh);
-  $('#theme').value = S.ui.theme;
-  $('#toggleTop').checked = !!S.ui.top;
-  $('#rowFont').value = S.ui.rowFont;
-  $('#dense').value = S.ui.dense;
-  $('#headerSize').value = S.ui.header;
-  $('#scale').value = S.ui.scale;
+  $('#themeSel').value = S.ui.theme;
+  $('#toggleTop').checked = !!S.ui.showTop;
   applyTheme();
 
-  // WS kurulum: spot havuzu ilk bağlantı, futures bağlantısı
-  ensureSpotConnForIndex(0);
-  S.conns.fut = new FuturesWS(); S.conns.fut.connect();
+  // WS bağlantıları
+  // spot havuzu ilk bağlantı
+  const first = new SpotWS(); first.connect(); S.conns.spot.push(first);
+  // futures bağlantısı
+  S.conns.fut = new FutWS(); S.conns.fut.connect();
 
-  // kaydedilmiş coinleri abone et
-  [...S.coins].forEach((sym, i)=>{
-    ensureSpotConnForIndex(i).subscribe(sym);
-    S.conns.fut.subscribe(sym);
-  });
+  // kayıtlı coinleri abone et
+  [...S.coins].forEach((sym,i)=>{ spotConnFor(i).sub(sym); S.conns.fut.sub(sym); });
 
-  // her durumda BTC_USDT futures göster
-  S.conns.fut.subscribe('BTC_USDT');
+  // saat
+  S.timers.clock=setInterval(()=>$('#clock').textContent=now(), 1000);
 
-  restartTicker();
+  tickRender();
   render();
 })();
+function blinkTop(){ const el=$('#topCard'); el.classList.add('blink'); setTimeout(()=>el.classList.remove('blink'),300); }
 </script>
 </body>
 </html>
