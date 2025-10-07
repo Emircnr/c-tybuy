@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Arbitraj Radarı — Paribu ⇄ Binance (TL)</title>
 <style>
+  /* ===== Temalar ===== */
   .theme-dark{
     --bg:#0b1220; --panel:#111a2b; --panel2:#0f1626; --text:#e6edf6;
     --muted:#9fb0ca; --accent:#60a5fa; --border:#17243e;
@@ -19,10 +20,22 @@
     --chipBg:#eef3ff; --chipBorder:#c8d6f5;
     --greenBg:#e9f8ef; --greenBd:#b9e5c8; --greenTx:#166534;
   }
+
+  /* ===== Kişiselleştirme değişkenleri ===== */
   :root{
-    --table-font:18px; --cell-pad-y:12px; --cell-pad-x:10px; --row-gap:6px; --cell-radius:12px;
-    --container-max:1100px; --col-coin:28%; --col-al:27%; --col-sat:27%; --col-pct:18%; --card-font:22px;
+    --table-font:18px;
+    --cell-pad-y:12px;
+    --cell-pad-x:10px;
+    --row-gap:6px;
+    --cell-radius:12px;
+    --container-max:1100px;
+    --col-coin:28%;
+    --col-al:27%;
+    --col-sat:27%;
+    --col-pct:18%;
+    --card-font:22px;
   }
+
   *{box-sizing:border-box}
   html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
   header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(180deg,var(--headerStart),var(--headerEnd));border-bottom:1px solid var(--border)}
@@ -32,6 +45,7 @@
   .btn{background:var(--accent);color:#091220;border:none;border-radius:10px;padding:10px 12px;font-weight:600;cursor:pointer}
   .ghost{background:var(--panel);color:var(--text);border:1px solid var(--border)}
 
+  /* En Yüksek Fark — sade tek satır */
   .hiWrap{padding:10px 16px}
   .hidden{display:none}
   .hiLine{
@@ -39,8 +53,10 @@
     background:var(--panel2);border:1px solid var(--border);
     border-left:6px solid #22c55e;border-radius:14px;padding:10px 14px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap
   }
-  .hiGreen{background:var(--greenBg);border:1px solid var(--greenBd);color:var(--greenTx);border-radius:999px;padding:4px 10px;font-weight:800}
+  .hiGreen{background:var(--greenBg);border:1px solid var(--greenBd);color:var(--greenTx);
+    border-radius:999px;padding:4px 10px;font-weight:800}
 
+  /* Üst kontrol şeritleri */
   .controls{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;padding:12px 16px;background:var(--panel);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
   .ctrl{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:10px}
   .ctrl label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
@@ -50,10 +66,12 @@
     border-radius:10px;padding:10px 12px;font-size:14px;outline:none
   }
   input[type="range"]{width:100%}
+
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
   .chip{display:inline-flex;gap:6px;align-items:center;background:var(--chipBg);border:1px solid var(--chipBorder);border-radius:999px;padding:5px 10px;font-size:12px}
   .chip button{all:unset;cursor:pointer;color:#4f79ff}
 
+  /* TABLO */
   .tableWrap{padding:12px 16px;max-width:var(--container-max);margin:0 auto}
   table{width:100%;border-collapse:separate;border-spacing:0 var(--row-gap);table-layout:fixed}
   thead th{font-size:calc(var(--table-font) - 4px);color:var(--muted);text-align:center;padding:0 8px}
@@ -68,8 +86,11 @@
   .coinSym{font-weight:800}
   .alCell,.satCell,.pctCell{text-align:center;font-weight:800}
 
+  /* ========== KİŞİSELLEŞTİR paneli ========== */
   .customWrap{padding:10px 16px}
-  .customPanel{background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:14px;display:grid;gap:12px}
+  .customPanel{
+    background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:14px;display:grid;gap:12px
+  }
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
   .rowLabel{font-size:12px;color:var(--muted);margin-bottom:4px}
@@ -89,14 +110,15 @@
   </div>
   <div class="rightBox">
     <div id="btcBox" class="sub">BTCUSDT: <span id="btc" class="mono">—</span></div>
+    <div class="sub">Paribu WS: <span id="pws">—</span> · Binance WS: <span id="bws">—</span></div>
     <button id="toggleHi" class="btn ghost">En Yüksek Fark: Açık</button>
     <button id="toggleCustom" class="btn ghost">Kişiselleştir: Kapalı</button>
-    <div class="sub">İzlenen: <span id="cnt">0</span> · Hata: <span id="err">0</span> · WS: <span id="wsst">—</span></div>
+    <div class="sub">İzlenen: <span id="cnt">0</span> · Hata: <span id="err">0</span></div>
   </div>
 </header>
 
+<!-- Highlight kartı -->
 <div id="anchorTop"></div>
-
 <section id="hiWrap" class="hiWrap">
   <div class="hiLine">
     <span id="hiCoin">—</span>
@@ -106,6 +128,7 @@
   </div>
 </section>
 
+<!-- Kontroller -->
 <section class="controls">
   <div class="ctrl">
     <label>Coin Ekle / Çıkar</label>
@@ -123,7 +146,7 @@
       <input id="rng" type="range" min="100" max="4000" step="100">
       <div class="mono" id="rngLbl">—</div>
     </div>
-    <div class="muted" style="font-size:12px;margin-top:6px">PyQt5 mantığı korunur; sadece periyot ayarlanır.</div>
+    <div class="muted" style="font-size:12px;margin-top:6px">Hesap periyodu (WS sürekli akar).</div>
   </div>
 
   <div class="ctrl">
@@ -146,18 +169,55 @@
   </div>
 </section>
 
+<!-- Kişiselleştir paneli -->
 <section id="customWrap" class="customWrap hidden">
   <div class="customPanel">
     <div class="grid3">
-      <div><div class="rowLabel">Tablo Yazı Boyutu</div><div class="kv"><input id="ui_tableFont" type="range" min="14" max="26" step="1"><span class="val" id="ui_tableFont_val"></span></div></div>
-      <div><div class="rowLabel">Satır İç Boşluk (Y)</div><div class="kv"><input id="ui_padY" type="range" min="6" max="24" step="1"><span class="val" id="ui_padY_val"></span></div></div>
-      <div><div class="rowLabel">Satır İç Boşluk (X)</div><div class="kv"><input id="ui_padX" type="range" min="6" max="24" step="1"><span class="val" id="ui_padX_val"></span></div></div>
+      <div>
+        <div class="rowLabel">Tablo Yazı Boyutu</div>
+        <div class="kv">
+          <input id="ui_tableFont" type="range" min="14" max="26" step="1">
+          <span class="val" id="ui_tableFont_val"></span>
+        </div>
+      </div>
+      <div>
+        <div class="rowLabel">Satır İç Boşluk (Y)</div>
+        <div class="kv">
+          <input id="ui_padY" type="range" min="6" max="24" step="1">
+          <span class="val" id="ui_padY_val"></span>
+        </div>
+      </div>
+      <div>
+        <div class="rowLabel">Satır İç Boşluk (X)</div>
+        <div class="kv">
+          <input id="ui_padX" type="range" min="6" max="24" step="1">
+          <span class="val" id="ui_padX_val"></span>
+        </div>
+      </div>
     </div>
 
     <div class="grid3">
-      <div><div class="rowLabel">Satır Boşluğu (Gap)</div><div class="kv"><input id="ui_rowGap" type="range" min="0" max="20" step="1"><span class="val" id="ui_rowGap_val"></span></div></div>
-      <div><div class="rowLabel">Köşe Radius</div><div class="kv"><input id="ui_radius" type="range" min="0" max="24" step="1"><span class="val" id="ui_radius_val"></span></div></div>
-      <div><div class="rowLabel">Tablo Genişliği (px)</div><div class="kv"><input id="ui_maxW" type="range" min="800" max="1600" step="10"><span class="val" id="ui_maxW_val"></span></div></div>
+      <div>
+        <div class="rowLabel">Satır Boşluğu (Gap)</div>
+        <div class="kv">
+          <input id="ui_rowGap" type="range" min="0" max="20" step="1">
+          <span class="val" id="ui_rowGap_val"></span>
+        </div>
+      </div>
+      <div>
+        <div class="rowLabel">Köşe Radius</div>
+        <div class="kv">
+          <input id="ui_radius" type="range" min="0" max="24" step="1">
+          <span class="val" id="ui_radius_val"></span>
+        </div>
+      </div>
+      <div>
+        <div class="rowLabel">Tablo Genişliği (px)</div>
+        <div class="kv">
+          <input id="ui_maxW" type="range" min="800" max="1600" step="10">
+          <span class="val" id="ui_maxW_val"></span>
+        </div>
+      </div>
     </div>
 
     <div>
@@ -172,7 +232,13 @@
     </div>
 
     <div class="grid2">
-      <div><div class="rowLabel">En Yüksek Fark Kartı Yazı Boyutu</div><div class="kv"><input id="ui_cardFont" type="range" min="16" max="36" step="1"><span class="val" id="ui_cardFont_val"></span></div></div>
+      <div>
+        <div class="rowLabel">En Yüksek Fark Kartı Yazı Boyutu</div>
+        <div class="kv">
+          <input id="ui_cardFont" type="range" min="16" max="36" step="1">
+          <span class="val" id="ui_cardFont_val"></span>
+        </div>
+      </div>
       <div>
         <div class="rowLabel">En Yüksek Fark Kartı Konumu</div>
         <select id="ui_hiPos">
@@ -196,6 +262,7 @@
   </div>
 </section>
 
+<!-- Tablonun kancaları -->
 <div id="anchorAfterControls"></div>
 
 <section class="tableWrap">
@@ -218,6 +285,7 @@
   </table>
 </section>
 
+<!-- Tablonun altına yerleştirme için kanca -->
 <div id="anchorAfterTable"></div>
 
 <script>
@@ -255,46 +323,39 @@ if(!UI.col) UI.col = { coin:28, al:27, sat:27, pct:18 };
 
 let timer = null, updating = false, errors = 0;
 let usdtryBid = null, usdtryLast = null;
-let paribuBooks = new Map(); // market -> {b:Array<[p,qty]>, a:Array<[p,qty]>, t:number}
 
-/* ====== Elemanlar ====== */
+/* ====== UI Elemanları ====== */
 const elUsd = $('#usdtry'), elUsdBox = $('#usdBox'), elLast = $('#last'), elCnt = $('#cnt'), elErr = $('#err'),
       elBody = $('#tbody'), elRngLbl = $('#rngLbl'), elRng = $('#rng'), elMin = $('#minPct'),
       elThemeSel = $('#themeSel'), elBtc = $('#btc'), elBtcBox = $('#btcBox'),
       elHiWrap = $('#hiWrap'), elHiCoin = $('#hiCoin'), elHiAct = $('#hiAct'),
       elHiPrice = $('#hiPrice'), elHiPct = $('#hiPct'), elHiToggle = $('#toggleHi'),
       elCustomWrap = $('#customWrap'), elCustomToggle = $('#toggleCustom'),
-      elWsState = $('#wsst');
+      elParibuWS = $('#pws'), elBinWS = $('#bws');
 
-/* ====== Ağ — Binance (HTTP, auth gerektirmez) ====== */
-function binanceBook(sym){ return `https://api.binance.com/api/v3/ticker/bookTicker?symbol=${sym}USDT`; }
-const BINANCE_BTC_PRICE = 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT';
-async function jget(url){
-  const res = await fetch(url, {cache:'no-store'});
-  if(!res.ok) throw new Error('HTTP '+res.status);
-  return res.json();
-}
-
-/* ====== Paribu Streams (WS, public) ====== */
-class ParibuStream {
+/* ====== PARIBU WS (public) ====== */
+class ParibuWS {
   constructor(){
     this.url = 'wss://stream.paribu.com';
     this.ws = null;
     this.connected = false;
     this.retries = 0;
     this.wantSubs = new Set();
+    this.books = new Map(); // market -> {b:Array<[p,qty]>, a:Array<[p,qty]>, t:number}
   }
   connect(){
     if(this.ws && (this.ws.readyState===WebSocket.OPEN || this.ws.readyState===WebSocket.CONNECTING)) return;
-    this.ws = new WebSocket(this.url);
-    elWsState.textContent = 'Bağlanıyor…';
+    try{
+      this.ws = new WebSocket(this.url);
+    }catch(e){ this._reconnect(); return; }
+    elParibuWS.textContent = 'Bağlanıyor…';
     this.ws.onopen = () => {
       this.connected = true; this.retries = 0;
-      elWsState.textContent = 'Bağlı';
-      if(this.wantSubs.size>0) this._send({method:'subscribe', channels:[...this.wantSubs], id:'init_'+Date.now()});
+      elParibuWS.textContent = 'Bağlı';
+      if(this.wantSubs.size>0) this._send({method:'subscribe', channels:[...this.wantSubs], id:'pinit_'+Date.now()});
     };
-    this.ws.onclose = () => { this.connected = false; elWsState.textContent = 'Kapalı'; this._reconnect(); };
-    this.ws.onerror = () => { errors++; elErr.textContent = errors; elWsState.textContent = 'Hata'; };
+    this.ws.onclose = () => { this.connected = false; elParibuWS.textContent = 'Kapalı'; this._reconnect(); };
+    this.ws.onerror = () => { errors++; elErr.textContent = errors; elParibuWS.textContent = 'Hata'; };
     this.ws.onmessage = (ev)=>{
       try{
         const msg = JSON.parse(ev.data);
@@ -302,9 +363,8 @@ class ParibuStream {
         if(msg.e==='orderbook' && msg.s){
           const b = Array.isArray(msg.r?.b) ? msg.r.b : [];
           const a = Array.isArray(msg.r?.a) ? msg.r.a : [];
-          paribuBooks.set(msg.s, {b, a, t: msg.E || Date.now()});
+          this.books.set(msg.s, {b, a, t: msg.E || Date.now()});
           if(msg.s==='usdt_tl'){
-            // en iyi bid
             let best = null;
             for(const [p,_] of b){ const fp = parseFloat(p); if(isFinite(fp)) best = (best==null?fp:Math.max(best, fp)); }
             if(best!=null){ usdtryBid = best; if(UI.showUSDT) elUsd.textContent = fmtFixedTR(usdtryBid, 4); }
@@ -327,6 +387,15 @@ class ParibuStream {
       this.ws.send(JSON.stringify(obj));
     }
   }
+  bestFromBook(market){ // {bid, ask}
+    const data = this.books.get(market);
+    if(!data) return {bid:NaN, ask:NaN};
+    const bids = data.b || [], asks = data.a || [];
+    let bid = null, ask = null;
+    for(const [p,_] of bids){ const fp = parseFloat(p); if(isFinite(fp)) bid = (bid==null?fp:Math.max(bid, fp)); }
+    for(const [p,_] of asks){ const fp = parseFloat(p); if(isFinite(fp)) ask = (ask==null?fp:Math.min(ask, fp)); }
+    return {bid: bid==null?NaN:bid, ask: ask==null?NaN:ask};
+  }
   updateWatched(symbols){
     const need = new Set(symbols.map(s => `orderbook:${s.toLowerCase()}_tl@1000ms`));
     // USDT/TRY (orderbook + ticker) her zaman gerekli
@@ -336,100 +405,131 @@ class ParibuStream {
     const toUnsub = [...this.wantSubs].filter(x => !need.has(x));
     const toSub   = [...need].filter(x => !this.wantSubs.has(x));
 
-    if(toUnsub.length>0) this._send({method:'unsubscribe', channels: toUnsub, id:'un_'+Date.now()});
-    if(toSub.length>0)   this._send({method:'subscribe',   channels: toSub,   id:'sub_'+Date.now()});
-
+    if(this.connected){
+      if(toUnsub.length>0) this._send({method:'unsubscribe', channels: toUnsub, id:'pun_'+Date.now()});
+      if(toSub.length>0)   this._send({method:'subscribe',   channels: toSub,   id:'psub_'+Date.now()});
+    }
     this.wantSubs = need;
   }
 }
-const PARIBU = new ParibuStream();
+const PARIBU = new ParibuWS();
+
+/* ====== BINANCE WS (bookTicker) ====== */
+class BinanceWS {
+  constructor(){
+    // 9443 ana endpoint; ihtiyaç olursa 443’e fallback yapılabilir.
+    this.url = 'wss://stream.binance.com:9443/ws';
+    this.ws = null;
+    this.connected = false;
+    this.retries = 0;
+    this.want = new Set(); // 'btcusdt@bookTicker'...
+    this.books = new Map(); // 'BTC' -> {bid, ask, t}
+  }
+  connect(){
+    if(this.ws && (this.ws.readyState===WebSocket.OPEN || this.ws.readyState===WebSocket.CONNECTING)) return;
+    try{
+      this.ws = new WebSocket(this.url);
+    }catch(e){ this._reconnect(); return; }
+    elBinWS.textContent = 'Bağlanıyor…';
+    this.ws.onopen = () => {
+      this.connected = true; this.retries = 0;
+      elBinWS.textContent = 'Bağlı';
+      if(this.want.size>0) this._send({method:'SUBSCRIBE', params:[...this.want], id: Date.now()});
+    };
+    this.ws.onclose = () => { this.connected = false; elBinWS.textContent = 'Kapalı'; this._reconnect(); };
+    this.ws.onerror = () => { errors++; elErr.textContent = errors; elBinWS.textContent = 'Hata'; };
+    this.ws.onmessage = (ev)=>{
+      try{
+        const msg = JSON.parse(ev.data);
+        // bookTicker ham payload (raw /ws) -> e:"bookTicker"
+        const data = msg.data || msg; // hem /stream hem /ws uyumu için
+        if(data.e==='bookTicker' && data.s){
+          const s = data.s; // örn "BTCUSDT"
+          if(!s.endsWith('USDT')) return;
+          const base = s.slice(0, -4); // "BTC"
+          const bid = parseFloat(data.b);
+          const ask = parseFloat(data.a);
+          if(isFinite(bid) && isFinite(ask)){
+            this.books.set(base, {bid, ask, t: data.E || Date.now()});
+            if(base==='BTC' && UI.showBTC){
+              elBtc.textContent = fmtFixedTR(parseFloat(data.c || ask), 2) || fmtFixedTR(ask,2);
+            }
+          }
+        }
+      }catch(e){}
+    };
+  }
+  _reconnect(){
+    if(this.retries>6) return;
+    const ms = Math.min(1000*Math.pow(2,this.retries), 8000);
+    this.retries++;
+    setTimeout(()=>this.connect(), ms);
+  }
+  _send(obj){
+    if(this.ws && this.ws.readyState===WebSocket.OPEN){
+      this.ws.send(JSON.stringify(obj));
+    }
+  }
+  updateWatched(symbols){
+    const need = new Set(symbols.map(s => `${s.toLowerCase()}usdt@bookTicker`));
+    const toUnsub = [...this.want].filter(x => !need.has(x));
+    const toSub   = [...need].filter(x => !this.want.has(x));
+
+    if(this.connected){
+      if(toUnsub.length>0) this._send({method:'UNSUBSCRIBE', params: toUnsub, id: Date.now()});
+      if(toSub.length>0)   this._send({method:'SUBSCRIBE',   params: toSub,   id: Date.now()+1});
+    }
+    this.want = need;
+  }
+  getBook(base){ // "BTC"
+    return this.books.get(base) || {bid:NaN, ask:NaN};
+  }
+}
+const BINANCE = new BinanceWS();
 
 /* ====== Hesap (Paribu TL ↔ Binance USDT) ====== */
-function bestFromBook(market){ // {bid, ask}
-  const data = paribuBooks.get(market);
-  if(!data) return {bid:NaN, ask:NaN};
-  const bids = data.b || [], asks = data.a || [];
-  let bid = null, ask = null;
-  for(const [p,_] of bids){ const fp = parseFloat(p); if(isFinite(fp)) bid = (bid==null?fp:Math.max(bid, fp)); }
-  for(const [p,_] of asks){ const fp = parseFloat(p); if(isFinite(fp)) ask = (ask==null?fp:Math.min(ask, fp)); }
-  return {bid: bid==null?NaN:bid, ask: ask==null?NaN:ask};
-}
 function getUsdTry(){
-  if(isFinite(usdtryBid)) return usdtryBid;       // öncelik: en iyi bid (daha temkinli)
-  if(isFinite(usdtryLast)) return usdtryLast;     // yedek: son fiyat
+  if(isFinite(usdtryBid)) return usdtryBid;       // en iyi bid
+  if(isFinite(usdtryLast)) return usdtryLast;     // yedek
   return NaN;
 }
 
-async function tick(){
-  if(updating) return;
-  updating = true;
-  try{
-    if(UI.showBTC){
-      try{
-        const btc = await jget(BINANCE_BTC_PRICE);
-        const p = parseFloat(btc.price);
-        if(isFinite(p)) elBtc.textContent = fmtFixedTR(p, 2);
-      }catch(e){}
-    }
+function computeRows(){
+  const usdtry = getUsdTry();
+  if(!isFinite(usdtry)) return [];
 
-    if(watched.size===0){
-      elBody.innerHTML = '';
-      updateHighlight([]);
-      elLast.textContent = nowStr();
-      updating = false;
-      return;
-    }
+  const syms = Array.from(watched);
+  const rows = [];
+  for(const sym of syms){
+    const paribuMarket = `${sym.toLowerCase()}_tl`;
+    const pBest = PARIBU.bestFromBook(paribuMarket);
+    const bBook = BINANCE.getBook(sym);
 
-    const usdtry = getUsdTry();
-    if(UI.showUSDT && isFinite(usdtry)) elUsd.textContent = fmtFixedTR(usdtry, 4);
+    const bBidTL = bBook.bid * usdtry;
+    const bAskTL = bBook.ask * usdtry;
 
-    const syms = Array.from(watched);
-    const jobs = syms.map(async sym=>{
-      const paribuMarket = `${sym.toLowerCase()}_tl`;
-      const pBest = bestFromBook(paribuMarket);
+    const diff1 = pBest.bid - bAskTL; // Binance'den AL, Paribu'da SAT
+    const diff2 = bBidTL - pBest.ask; // Paribu'dan AL, Binance'de SAT
 
-      // Binance bookTicker
-      const bJson = await jget(binanceBook(sym));
-      const bBidUSDT = parseFloat(bJson.bidPrice);
-      const bAskUSDT = parseFloat(bJson.askPrice);
-
-      const mul = usdtry;
-      const bBidTL = bBidUSDT * mul;
-      const bAskTL = bAskUSDT * mul;
-
-      const diff1 = pBest.bid - bAskTL; // Binance AL, Paribu SAT
-      const diff2 = bBidTL - pBest.ask; // Paribu AL, Binance SAT
-
-      let show=false, low=0, high=0, pct=0, lowSrc='', highSrc='';
-      let paribuAction=null, paribuPrice=null;
-
-      if((diff1>0 || diff2>0) && isFinite(pBest.bid) && isFinite(pBest.ask) && isFinite(bBidTL) && isFinite(bAskTL)){
-        show = true;
-        if(diff1 > diff2){
-          pct = (diff1 / bAskTL) * 100;
-          low = bAskTL; high = pBest.bid; lowSrc='Binance'; highSrc='Paribu';
-          paribuAction = 'SAT'; paribuPrice = pBest.bid;
-        }else{
-          pct = (diff2 / pBest.ask) * 100;
-          low = pBest.ask; high = bBidTL; lowSrc='Paribu'; highSrc='Binance';
-          paribuAction = 'AL'; paribuPrice = pBest.ask;
-        }
+    let show=false, low=0, high=0, pct=0, lowSrc='', highSrc='', paribuAction=null, paribuPrice=null;
+    if((diff1>0 || diff2>0) && isFinite(pBest.bid) && isFinite(pBest.ask) && isFinite(bBidTL) && isFinite(bAskTL)){
+      show = true;
+      if(diff1 > diff2){
+        pct = (diff1 / bAskTL) * 100;
+        low = bAskTL; high = pBest.bid; lowSrc='Binance'; highSrc='Paribu';
+        paribuAction = 'SAT'; paribuPrice = pBest.bid;
+      }else{
+        pct = (diff2 / pBest.ask) * 100;
+        low = pBest.ask; high = bBidTL; lowSrc='Paribu'; highSrc='Binance';
+        paribuAction = 'AL'; paribuPrice = pBest.ask;
       }
-      return {sym, show, low, high, pct, lowSrc, highSrc, paribuAction, paribuPrice};
-    });
-
-    let rows = await Promise.all(jobs);
-    rows = rows.filter(r => r && r.show && isFinite(r.pct) && r.pct >= (Number(minPctFilter)||0));
-    rows.sort((a,b)=> b.pct - a.pct);
-    draw(rows);
-    updateHighlight(rows);
-
-    elLast.textContent = nowStr();
-  }catch(e){
-    errors++; elErr.textContent = errors;
-  }finally{
-    updating = false;
+    }
+    if(show && pct >= (Number(minPctFilter)||0)){
+      rows.push({sym, low, high, pct, lowSrc, highSrc, paribuAction, paribuPrice});
+    }
   }
+  rows.sort((a,b)=> b.pct - a.pct);
+  return rows;
 }
 
 /* ====== Çizim ====== */
@@ -544,11 +644,10 @@ function placeHi(pos){
   else if(pos==='afterTable') $('#anchorAfterTable').after(wrap);
 }
 
-/* ====== UI / Kontroller ====== */
+/* ====== UI / Kontroller (kalıcı) ====== */
 function renderChips(){
   const wrap = $('#chips'); wrap.innerHTML='';
-  const arr = Array.from(watched).sort();
-  arr.forEach(sym=>{
+  Array.from(watched).sort().forEach(sym=>{
     const d = document.createElement('div'); d.className='chip';
     d.innerHTML = `<span>${sym}</span>`;
     const b = document.createElement('button'); b.textContent='×';
@@ -557,6 +656,7 @@ function renderChips(){
       LS.set('arbi:watched', Array.from(watched));
       $('#cnt').textContent = watched.size; renderChips();
       PARIBU.updateWatched(Array.from(watched));
+      BINANCE.updateWatched(Array.from(watched));
     };
     d.appendChild(b); wrap.appendChild(d);
   });
@@ -568,9 +668,28 @@ function schedule(ms){
   elRngLbl.textContent = (refreshMs/1000).toFixed(1)+' sn';
   LS.set('arbi:interval', refreshMs);
   if(timer) clearInterval(timer);
-  timer = setInterval(tick, refreshMs);
+  timer = setInterval(mainTick, refreshMs);
 }
 
+/* ====== Main Tick ====== */
+function mainTick(){
+  try{
+    // USDT-TRY görsel
+    const usdtry = getUsdTry();
+    if(UI.showUSDT && isFinite(usdtry)) elUsd.textContent = fmtFixedTR(usdtry, 4);
+
+    // tablo
+    const rows = computeRows();
+    draw(rows);
+    updateHighlight(rows);
+
+    elLast.textContent = nowStr();
+  }catch(e){
+    errors++; elErr.textContent = errors;
+  }
+}
+
+/* ====== Eventler ====== */
 $('#add').onclick = ()=>{
   const raw = $('#coinIn').value;
   const sym = norm(raw);
@@ -579,6 +698,7 @@ $('#add').onclick = ()=>{
     LS.set('arbi:watched', Array.from(watched));
     renderChips();
     PARIBU.updateWatched(Array.from(watched));
+    BINANCE.updateWatched(Array.from(watched));
   }
   $('#coinIn').value='';
 };
@@ -589,6 +709,7 @@ $('#clear').onclick = ()=>{
   LS.set('arbi:watched', []);
   renderChips(); elBody.innerHTML='';
   PARIBU.updateWatched([]);
+  BINANCE.updateWatched([]);
 };
 
 elRng.addEventListener('input', e=> schedule(Number(e.target.value)));
@@ -618,8 +739,8 @@ $('#ui_radius').oninput = (e)=>{ UI.radius=+e.target.value; applyUI(UI); saveUI(
 $('#ui_maxW').oninput = (e)=>{ UI.maxW=+e.target.value; applyUI(UI); saveUI(); };
 $('#ui_cardFont').oninput = (e)=>{ UI.cardFont=+e.target.value; applyUI(UI); saveUI(); };
 $('#ui_hiPos').onchange = (e)=>{ UI.hiPos=e.target.value; applyUI(UI); saveUI(); };
-$('#ui_showBTC').onchange = (e)=>{ UI.showBTC=e.target.checked; applyUI(UI); saveUI(); };
-$('#ui_showUSDT').onchange = (e)=>{ UI.showUSDT=e.target.checked; applyUI(UI); saveUI(); };
+$('#ui_showBTC').onchange = (e)=>{ UI.showBTC=e.target.checked; elBtcBox.style.display = e.target.checked?'':'none'; saveUI(); };
+$('#ui_showUSDT').onchange = (e)=>{ UI.showUSDT=e.target.checked; elUsdBox.style.display = e.target.checked?'':'none'; saveUI(); };
 ['ui_colCoin','ui_colAl','ui_colSat','ui_colPct'].forEach(id=>{
   $('#'+id).addEventListener('input',(e)=>{
     const v = Math.max(10, Math.min(60, +e.target.value||0));
@@ -631,12 +752,10 @@ $('#ui_showUSDT').onchange = (e)=>{ UI.showUSDT=e.target.checked; applyUI(UI); s
     applyUI(UI); saveUI();
   });
 });
-
 $('#ui_reset').onclick = ()=>{ UI = JSON.parse(JSON.stringify(UI_DEFAULTS)); applyUI(UI); saveUI(); };
 
 /* ====== Başlat ====== */
 (function init(){
-  // İlk kez açılıyorsa örnek semboller:
   if(watched.size===0){
     ['BTC','ETH','SOL','AVAX','XRP'].forEach(s=>watched.add(s));
     LS.set('arbi:watched', Array.from(watched));
@@ -646,10 +765,18 @@ $('#ui_reset').onclick = ()=>{ UI = JSON.parse(JSON.stringify(UI_DEFAULTS)); app
   applyUI(UI);
   $('#minPct').value = isFinite(minPctFilter)? minPctFilter : 0.00;
   elHiToggle.textContent = 'En Yüksek Fark: ' + (hiOn ? 'Açık' : 'Kapalı');
+
+  // WS bağlantıları
+  PARIBU.connect();
+  BINANCE.connect();
+  PARIBU.updateWatched(Array.from(watched));
+  BINANCE.updateWatched(Array.from(watched));
+
+  // Tick döngüsü
   schedule(isFinite(refreshMs) ? refreshMs : 1000);
   elLast.textContent = nowStr();
-  PARIBU.connect();
-  PARIBU.updateWatched(Array.from(watched));
+
+  // Arka planda sadece zamanı tazele
   setInterval(()=>{ if(watched.size===0) elLast.textContent = nowStr(); }, 1000);
 })();
 </script>
